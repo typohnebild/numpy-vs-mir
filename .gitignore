@@ -1,0 +1,8 @@
+*.dub
+*.vscode
+*.json
+__dummy.html
+*.o
+*.obj
+*.exe
+
