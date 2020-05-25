@@ -2,8 +2,13 @@
 import numpy as np
 
 
-def gauss_seidl(A, b, eps=1e-8, max_iter=1000):
-    """ Implementation of Gauss seidl iterations """
+def gauss_seidel(A, b, eps=1e-8, max_iter=1000):
+    """Implementation of Gauss Seidl iterations
+       should solve Ax = b
+       @param A n x m Matrix
+       @param b n vector
+       @return x n vector
+    """
     n, _ = A.shape
     x = np.zeros_like(b)
     for _ in range(max_iter):
@@ -29,5 +34,5 @@ def test():
     b = np.array([6., 25., -11., 15.])
     eps = 1e-10
     x_opt = np.linalg.solve(A, b)
-    x = gauss_seidl(A, b, eps)
+    x = gauss_seidel(A, b, eps)
     assert(np.linalg.norm(x_opt - x) <= eps)

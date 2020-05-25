@@ -5,4 +5,6 @@ __dummy.html
 *.o
 *.obj
 *.exe
-
+*.vim
+*.swp
+*.swo
