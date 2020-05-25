@@ -2,7 +2,7 @@
 import numpy as np
 
 
-def gauss_seidel(A, b, eps=1e-8, max_iter=1000):
+def gauss_seidel(A, b, x=None, eps=1e-8, max_iter=1000):
     """Implementation of Gauss Seidl iterations
        should solve Ax = b
        @param A n x m Matrix
@@ -10,7 +10,8 @@ def gauss_seidel(A, b, eps=1e-8, max_iter=1000):
        @return x n vector
     """
     n, _ = A.shape
-    x = np.zeros_like(b)
+    if x is None:
+        x = np.zeros_like(b)
     for _ in range(max_iter):
         x_next = np.zeros_like(x)
         for i in range(n):
