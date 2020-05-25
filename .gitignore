@@ -8,3 +8,4 @@ __dummy.html
 *.vim
 *.swp
 *.swo
+__pycache__
