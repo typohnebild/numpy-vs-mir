@@ -1,5 +1,6 @@
 import numpy as np
 import gaussSeidel as gs
+from operators import poisson_operator_2D
 import matplotlib.pyplot as plt
 
 
@@ -16,8 +17,10 @@ def drawMap(map):
 
 def run(dim, iter):
     # get initial Heat Map
-    map = initMap(dim)
+    U = initMap(dim).flatten()
+    F = np.zeros(dim*dim)
     # apply Gauss Seidel on it
-    # map = gs.gauss_seidel(map, max_iter=iter)
+    A = poisson_operator_2D(dim)
+    U = gs.gauss_seidel(A, U, F, max_iter=iter)
     # draw result
-    drawMap(map)
+    return U.reshape((dim, dim))

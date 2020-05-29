@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.linalg import block_diag
 
 
 def restriction_operator(N):
@@ -21,3 +22,15 @@ def poisson_operator(N):
     upper = -1. * np.eye(N, N - 1)
     upper = np.concatenate((np.zeros((N, 1)), upper), axis=1)
     return A + upper + upper.T
+
+
+def poisson_operator_2D(N):
+    """
+        return n^2 x n^2 matrix
+    """
+    B = poisson_operator(N)
+    I = -np.eye(N)
+    middle = block_diag(*[B] * N)
+    upper = - np.eye(N * N, N * (N - 1))
+    upper = np.concatenate((np.zeros((N * N, N)), upper), axis=1)
+    return middle + upper + upper.T
