@@ -9,7 +9,7 @@ def gauss_seidel(A, b, x=None, eps=1e-8, max_iter=1000):
        @param b n vector
        @return x n vector
     """
-    n, _ = A.shape
+    n, *_ = A.shape
     if x is None:
         x = np.zeros_like(b)
     for _ in range(max_iter):
