@@ -13,7 +13,7 @@ def restriction_operator(N):
     return ret.reshape((N // 2 - 1, N - 1))
 
 
-def possion_operator(N):
+def poisson_operator(N):
     """
         returns a Matrix with  nxn -1 4 -1 on diagonal
     """
