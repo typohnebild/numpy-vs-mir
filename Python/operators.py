@@ -18,6 +18,6 @@ def possion_operator(N):
         returns a Matrix with  nxn -1 4 -1 on diagonal
     """
     A = 4. * np.eye(N, N)
-    upper = -1. *np.eye(N, N - 1)
+    upper = -1. * np.eye(N, N - 1)
     upper = np.concatenate((np.zeros((N, 1)), upper), axis=1)
     return A + upper + upper.T
