@@ -1,7 +1,9 @@
 #!/bin/usr/env python3
 import numpy as np
+from util import timer
 
 
+@timer
 def gauss_seidel(A, b, x=None, eps=1e-8, max_iter=1000):
     """Implementation of Gauss Seidl iterations
        should solve Ax = b
@@ -12,16 +14,17 @@ def gauss_seidel(A, b, x=None, eps=1e-8, max_iter=1000):
     n, *_ = A.shape
     if x is None:
         x = np.zeros_like(b)
-    for _ in range(max_iter):
+    for it in range(max_iter):
         x_next = np.zeros_like(x)
         for i in range(n):
             left = np.dot(A[i, :i], x_next[:i])
-            right = np.dot(A[i, i+1:], x[i+1:])
-            x_next[i] = (b[i] - left - right)/A[i, i]
+            right = np.dot(A[i, i + 1:], x[i + 1:])
+            x_next[i] = (b[i] - left - right) / A[i, i]
 
         x = x_next
         if np.linalg.norm(b - A @ x) < eps:
             break
+    print(it)
     return x
 
 

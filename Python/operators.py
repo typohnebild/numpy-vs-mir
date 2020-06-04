@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.linalg import block_diag
+from util import timer
 
 
 def restriction_operator(N):
@@ -24,6 +25,7 @@ def poisson_operator(N):
     return A + upper + upper.T
 
 
+@timer
 def poisson_operator_2D(N):
     """
         return n^2 x n^2 matrix
