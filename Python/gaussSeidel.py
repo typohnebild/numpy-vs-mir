@@ -36,6 +36,10 @@ def GS_RB(F, U=None, eps=1e-8, max_iter=1000):
        @param F n vector
        @return U n vector
     """
+
+    if U is None:
+        U = np.zeros_like(F)
+
     if len(F.shape) == 2:
         return GS_2D_RB(F, U, eps, max_iter)
     if len(F.shape) == 3:
@@ -44,16 +48,13 @@ def GS_RB(F, U=None, eps=1e-8, max_iter=1000):
     raise ValueError("Wrong Shape!!!")
 
 
-def GS_2D_RB(F, U=None, eps=1e-8, max_iter=1000):
+def GS_2D_RB(F, U, eps, max_iter):
     """Implementation of 2D Red Black Gauss Seidl iterations
        should solve AU = F
        A poisson equation
        @param F n vector
        @return U n vector
     """
-
-    if U is None:
-        U = np.zeros_like(F)
 
     # initialize dimensions
     m, n = F.shape
@@ -82,17 +83,13 @@ def GS_2D_RB(F, U=None, eps=1e-8, max_iter=1000):
     return U
 
 
-def GS_3D_RB(F, U=None, eps=1e-8, max_iter=1000):
+def GS_3D_RB(F, U, eps, max_iter):
     """Implementation of 3D Red Black Gauss Seidl iterations
        should solve AU = F
        A poisson equation
        @param F n vector
        @return U n vector
     """
-
-    if U is None:
-        U = np.zeros_like(F)
-
     # initialize dimensions
     m, n, o = F.shape
 
