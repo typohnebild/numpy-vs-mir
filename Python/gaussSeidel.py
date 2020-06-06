@@ -40,14 +40,10 @@ def GS_3D_RB(F, U=None, eps=1e-8, max_iter=1000):
     if U is None:
         U = np.zeros_like(F)
 
-    # TODO
-    o = F.shape[0]
-    m = F.shape[1]
-    n = F.shape[2]
-    dh = 1
-
-    # diskrete Werte auf dem Gitter in U und F berechnen
-    # TODO
+    # initialize dimensions
+    m = F.shape[0]
+    n = F.shape[1]
+    o = F.shape[2]
 
     # Anzahl an Gauss-Seidel-Iterationen ausfuehren
     for _ in range(max_iter):
