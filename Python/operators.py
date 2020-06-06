@@ -31,7 +31,7 @@ def poisson_operator_2D(N):
         return n^2 x n^2 matrix
     """
     B = poisson_operator(N)
-    I = -np.eye(N)
+    # I = -np.eye(N)
     middle = block_diag(*[B] * N)
     upper = - np.eye(N * N, N * (N - 1))
     upper = np.concatenate((np.zeros((N * N, N)), upper), axis=1)

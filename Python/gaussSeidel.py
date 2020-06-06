@@ -69,6 +69,8 @@ def GS_3D_RB(F, U=None, eps=1e-8, max_iter=1000):
                         + U[i, j + 1, k] + U[i, j, k - 1] + U[i, j, k + 1]
                         - dh * dh * F[i, j, k] ) / 6.0
 
+    return U
+
 
 def test():
     """ some test stolen from wikipedia """
