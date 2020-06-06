@@ -39,7 +39,7 @@ def run(dim, iter=1000):
     return U.reshape((dim, dim))
 
 
-def simulate_2D(N):
+def simulate_2D(N, max_iter=500):
     U = initMap_2D(N)
     F = heat_sources_2D(N)
-    return gs.GS_RB(F, U)
+    return gs.GS_RB(F, U, max_iter=max_iter)
