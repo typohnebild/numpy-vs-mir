@@ -29,6 +29,61 @@ def gauss_seidel(A, b, x=None, eps=1e-8, max_iter=1000):
 
 
 @timer
+def GS_RB(F, U=None, eps=1e-8, max_iter=1000):
+    """Implementation of Gauss Seidl Red Black iterations
+       should solve AU = F
+       A poisson equation
+       @param F n vector
+       @return U n vector
+    """
+    if len(F.shape) == 2:
+        return GS_2D_RB(F, U, eps, max_iter)
+    if len(F.shape) == 3:
+        return GS_3D_RB(F, U, eps, max_iter)
+
+    print("Wrong Shape!!!")
+
+
+def GS_2D_RB(F, U=None, eps=1e-8, max_iter=1000):
+    """Implementation of 2D Red Black Gauss Seidl iterations
+       should solve AU = F
+       A poisson equation
+       @param F n vector
+       @return U n vector
+    """
+
+    if U is None:
+        U = np.zeros_like(F)
+
+    # initialize dimensions
+    m = F.shape[0]
+    n = F.shape[1]
+
+    # Anzahl an Gauss-Seidel-Iterationen ausfuehren
+    for _ in range(max_iter):
+        # rote Halbiteration
+        for j in range(1, n - 1):
+            for i in range(1, m - 1):
+                if (i + j) % 2 == 1:
+                    U[i, j] = (U[i - 1, j] +
+                                U[i + 1, j] +
+                                U[i, j - 1] +
+                                U[i, j + 1] +
+                                F[i, j]) / 4.0
+
+        # schwarze Halbiteration
+        for j in range(1, n - 1):
+            for i in range(1, m - 1):
+                if (i + j) % 2 == 0:
+                    U[i, j] = (U[i - 1, j] +
+                                U[i + 1, j] +
+                                U[i, j - 1] +
+                                U[i, j + 1] +
+                                F[i, j]) / 4.0
+
+    return U
+
+
 def GS_3D_RB(F, U=None, eps=1e-8, max_iter=1000):
     """Implementation of 3D Red Black Gauss Seidl iterations
        should solve AU = F
