@@ -13,9 +13,25 @@ def initMap_2D(dimension):
     return U
 
 
+def initMap_3D(dimension):
+    U = np.random.uniform(0, 1, (dimension, dimension, dimension))
+    U[:, 0, :] = 1
+    U[0, :, :] = 1
+    U[:, :, 0] = 1
+    U[:, -1, :] = 0
+    U[-1, :, :] = 0
+    U[:, :, -1] = 0
+    return U
+
+
 def drawMap(map):
-    plt.imshow(map, cmap='hot', interpolation='nearest')
+    plt.imshow(map, cmap='YlGnBu_r', interpolation='nearest')
     plt.show()
+
+
+def draw3D(map):
+    # TODO
+    pass
 
 
 def run(dim, iter=1000):
@@ -32,4 +48,10 @@ def run(dim, iter=1000):
 def simulate_2D(N, max_iter=500):
     U = initMap_2D(N)
     F = np.zeros((N, N))
+    return gs.GS_RB(F, U, max_iter=max_iter)
+
+
+def simulate_3D(N, max_iter=500):
+    U = initMap_3D(N)
+    F = np.zeros((N, N, N))
     return gs.GS_RB(F, U, max_iter=max_iter)
