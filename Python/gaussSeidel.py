@@ -28,6 +28,50 @@ def gauss_seidel(A, b, x=None, eps=1e-8, max_iter=1000):
     return x
 
 
+@timer
+def GS_3D_RB(A, b, x=None, eps=1e-8, max_iter=1000):
+    """Implementation of 3D Red Black Gauss Seidl iterations
+       should solve Ax = b
+       @param A n x m Matrix
+       @param b n vector
+       @return x n vector
+    """
+
+    # TODO
+    o = A.shape[0]
+    m = A.shape[1]
+    n = A.shape[2]
+
+    # Arrays F und U
+    # TODO
+    F = np.zeros((3,3,3))
+    U = np.zeros((3,3,3))
+    dh = 1
+
+    # diskrete Werte auf dem Gitter in U und F berechnen
+    # TODO
+
+    # Anzahl an Gauss-Seidel-Iterationen ausfuehren
+    for _ in range(max_iter):
+        # rote Halbiteration
+        for k in range(1, o):
+            for j in range(1, n):
+                for i in range(1, m):
+                    if ( (i+j+k) % 2 == 1):
+                        U[i,j,k]=( U[i-1,j,k] + U[i+1,j,k] + U[i,j-1,k]
+                        + U[i,j+1,k] + U[i,j,k-1] + U[i,j,k+1]
+                        - dh * dh * F[i,j,k] ) / 6.0
+
+        # schwarze Halbiteration
+        for k in range(1, o):
+            for j in range(1, n):
+                for i in range(1, m):
+                    if ( (i+j+k) % 2 == 0):
+                        U[i,j,k]=( U[i-1,j,k] + U[i+1,j,k] + U[i,j-1,k]
+                        + U[i,j+1,k] + U[i,j,k-1] + U[i,j,k+1]
+                        - dh * dh * F[i,j,k] ) / 6.0
+
+
 def test():
     """ some test stolen from wikipedia """
     A = np.array([[10., -1., 2., 0.],
