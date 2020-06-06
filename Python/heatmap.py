@@ -36,7 +36,7 @@ def heat_sources_2D(dimension):
 
 
 def drawMap(map):
-    plt.imshow(map, cmap='YlGnBu_r', interpolation='nearest')
+    plt.imshow(map, cmap='inferno', interpolation='nearest')
     plt.show()
 
 
@@ -47,7 +47,7 @@ def draw3D(map):
     # Plot the surface.
     for index, x in np.ndenumerate(map):
         if x > 0.5:
-            ax.scatter(*index, c = 'red', alpha = max(x - 0.5, 0))
+            ax.scatter(*index, c ='black', alpha = max(x - 0.5, 0))
 
     fig.show()
 
