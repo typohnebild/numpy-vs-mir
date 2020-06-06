@@ -41,7 +41,7 @@ def GS_RB(F, U=None, eps=1e-8, max_iter=1000):
     if len(F.shape) == 3:
         return GS_3D_RB(F, U, eps, max_iter)
 
-    print("Wrong Shape!!!")
+    raise ValueError("Wrong Shape!!!")
 
 
 def GS_2D_RB(F, U=None, eps=1e-8, max_iter=1000):
@@ -56,30 +56,28 @@ def GS_2D_RB(F, U=None, eps=1e-8, max_iter=1000):
         U = np.zeros_like(F)
 
     # initialize dimensions
-    m = F.shape[0]
-    n = F.shape[1]
+    m, n = F.shape
+
+    def sweep(color):
+        """
+        Does the sweeps
+        @param color 1 = red 0 for black
+        """
+        for j in range(1, n - 1):
+            for i in range(1, m - 1):
+                if (i + j) % 2 == color:
+                    U[i, j] = (U[i - 1, j] +
+                               U[i + 1, j] +
+                               U[i, j - 1] +
+                               U[i, j + 1] +
+                               F[i, j]) / 4.0
 
     # Anzahl an Gauss-Seidel-Iterationen ausfuehren
     for _ in range(max_iter):
         # rote Halbiteration
-        for j in range(1, n - 1):
-            for i in range(1, m - 1):
-                if (i + j) % 2 == 1:
-                    U[i, j] = (U[i - 1, j] +
-                                U[i + 1, j] +
-                                U[i, j - 1] +
-                                U[i, j + 1] +
-                                F[i, j]) / 4.0
-
+        sweep(1)
         # schwarze Halbiteration
-        for j in range(1, n - 1):
-            for i in range(1, m - 1):
-                if (i + j) % 2 == 0:
-                    U[i, j] = (U[i - 1, j] +
-                                U[i + 1, j] +
-                                U[i, j - 1] +
-                                U[i, j + 1] +
-                                F[i, j]) / 4.0
+        sweep(0)
 
     return U
 
@@ -96,37 +94,31 @@ def GS_3D_RB(F, U=None, eps=1e-8, max_iter=1000):
         U = np.zeros_like(F)
 
     # initialize dimensions
-    m = F.shape[0]
-    n = F.shape[1]
-    o = F.shape[2]
+    m, n, o = F.shape
+
+    def sweep(color):
+        """
+        Does the sweeps
+        @param color 1 = red 0 for black
+        """
+        for k in range(1, o - 1):
+            for j in range(1, n - 1):
+                for i in range(1, m - 1):
+                    if (i + j + k) % 2 == color:
+                        U[i, j, k] = (U[i - 1, j, k] +
+                                      U[i + 1, j, k] +
+                                      U[i, j - 1, k] +
+                                      U[i, j + 1, k] +
+                                      U[i, j, k - 1] +
+                                      U[i, j, k + 1] -
+                                      F[i, j, k]) / 6.0
 
     # Anzahl an Gauss-Seidel-Iterationen ausfuehren
     for _ in range(max_iter):
         # rote Halbiteration
-        for k in range(1, o - 1):
-            for j in range(1, n - 1):
-                for i in range(1, m - 1):
-                    if (i + j + k) % 2 == 1:
-                        U[i, j, k] = (U[i - 1, j, k] +
-                                      U[i + 1, j, k] +
-                                      U[i, j - 1, k] +
-                                      U[i, j + 1, k] +
-                                      U[i, j, k - 1] +
-                                      U[i, j, k + 1] -
-                                      F[i, j, k]) / 6.0
-
+        sweep(1)
         # schwarze Halbiteration
-        for k in range(1, o - 1):
-            for j in range(1, n - 1):
-                for i in range(1, m - 1):
-                    if (i + j + k) % 2 == 0:
-                        U[i, j, k] = (U[i - 1, j, k] +
-                                      U[i + 1, j, k] +
-                                      U[i, j - 1, k] +
-                                      U[i, j + 1, k] +
-                                      U[i, j, k - 1] +
-                                      U[i, j, k + 1] -
-                                      F[i, j, k]) / 6.0
+        sweep(0)
 
     return U
 
