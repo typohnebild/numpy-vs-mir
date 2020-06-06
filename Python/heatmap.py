@@ -2,6 +2,7 @@ import numpy as np
 import gaussSeidel as gs
 from operators import poisson_operator_2D
 import matplotlib.pyplot as plt
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
 
 def initMap_2D(dimension):
@@ -40,8 +41,14 @@ def drawMap(map):
 
 
 def draw3D(map):
-    # TODO
-    pass
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Plot the surface.
+    z, x, y = (map > 0.5).nonzero()
+    ax.scatter(x, y, -z, zdir='z', c='red')
+
+    fig.show()
 
 
 def run(dim, iter=1000):
