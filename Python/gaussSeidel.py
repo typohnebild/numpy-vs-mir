@@ -55,19 +55,27 @@ def GS_3D_RB(F, U=None, eps=1e-8, max_iter=1000):
         for k in range(1, o):
             for j in range(1, n):
                 for i in range(1, m):
-                    if ( (i + j + k) % 2 == 1):
-                        U[i, j, k]=( U[i - 1, j, k] + U[i + 1, j, k] + U[i, j - 1, k]
-                        + U[i, j + 1, k] + U[i, j, k - 1] + U[i, j, k + 1]
-                        - dh * dh * F[i, j, k] ) / 6.0
+                    if (i + j + k) % 2 == 1:
+                        U[i, j, k] = (U[i - 1, j, k] +
+                                      U[i + 1, j, k] +
+                                      U[i, j - 1, k] +
+                                      U[i, j + 1, k] +
+                                      U[i, j, k - 1] +
+                                      U[i, j, k + 1] -
+                                      dh * dh * F[i, j, k]) / 6.0
 
         # schwarze Halbiteration
         for k in range(1, o):
             for j in range(1, n):
                 for i in range(1, m):
-                    if ( (i + j + k) % 2 == 0):
-                        U[i, j, k]=( U[i - 1, j, k] + U[i + 1, j, k] + U[i, j - 1, k]
-                        + U[i, j + 1, k] + U[i, j, k - 1] + U[i, j, k + 1]
-                        - dh * dh * F[i, j, k] ) / 6.0
+                    if (i + j + k) % 2 == 0:
+                        U[i, j, k] = (U[i - 1, j, k] +
+                                      U[i + 1, j, k] +
+                                      U[i, j - 1, k] +
+                                      U[i, j + 1, k] +
+                                      U[i, j, k - 1] +
+                                      U[i, j, k + 1] -
+                                      dh * dh * F[i, j, k]) / 6.0
 
 
 def test():
