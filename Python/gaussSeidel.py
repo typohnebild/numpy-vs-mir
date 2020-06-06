@@ -44,11 +44,6 @@ def GS_3D_RB(F, U=None, eps=1e-8, max_iter=1000):
     o = F.shape[0]
     m = F.shape[1]
     n = F.shape[2]
-
-    # Arrays F und U
-    # TODO
-    F = np.zeros((m, n, o))
-    U = np.zeros((m, n, o))
     dh = 1
 
     # diskrete Werte auf dem Gitter in U und F berechnen
