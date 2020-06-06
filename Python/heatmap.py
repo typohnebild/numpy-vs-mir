@@ -24,6 +24,16 @@ def initMap_3D(dimension):
     return U
 
 
+def heat_sources_2D(dimension):
+    F = np.zeros((dimension, dimension))
+    F[:, 0] = 1
+    F[0, :] = 1
+    F[:, -1] = 0
+    F[-1, :] = 0
+    F[dimension//2, dimension//2] = 1
+    return F
+
+
 def drawMap(map):
     plt.imshow(map, cmap='YlGnBu_r', interpolation='nearest')
     plt.show()
@@ -37,7 +47,7 @@ def draw3D(map):
 def run(dim, iter=1000):
     # get initial Heat Map
     U = initMap_2D(dim).flatten()
-    F = np.zeros(dim * dim)
+    F = heat_sources_2D(dim).flatten()
     # apply Gauss Seidel on it
     A = poisson_operator_2D(dim)
     U = gs.gauss_seidel(A, F, U, max_iter=iter)
@@ -47,7 +57,7 @@ def run(dim, iter=1000):
 
 def simulate_2D(N, max_iter=500):
     U = initMap_2D(N)
-    F = np.zeros((N, N))
+    F = heat_sources_2D(N)
     return gs.GS_RB(F, U, max_iter=max_iter)
 
 
