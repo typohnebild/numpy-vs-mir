@@ -45,8 +45,9 @@ def draw3D(map):
     ax = fig.add_subplot(111, projection='3d')
 
     # Plot the surface.
-    z, x, y = (map > 0.5).nonzero()
-    ax.scatter(x, y, -z, zdir='z', c='red')
+    for index, x in np.ndenumerate(map):
+        if x > 0.5:
+            ax.scatter(*index, c = 'red', alpha = max(x - 0.5, 0))
 
     fig.show()
 
