@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from gaussSeidel import GS_RB
 
 
 def MatrixGenerator(dim, max_value=500):

@@ -70,7 +70,7 @@ def GS_2D_RB(F, U, eps, max_iter):
                     U[i, j] = (U[i - 1, j] +
                                U[i + 1, j] +
                                U[i, j - 1] +
-                               U[i, j + 1] +
+                               U[i, j + 1] -
                                F[i, j]) / 4.0
 
     # Anzahl an Gauss-Seidel-Iterationen ausfuehren
