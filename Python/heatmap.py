@@ -32,7 +32,7 @@ def heat_sources_2D(dimension):
     F[:, -1] = 0
     F[-1, :] = 0
     F[dimension//2, dimension//2] = 1
-    return -F
+    return F
 
 
 def draw2D(map):
@@ -66,7 +66,7 @@ def run(dim, iter=1000):
 def simulate_2D(N, max_iter=500):
     U = initMap_2D(N)
     F = heat_sources_2D(N)
-    return gs.GS_RB(F, U, max_iter=max_iter)
+    return gs.GS_RB(-F, U, max_iter=max_iter)
 
 
 def simulate_3D(N, max_iter=500):
