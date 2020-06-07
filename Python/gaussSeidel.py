@@ -118,17 +118,3 @@ def GS_3D_RB(F, U, eps, max_iter):
         sweep(0)
 
     return U
-
-
-def test():
-    """ some test stolen from wikipedia """
-    A = np.array([[10., -1., 2., 0.],
-                  [-1., 11., -1., 3.],
-                  [2., -1., 10., -1.],
-                  [0., 3., -1., 8.]])
-
-    b = np.array([6., 25., -11., 15.])
-    eps = 1e-10
-    x_opt = np.linalg.solve(A, b)
-    x = gauss_seidel(A, b, eps)
-    assert(np.linalg.norm(x_opt - x) <= eps)
