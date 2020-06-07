@@ -1,7 +1,5 @@
-import numpy as np
 import pytest
-from gaussSeidel import GS_RB
-
+import numpy as np
 import gaussSeidel as gs
 import heatmap as hm
 
@@ -12,7 +10,6 @@ def MatrixGenerator(dim, max_value=500):
 
 # TODO: put some testcases here
 # --- GausSeidel TestCases ---
-
 
 def test_np_gs():
     """ some test stolen from wikipedia """
@@ -29,13 +26,23 @@ def test_np_gs():
 
 
 def test_2D_heatMap():
-    A = hm.simulate_2D(100, 500)
-    hm.draw2D(A)
+    A = hm.simulate_2D(10, 500)
+    # hm.draw2D(A)
 
 
 def test_3D_heatMap():
-    A = hm.simulate_3D(100, 500)
-    hm.draw3D(A)
+    A = hm.simulate_3D(10, 500)
+    # hm.draw3D(A)
+
+
+def test_red_black_one_iter():
+    U = np.ones((3, 3))
+    F = np.zeros((3, 3))
+    F[1, 1] = 1
+    expected = np.ones((3, 3))
+    expected[1, 1] = 0.75
+    actual = gs.GS_RB(F, U, eps=1e-8, max_iter=1)
+    assert np.allclose(expected, actual, rtol=1e-8)
 
 
 # --- MultiGrid TestCases ---
