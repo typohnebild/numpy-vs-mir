@@ -24,7 +24,7 @@ def gauss_seidel(A, b, x=None, eps=1e-8, max_iter=1000):
         x = x_next
         if np.linalg.norm(b - A @ x) < eps:
             break
-    print(it)
+
     return x
 
 

@@ -32,7 +32,7 @@ def heat_sources_2D(dimension):
     F[:, -1] = 0
     F[-1, :] = 0
     F[dimension//2, dimension//2] = 1
-    return F
+    return -F
 
 
 def draw2D(map):
