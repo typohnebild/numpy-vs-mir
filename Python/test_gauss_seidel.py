@@ -21,8 +21,8 @@ def test_np_gs():
     b = np.array([6., 25., -11., 15.])
     eps = 1e-10
     x_opt = np.linalg.solve(A, b)
-    x = gs.gauss_seidel(A, b, eps)
-    assert(np.linalg.norm(x_opt - x) <= eps)
+    x = gs.gauss_seidel(A, b, eps=eps)
+    assert np.allclose(x, x_opt, rtol=eps)
 
 
 def test_2D_heatMap():
@@ -41,7 +41,7 @@ def test_red_black_one_iter():
     F[1, 1] = 1
     expected = np.ones((3, 3))
     expected[1, 1] = 0.75
-    actual = gs.GS_RB(F, U, eps=1e-8, max_iter=1)
+    actual = gs.GS_RB(F, U, max_iter=1)
     assert np.allclose(expected, actual, rtol=1e-8)
 
 
