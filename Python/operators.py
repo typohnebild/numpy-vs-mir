@@ -36,7 +36,8 @@ def poisson_operator_2D(N):
     B = [poisson_operator(N)] * (N - 2)
     I = np.eye(N)
     middle = block_diag(I, *B, I)
-    upper = - np.eye(N * (N - 2), N * (N - 2))
+    upper = - np.eye(N, N)
     upper[0, 0] = upper[-1, -1] = 0
+    upper = block_diag(*[upper] * (N - 2))
     upper = np.pad(upper, ((N, N), (2 * N, 0)))
     return middle + upper + np.flip(upper)

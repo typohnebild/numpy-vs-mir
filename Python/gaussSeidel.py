@@ -4,7 +4,7 @@ from util import timer
 
 
 @timer
-def gauss_seidel(A, b, x=None, eps=1e-8, max_iter=1000):
+def gauss_seidel(A, b, x=None, eps=1e-10, max_iter=1000):
     """Implementation of Gauss Seidl iterations
        should solve Ax = b
        @param A n x m Matrix
@@ -29,7 +29,7 @@ def gauss_seidel(A, b, x=None, eps=1e-8, max_iter=1000):
 
 
 @timer
-def GS_RB(F, U=None, eps=1e-8, max_iter=1000):
+def GS_RB(F, U=None, max_iter=1000):
     """Implementation of Gauss Seidl Red Black iterations
        should solve AU = F
        A poisson equation
@@ -41,14 +41,14 @@ def GS_RB(F, U=None, eps=1e-8, max_iter=1000):
         U = np.zeros_like(F)
 
     if len(F.shape) == 2:
-        return GS_2D_RB(F, U, eps, max_iter)
+        return GS_2D_RB(F, U, max_iter)
     if len(F.shape) == 3:
-        return GS_3D_RB(F, U, eps, max_iter)
+        return GS_3D_RB(F, U, max_iter)
 
     raise ValueError("Wrong Shape!!!")
 
 
-def GS_2D_RB(F, U, eps, max_iter):
+def GS_2D_RB(F, U, max_iter):
     """Implementation of 2D Red Black Gauss Seidl iterations
        should solve AU = F
        A poisson equation
@@ -83,7 +83,7 @@ def GS_2D_RB(F, U, eps, max_iter):
     return U
 
 
-def GS_3D_RB(F, U, eps, max_iter):
+def GS_3D_RB(F, U, max_iter):
     """Implementation of 3D Red Black Gauss Seidl iterations
        should solve AU = F
        A poisson equation
@@ -118,3 +118,4 @@ def GS_3D_RB(F, U, eps, max_iter):
         sweep(0)
 
     return U
+

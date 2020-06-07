@@ -45,5 +45,21 @@ def test_red_black_one_iter():
     assert np.allclose(expected, actual, rtol=1e-8)
 
 
+def test_red_black_against_gauss_seidel():
+    eps = 1e-12
+    N = 20
+    max_iter = 1000
+    A = hm.poisson_operator_2D(N)
+    U = hm.initMap_2D(N)
+    F = hm.heat_sources_2D(N)
+    U1 = gs.gauss_seidel(A,
+                         F.flatten(),
+                         U.copy().flatten(),
+                         eps=eps,
+                         max_iter=max_iter).reshape((N, N))
+    U2 = gs.GS_RB(-F, U.copy(), max_iter=max_iter)
+    assert np.allclose(U1, U2, rtol=eps)
+
+
 # --- MultiGrid TestCases ---
 # TODO: put some testcases here

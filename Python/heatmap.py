@@ -7,31 +7,31 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
 def initMap_2D(dimension):
     U = np.random.uniform(0, 1, (dimension, dimension))
-    U[:, 0] = 1
-    U[0, :] = 1
     U[:, -1] = 0
     U[-1, :] = 0
+    U[:, 0] = 1
+    U[0, :] = 1
     return U
 
 
 def initMap_3D(dimension):
     U = np.random.uniform(0, 1, (dimension, dimension, dimension))
-    U[:, 0, :] = 1
-    U[0, :, :] = 1
-    U[:, :, 0] = 1
     U[:, -1, :] = 0
     U[-1, :, :] = 0
     U[:, :, -1] = 0
+    U[:, 0, :] = 1
+    U[0, :, :] = 1
+    U[:, :, 0] = 1
     return U
 
 
 def heat_sources_2D(dimension):
     F = np.zeros((dimension, dimension))
-    F[:, 0] = 1
-    F[0, :] = 1
     F[:, -1] = 0
     F[-1, :] = 0
-    F[dimension//2, dimension//2] = 1
+    F[:, 0] = 1
+    F[0, :] = 1
+    F[dimension // 2, dimension // 2] = 1
     return F
 
 
@@ -52,7 +52,7 @@ def draw3D(map):
     fig.show()
 
 
-def run(dim, iter=1000):
+def run(dim, iter=500):
     # get initial Heat Map
     U = initMap_2D(dim).flatten()
     F = heat_sources_2D(dim).flatten()
