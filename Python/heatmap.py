@@ -35,7 +35,7 @@ def heat_sources_2D(dimension):
     return F
 
 
-def drawMap(map):
+def draw2D(map):
     plt.imshow(map, cmap='RdBu_r', interpolation='nearest')
     plt.show()
 
