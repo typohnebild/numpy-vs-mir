@@ -3,6 +3,7 @@ import numpy as np
 import gaussSeidel as gs
 import heatmap as hm
 import multiGrid as mg
+import operators as op
 
 
 def MatrixGenerator(dim, max_value=500):
@@ -102,6 +103,19 @@ def test_MG_Restriction_Prolongation_Shapes_3D_odd():
     C = mg.prolongation(B, 1)
 
     assert A.shape == C.shape
+
+
+def test_residualize():
+    eps = 1e-5
+    # Variables
+    U = hm.initMap_2D(40)
+
+    A = op.poisson_operator_2D(U.shape[0])
+    B = A @ U.flatten()
+    C = mg.residualize(U)
+
+    assert np.allclose(C, B, rtol=eps)
+
 
 
 def test_MultiGrid_VS_GS_RB():

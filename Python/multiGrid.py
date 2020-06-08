@@ -28,18 +28,18 @@ def weighted_restriction(A):
         for i in range(A.shape[0] - 1):
             for j in range(A.shape[1] - 1):
                 B[i][j] = ( A[2*i][2*j] / 2 +
-                        (   A[2*i + 1, 2*j] + A[2*i - 1, 2*j] +
-                            A[2*i, 2*j + 1] + A[2*i, 2*j -1]
+                        (   A[2*i + 1][2*j] + A[2*i - 1][2*j] +
+                            A[2*i][2*j + 1] + A[2*i][2*j -1]
                         ) / 4 +
-                        (   A[2*i + 1, 2*j + 1] + A[2*i + 1, 2*j - 1] +
-                            A[2*i - 1, 2*j + 1] + A[2*i - 1, 2*j - 1]
+                        (   A[2*i + 1][2*j + 1] + A[2*i + 1][2*j - 1] +
+                            A[2*i - 1][2*j + 1] + A[2*i - 1][2*j - 1]
                         ) / 8 )
         return B
     if alpha == 3:
         # TODO
         return A[1::2, 1::2, 1::2]
     else:
-        raise ValueError('restriction: invalid dimension')
+        raise ValueError('weighted restriction: invalid dimension')
 
 
 def prolongation(e, plus):
