@@ -58,7 +58,7 @@ def test_red_black_against_gauss_seidel():
 # --- MultiGrid TestCases ---
 
 def test_MG_Restriction_Prolongation_Shapes_1D_even():
-    A = MatrixGenerator((100))
+    A = MatrixGenerator((100,))
     B = mg.restriction(A)
     C = mg.prolongation(B, 0)
 
@@ -66,7 +66,7 @@ def test_MG_Restriction_Prolongation_Shapes_1D_even():
 
 
 def test_MG_Restriction_Prolongation_Shapes_1D_odd():
-    A = MatrixGenerator((99))
+    A = MatrixGenerator((99,))
     B = mg.restriction(A)
     C = mg.prolongation(B, 1)
 
@@ -106,12 +106,12 @@ def test_MG_Restriction_Prolongation_Shapes_3D_odd():
 
 
 def test_residualize():
-    eps = 1e-5
+    eps = 1e-12
     # Variables
     U = hm.initMap_2D(40)
 
     A = op.poisson_operator_2D(U.shape[0])
-    B = A @ U.flatten()
+    B = (A @ U.flatten()).reshape(U.shape)
     C = mg.residualize(U)
 
     assert np.allclose(C, B, rtol=eps)

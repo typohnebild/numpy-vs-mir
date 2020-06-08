@@ -20,14 +20,14 @@ def restriction(A):
 
 def weighted_restriction(A):
     alpha = len(A.shape)
-    B = np.zeros_like(np.array(A.shape) / 2)
+    B = np.zeros(np.array(A.shape) // 2)
 
     if alpha == 1:
         # TODO
         return A[1::2]
     if alpha == 2:
-        for i in range(A.shape[0] - 1):
-            for j in range(A.shape[1] - 1):
+        for i in range(B.shape[0] - 1):
+            for j in range(B.shape[1] - 1):
                 B[i][j] = (A[2 * i][2 * j] / 2 +
                            (A[2 * i + 1, 2 * j] + A[2 * i - 1, 2 * j] +
                             A[2 * i, 2 * j + 1] + A[2 * i, 2 * j - 1]
@@ -78,7 +78,7 @@ def residualize(U):
         x[0] = U[0]
         x[-1] = U[-1]
         for i in range(1, U.shape[0] - 1):
-            x[i] = (2.0 * U[i] - U[i - 1] - U[i + 1]) / 2.0
+            x[i] = (2.0 * U[i] - U[i - 1] - U[i + 1])
     elif alpha == 2:
         x[:, 0] = U[:, 0]
         x[0, :] = U[0, :]
@@ -86,7 +86,7 @@ def residualize(U):
             for j in range(1, U.shape[1] - 1):
                 x[i, j] = (4.0 * U[i, j] -
                            U[i - 1, j] - U[i + 1, j] -
-                           U[i, j - 1] - U[i, j + 1]) / 4.0
+                           U[i, j - 1] - U[i, j + 1])
     elif alpha == 3:
         x[:, :, 0] = U[:, :, 0]
         x[:, 0, :] = U[:, 0, :]
@@ -97,7 +97,7 @@ def residualize(U):
                     x[i, j] = (4.0 * U[i, j] -
                                U[i - 1, j, k] - U[i + 1, j, k] -
                                U[i, j - 1, k] - U[i, j + 1, k] -
-                               U[i, j, k - 1] - U[i, j, k + 1]) / 8.0
+                               U[i, j, k - 1] - U[i, j, k + 1])
     else:
         raise ValueError('residual: invalid dimension')
 
