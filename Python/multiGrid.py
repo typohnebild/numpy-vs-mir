@@ -78,7 +78,7 @@ def residualize(U):
         x[0] = U[0]
         x[-1] = U[-1]
         for i in range(1, U.shape[0] - 1):
-            x[i] = (2.0 * U[i] - U[i - 1] - U[i + 1]) / 2.0
+            x[i] = (2.0 * U[i] - U[i - 1] - U[i + 1])
     elif alpha == 2:
         x[:, 0] = U[:, 0]
         x[0, :] = U[0, :]
@@ -86,7 +86,7 @@ def residualize(U):
             for j in range(1, U.shape[1] - 1):
                 x[i, j] = (4.0 * U[i, j] -
                            U[i - 1, j] - U[i + 1, j] -
-                           U[i, j - 1] - U[i, j + 1]) / 4.0
+                           U[i, j - 1] - U[i, j + 1])
     elif alpha == 3:
         x[:, :, 0] = U[:, :, 0]
         x[:, 0, :] = U[:, 0, :]
@@ -97,7 +97,7 @@ def residualize(U):
                     x[i, j] = (4.0 * U[i, j] -
                                U[i - 1, j, k] - U[i + 1, j, k] -
                                U[i, j - 1, k] - U[i, j + 1, k] -
-                               U[i, j, k - 1] - U[i, j, k + 1]) / 8.0
+                               U[i, j, k - 1] - U[i, j, k + 1])
     else:
         raise ValueError('residual: invalid dimension')
 
