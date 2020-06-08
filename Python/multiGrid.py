@@ -16,9 +16,9 @@ def restriction(A):
         raise ValueError('restriction: invalid dimension')
 
 
-def prolongation(e):
+def prolongation(e, plus):
     alpha = len(e.shape)
-    w = np.zeros(np.array(e.shape) * 2 + 1)
+    w = np.zeros(np.array(e.shape) * 2 + plus)
 
     if alpha == 1:
         w[0] = e[0] / 2
@@ -43,7 +43,7 @@ def prolongation(e):
     return w
 
 
-def multigrid(U, F, l, v1, v2, mu):
+def multigrid(F, U, l, v1, v2, mu):
     if l == 1:
         # solve
         return gs.GS_RB(F, U=U, max_iter=1000)
@@ -60,14 +60,14 @@ def multigrid(U, F, l, v1, v2, mu):
         for _ in range(mu):
             e = multigrid(e, r, l - 1, v1, v2, mu)
         # prolongation
-        e = prolongation(e)
+        e = prolongation(e, F.shape[0] % 2)
         # correction
         U = U + e
         # post smoothing
         return gs.GS_RB(F, U=U, max_iter=v2)
 
 
-
+# --- Some minor Tests ---
 def test_1D():
     """
     A = np.array([[10., -1., 2.],

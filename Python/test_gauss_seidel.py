@@ -59,11 +59,11 @@ def test_red_black_against_gauss_seidel():
 def test_MultiGrid_VS_GS_RB():
     eps = 1e-12
     # Variables
-    U = hm.initMap_2D(100)
-    F = hm.heat_sources_2D(100)
+    U = hm.initMap_2D(10)
+    F = hm.heat_sources_2D(10)
     # Gauss Seidel Red Black
     A = gs.GS_RB(-F, U, max_iter=500)
     # MultiGrid
-    B = mg.multigrid(U, F, 10, 3, 3, 1)
+    B = mg.multigrid(F, U, 10, 3, 3, 1)
 
     assert np.allclose(A, B, rtol=eps)
