@@ -56,16 +56,48 @@ def test_red_black_against_gauss_seidel():
 
 # --- MultiGrid TestCases ---
 
-def test_MG_Restriction_Prolongation_Shapes_even():
-    A = MatrixGenerator((100,100))
+def test_MG_Restriction_Prolongation_Shapes_1D_even():
+    A = MatrixGenerator((100))
     B = mg.restriction(A)
     C = mg.prolongation(B, 0)
 
     assert A.shape == C.shape
 
 
-def test_MG_Restriction_Prolongation_Shapes_odd():
-    A = MatrixGenerator((99,99))
+def test_MG_Restriction_Prolongation_Shapes_1D_odd():
+    A = MatrixGenerator((99))
+    B = mg.restriction(A)
+    C = mg.prolongation(B, 1)
+
+    assert A.shape == C.shape
+
+
+def test_MG_Restriction_Prolongation_Shapes_2D_even():
+    A = MatrixGenerator((100, 100))
+    B = mg.restriction(A)
+    C = mg.prolongation(B, 0)
+
+    assert A.shape == C.shape
+
+
+def test_MG_Restriction_Prolongation_Shapes_2D_odd():
+    A = MatrixGenerator((99, 99))
+    B = mg.restriction(A)
+    C = mg.prolongation(B, 1)
+
+    assert A.shape == C.shape
+
+
+def test_MG_Restriction_Prolongation_Shapes_3D_even():
+    A = MatrixGenerator((100, 100, 100))
+    B = mg.restriction(A)
+    C = mg.prolongation(B, 0)
+
+    assert A.shape == C.shape
+
+
+def test_MG_Restriction_Prolongation_Shapes_3D_odd():
+    A = MatrixGenerator((99, 99, 99))
     B = mg.restriction(A)
     C = mg.prolongation(B, 1)
 
