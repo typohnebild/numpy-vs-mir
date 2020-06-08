@@ -43,55 +43,56 @@ def prolongation(e):
     return w
 
 
-def multigrid(A, x, b, l, v1, v2, mu):
+def multigrid(U, F, l, v1, v2, mu):
     if l == 1:
         # solve
         return np.linalg.solve(A, b)
     else:
         # smoothing
-        x = gs.gauss_seidel(A, b, x=x, max_iter=v1)
+        U = gs.GS_RB(F, U=U, max_iter=v1)
         # residual
-        r = b - A @ x
+        r = F - U
         # restriction
-        A_next = restriction(A)
         r = restriction(r)
-        print(A_next)
         print(r)
 
         # recursive call
         e = np.zeros_like(r)
         for _ in range(mu):
-            e = multigrid(A_next, e, r, l - 1, v1, v2, mu)
+            e = multigrid(e, r, l - 1, v1, v2, mu)
         print(e)
         # prolongation
         e = prolongation(e)
         # correction
-        x = x + e
+        U = U + e
         # post smoothing
-        return gs.gauss_seidel(A, b, x=x, max_iter=v2)
+        return gs.GS_RB(F, U=U, max_iter=v2)
 
 
 def test():
+    """
     A = np.array([[10., -1., 2.],
                   [-1., 11., -1.],
                   [2., -1., 10.]])
+    """
 
     b = np.array([6., 25., -11.])
 
-    print(multigrid(A, np.zeros_like(b), b, 1, 1, 1, 1))
-    print(multigrid(A, np.zeros_like(b), b, 2, 1, 1, 1))
+    print(multigrid(np.zeros_like(b), b, 1, 1, 1, 1))
+    print(multigrid(np.zeros_like(b), b, 2, 1, 1, 1))
 
 
 def test2():
+    """
     A = np.array([[[10., -1., 2.],
                    [-1., 11., -1.],
                    [2., -1., 10.]],
                   [[10., -1., 2.],
                    [-1., 11., -1.],
                    [2., -1., 10.]]])
-
+    """
     b = np.array([[6., 25., -11.], [6., 25., -11.]])
 
-    print(multigrid(A, np.zeros_like(b), b, 1, 1, 1, 1))
-    print(multigrid(A, np.zeros_like(b), b, 2, 1, 1, 1))
+    print(multigrid(np.zeros_like(b), b, 1, 1, 1, 1))
+    print(multigrid(np.zeros_like(b), b, 2, 1, 1, 1))
 
