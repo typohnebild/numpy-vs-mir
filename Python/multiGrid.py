@@ -1,6 +1,7 @@
 #!/bin/usr/env python3
 import numpy as np
 import gaussSeidel as gs
+from operators import poisson_operator_2D
 
 
 def restriction(A):
@@ -27,10 +28,7 @@ def prolongation(e, plus):
         w[-1] = e[-1] / 2
     elif alpha == 2:
         e = np.pad(e, 1)
-        # w[1::2, 1::2] = e[::, ::] / 2
-        # w[1::2, ::2] = (e[:-1:, ::] + e[1::, ::]) / 4
-        # w[::2, 1::2] = (e[::, :-1:] + e[::, 1::]) / 4
-        # w[1::2, 1::2] = (e[:-1:, :-1:] + e[1::, :-1:] + e[:-1:, 1::]  + e[1::, 1::]) / 8
+
         for i in range(e.shape[0] - 2):
             for j in range(e.shape[1] - 2):
                 w[2 * i][2 * j] = e[i][j] / 2
@@ -43,6 +41,11 @@ def prolongation(e, plus):
     return w
 
 
+def apply_poisson(U):
+    ret = poisson_operator_2D(U.shape[0]) @ U.flatten()
+    return ret.reshape(U.shape)
+
+
 def multigrid(F, U, l, v1, v2, mu):
     if l == 1:
         # solve
@@ -51,16 +54,17 @@ def multigrid(F, U, l, v1, v2, mu):
         # smoothing
         U = gs.GS_RB(F, U=U, max_iter=v1)
         # residual
-        r = F - U
+        r = F - apply_poisson(U)
         # restriction
         r = restriction(r)
 
         # recursive call
         e = np.zeros_like(r)
         for _ in range(mu):
-            e = multigrid(e, r, l - 1, v1, v2, mu)
+            e = multigrid(e, np.copy(r), l - 1, v1, v2, mu)
         # prolongation
         e = prolongation(e, F.shape[0] % 2)
+
         # correction
         U = U + e
         # post smoothing
@@ -94,3 +98,4 @@ def test_2D():
 
     print(multigrid(np.zeros_like(b), b, 1, 1, 1, 1))
     print(multigrid(np.zeros_like(b), b, 2, 1, 1, 1))
+
