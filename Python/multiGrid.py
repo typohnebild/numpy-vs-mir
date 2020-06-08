@@ -1,6 +1,7 @@
 #!/bin/usr/env python3
 import numpy as np
 import gaussSeidel as gs
+from operators import poisson_operator_2D
 import operators as op
 
 
@@ -27,13 +28,13 @@ def weighted_restriction(A):
     if alpha == 2:
         for i in range(A.shape[0] - 1):
             for j in range(A.shape[1] - 1):
-                B[i][j] = ( A[2*i][2*j] / 2 +
-                        (   A[2*i + 1][2*j] + A[2*i - 1][2*j] +
-                            A[2*i][2*j + 1] + A[2*i][2*j -1]
-                        ) / 4 +
-                        (   A[2*i + 1][2*j + 1] + A[2*i + 1][2*j - 1] +
-                            A[2*i - 1][2*j + 1] + A[2*i - 1][2*j - 1]
-                        ) / 8 )
+                B[i][j] = (A[2 * i][2 * j] / 2 +
+                           (A[2 * i + 1, 2 * j] + A[2 * i - 1, 2 * j] +
+                            A[2 * i, 2 * j + 1] + A[2 * i, 2 * j - 1]
+                            ) / 4 +
+                           (A[2 * i + 1, 2 * j + 1] + A[2 * i + 1, 2 * j - 1] +
+                            A[2 * i - 1, 2 * j + 1] + A[2 * i - 1, 2 * j - 1]
+                            ) / 8)
         return B
     if alpha == 3:
         # TODO
@@ -53,10 +54,7 @@ def prolongation(e, plus):
         w[-1] = e[-1] / 2
     elif alpha == 2:
         e = np.pad(e, 1)
-        # w[1::2, 1::2] = e[::, ::] / 2
-        # w[1::2, ::2] = (e[:-1:, ::] + e[1::, ::]) / 4
-        # w[::2, 1::2] = (e[::, :-1:] + e[::, 1::]) / 4
-        # w[1::2, 1::2] = (e[:-1:, :-1:] + e[1::, :-1:] + e[:-1:, 1::]  + e[1::, 1::]) / 8
+
         for i in range(e.shape[0] - 2):
             for j in range(e.shape[1] - 2):
                 w[2 * i][2 * j] = e[i][j] / 2
@@ -86,9 +84,9 @@ def residualize(U):
         x[0, :] = U[0, :]
         for i in range(1, U.shape[0] - 1):
             for j in range(1, U.shape[1] - 1):
-                x[i, j] = (4.0 * U[i,j] -
-                            U[i - 1, j] - U[i + 1, j] -
-                            U[i, j - 1] - U[i, j + 1]) / 4.0
+                x[i, j] = (4.0 * U[i, j] -
+                           U[i - 1, j] - U[i + 1, j] -
+                           U[i, j - 1] - U[i, j + 1]) / 4.0
     elif alpha == 3:
         x[:, :, 0] = U[:, :, 0]
         x[:, 0, :] = U[:, 0, :]
@@ -96,10 +94,10 @@ def residualize(U):
         for i in range(1, U.shape[0] - 1):
             for j in range(1, U.shape[1] - 1):
                 for k in range(1, U.shape[2] - 1):
-                    x[i, j] = (4.0 * U[i,j] -
-                                U[i - 1, j, k] - U[i + 1, j, k] -
-                                U[i, j - 1, k] - U[i, j + 1, k] -
-                                U[i, j, k - 1] - U[i, j, k + 1]) / 8.0
+                    x[i, j] = (4.0 * U[i, j] -
+                               U[i - 1, j, k] - U[i + 1, j, k] -
+                               U[i, j - 1, k] - U[i, j + 1, k] -
+                               U[i, j, k - 1] - U[i, j, k + 1]) / 8.0
     else:
         raise ValueError('residual: invalid dimension')
 
@@ -124,9 +122,10 @@ def multigrid(F, U, l, v1, v2, mu):
         # recursive call
         e = np.zeros_like(r)
         for _ in range(mu):
-            e = multigrid(e, r, l - 1, v1, v2, mu)
+            e = multigrid(e, np.copy(r), l - 1, v1, v2, mu)
         # prolongation
         e = prolongation(e, F.shape[0] % 2)
+
         # correction
         U = U + e
         # post smoothing

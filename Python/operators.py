@@ -28,7 +28,7 @@ def poisson_operator(N):
     return ret
 
 
-@timer
+# @timer
 def poisson_operator_2D(N):
     """
         return n^2 x n^2 matrix
