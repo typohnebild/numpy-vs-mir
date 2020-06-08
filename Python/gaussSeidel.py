@@ -28,7 +28,7 @@ def gauss_seidel(A, b, x=None, eps=1e-10, max_iter=1000):
     return x
 
 
-@timer
+#@timer
 def GS_RB(F, U=None, max_iter=1000):
     """Implementation of Gauss Seidl Red Black iterations
        should solve AU = F

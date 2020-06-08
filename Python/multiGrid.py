@@ -38,12 +38,50 @@ def prolongation(e, plus):
                 w[2 * i][2 * j + 1] = (e[i][j] + e[i][j + 1]) / 4
                 w[2 * i + 1][2 * j + 1] = (e[i][j] + e[i][j + 1] +
                                            e[i + 1][j] + e[i + 1][j + 1]) / 8
+    elif alpha == 3:
+        # TODO
+        raise ValueError('prolongation: dimension not implemented')
     else:
         raise ValueError('prolongation: invalid dimension')
     return w
 
 
+def residual(U):
+    alpha = len(U.shape)
+    x = np.zeros_like(U)
+    print(x)
+    if alpha == 1:
+        x[0] = U[0]
+        x[-1] = U[-1]
+        for i in range(1, U.shape[0] - 1):
+            x[i] = (2.0 * U[i] - U[i - 1] - U[i + 1]) / 2.0
+    elif alpha == 2:
+        x[:, 0] = U[:, 0]
+        x[0, :] = U[0, :]
+        for i in range(1, U.shape[0] - 1):
+            for j in range(1, U.shape[1] - 1):
+                x[i, j] = (4.0 * U[i,j] -
+                            U[i - 1, j] - U[i + 1, j] -
+                            U[i, j - 1] - U[i, j + 1]) / 4.0
+    elif alpha == 3:
+        x[:, :, 0] = U[:, :, 0]
+        x[:, 0, :] = U[:, 0, :]
+        x[0, :, :] = U[0, :, :]
+        for i in range(1, U.shape[0] - 1):
+            for j in range(1, U.shape[1] - 1):
+                for k in range(1, U.shape[2] - 1):
+                    x[i, j] = (4.0 * U[i,j] -
+                                U[i - 1, j, k] - U[i + 1, j, k] -
+                                U[i, j - 1, k] - U[i, j + 1, k] -
+                                U[i, j, k - 1] - U[i, j, k + 1]) / 8.0
+    else:
+        raise ValueError('residual: invalid dimension')
+
+    return x
+
+
 def multigrid(F, U, l, v1, v2, mu):
+    # TODO: abfangen, dass level zu gross wird!!!
     if l == 1:
         # solve
         return gs.GS_RB(F, U=U, max_iter=1000)
@@ -51,7 +89,7 @@ def multigrid(F, U, l, v1, v2, mu):
         # smoothing
         U = gs.GS_RB(F, U=U, max_iter=v1)
         # residual
-        r = F - U
+        r = F - residual(U)
         # restriction
         r = restriction(r)
 

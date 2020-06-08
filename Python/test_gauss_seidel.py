@@ -105,13 +105,18 @@ def test_MG_Restriction_Prolongation_Shapes_3D_odd():
 
 
 def test_MultiGrid_VS_GS_RB():
-    eps = 1e-12
+    eps = 1e-5
     # Variables
-    U = hm.initMap_2D(10)
-    F = hm.heat_sources_2D(10)
+    U = hm.initMap_2D(20)
+    F = hm.heat_sources_2D(20)
     # Gauss Seidel Red Black
-    A = gs.GS_RB(-F, U, max_iter=500)
+    A = gs.GS_RB(-F, U, max_iter=100)
     # MultiGrid
-    B = mg.multigrid(F, U, 500, 3, 3, 1)
+    U = hm.initMap_2D(20)
+    F = hm.heat_sources_2D(20)
+    B = mg.multigrid(-F, U, 6, 5, 5, 3)
+
+    hm.draw2D(A)
+    hm.draw2D(B)
 
     assert np.allclose(A, B, rtol=eps)
