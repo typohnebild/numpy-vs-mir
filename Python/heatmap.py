@@ -73,3 +73,15 @@ def simulate_3D(N, max_iter=500):
     U = initMap_3D(N)
     F = np.zeros((N, N, N))
     return gs.GS_RB(F, U, max_iter=max_iter)
+
+
+def test_2D_heatMap():
+    A = simulate_2D(10, 500)
+    draw2D(A)
+    return A
+
+
+def test_3D_heatMap():
+    A = simulate_3D(10, 500)
+    draw3D(A)
+    return A

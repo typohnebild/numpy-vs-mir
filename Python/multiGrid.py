@@ -54,24 +54,21 @@ def multigrid(U, F, l, v1, v2, mu):
         r = F - U
         # restriction
         r = restriction(r)
-        print(r)
 
         # recursive call
         e = np.zeros_like(r)
         for _ in range(mu):
             e = multigrid(e, r, l - 1, v1, v2, mu)
-        print(e)
         # prolongation
         e = prolongation(e)
         # correction
-        print(U.shape)
-        print(e.shape)
         U = U + e
         # post smoothing
         return gs.GS_RB(F, U=U, max_iter=v2)
 
 
-def test():
+
+def test_1D():
     """
     A = np.array([[10., -1., 2.],
                   [-1., 11., -1.],
@@ -84,7 +81,7 @@ def test():
     print(multigrid(np.zeros_like(b), b, 2, 1, 1, 1))
 
 
-def test2():
+def test_2D():
     """
     A = np.array([[[10., -1., 2.],
                    [-1., 11., -1.],
@@ -93,8 +90,7 @@ def test2():
                    [-1., 11., -1.],
                    [2., -1., 10.]]])
     """
-    b = np.array([[6., 25., -11.], [6., 25., -11.]])
+    b = np.array([[6., 25., -11.], [6., 25., -11.], [6, 25, -11]])
 
     print(multigrid(np.zeros_like(b), b, 1, 1, 1, 1))
     print(multigrid(np.zeros_like(b), b, 2, 1, 1, 1))
-

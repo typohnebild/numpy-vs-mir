@@ -2,13 +2,13 @@ import pytest
 import numpy as np
 import gaussSeidel as gs
 import heatmap as hm
+import multiGrid as mg
 
 
 def MatrixGenerator(dim, max_value=500):
     return np.random.rand(*dim) * np.random.randint(max_value)
 
 
-# TODO: put some testcases here
 # --- GausSeidel TestCases ---
 
 def test_np_gs():
@@ -24,17 +24,6 @@ def test_np_gs():
     x = gs.gauss_seidel(A, b, eps=eps)
     assert np.allclose(x, x_opt, rtol=eps)
 
-
-def test_2D_heatMap():
-    A = hm.simulate_2D(10, 500)
-    # hm.draw2D(A)
-    return A
-
-
-def test_3D_heatMap():
-    A = hm.simulate_3D(10, 500)
-    # hm.draw3D(A)
-    return A
 
 
 def test_red_black_one_iter():
@@ -63,5 +52,18 @@ def test_red_black_against_gauss_seidel():
     assert np.allclose(U1, U2, rtol=eps)
 
 
+
+
 # --- MultiGrid TestCases ---
-# TODO: put some testcases here
+
+def test_MultiGrid_VS_GS_RB():
+    eps = 1e-12
+    # Variables
+    U = hm.initMap_2D(100)
+    F = hm.heat_sources_2D(100)
+    # Gauss Seidel Red Black
+    A = gs.GS_RB(-F, U, max_iter=500)
+    # MultiGrid
+    B = mg.multigrid(U, F, 10, 3, 3, 1)
+
+    assert np.allclose(A, B, rtol=eps)
