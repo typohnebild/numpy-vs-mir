@@ -1,6 +1,7 @@
 #!/bin/usr/env python3
 import numpy as np
 import gaussSeidel as gs
+import operators as op
 
 
 def restriction(A):
@@ -11,6 +12,31 @@ def restriction(A):
     if alpha == 2:
         return A[1::2, 1::2]
     if alpha == 3:
+        return A[1::2, 1::2, 1::2]
+    else:
+        raise ValueError('restriction: invalid dimension')
+
+
+def weighted_restriction(A):
+    alpha = len(A.shape)
+    B = np.zeros_like(np.array(A.shape) / 2)
+
+    if alpha == 1:
+        # TODO
+        return A[1::2]
+    if alpha == 2:
+        for i in range(A.shape[0] - 1):
+            for j in range(A.shape[1] - 1):
+                B[i][j] = ( A[2*i][2*j] / 2 +
+                        (   A[2*i + 1, 2*j] + A[2*i - 1, 2*j] +
+                            A[2*i, 2*j + 1] + A[2*i, 2*j -1]
+                        ) / 4 +
+                        (   A[2*i + 1, 2*j + 1] + A[2*i + 1, 2*j - 1] +
+                            A[2*i - 1, 2*j + 1] + A[2*i - 1, 2*j - 1]
+                        ) / 8 )
+        return B
+    if alpha == 3:
+        # TODO
         return A[1::2, 1::2, 1::2]
     else:
         raise ValueError('restriction: invalid dimension')
@@ -46,10 +72,10 @@ def prolongation(e, plus):
     return w
 
 
-def residual(U):
+def residualize(U):
     alpha = len(U.shape)
     x = np.zeros_like(U)
-    print(x)
+    # print(x)
     if alpha == 1:
         x[0] = U[0]
         x[-1] = U[-1]
@@ -85,13 +111,15 @@ def multigrid(F, U, l, v1, v2, mu):
     if l == 1:
         # solve
         return gs.GS_RB(F, U=U, max_iter=1000)
+        # A = op.poisson_operator(U.shape[0])
+        # return np.linalg.solve(A, U)
     else:
         # smoothing
         U = gs.GS_RB(F, U=U, max_iter=v1)
         # residual
-        r = F - residual(U)
+        r = F - residualize(U)
         # restriction
-        r = restriction(r)
+        r = weighted_restriction(r)
 
         # recursive call
         e = np.zeros_like(r)
