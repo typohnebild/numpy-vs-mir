@@ -64,6 +64,8 @@ def multigrid(U, F, l, v1, v2, mu):
         # prolongation
         e = prolongation(e)
         # correction
+        print(U.shape)
+        print(e.shape)
         U = U + e
         # post smoothing
         return gs.GS_RB(F, U=U, max_iter=v2)
