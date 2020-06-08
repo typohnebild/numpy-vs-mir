@@ -113,6 +113,7 @@ def test_residualize():
     A = op.poisson_operator_2D(U.shape[0])
     B = (A @ U.flatten()).reshape(U.shape)
     C = mg.residualize(U)
+    # print(np.linalg.norm(B - C))
 
     assert np.allclose(C, B, rtol=eps)
 
@@ -126,7 +127,7 @@ def test_MultiGrid_VS_GS_RB():
     # Gauss Seidel Red Black
     A = gs.GS_RB(-F, U, max_iter=30)
 
-    hm.draw2D(A)
+    # hm.draw2D(A)
 
 
     # MultiGrid
