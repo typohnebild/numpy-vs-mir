@@ -56,6 +56,22 @@ def test_red_black_against_gauss_seidel():
 
 # --- MultiGrid TestCases ---
 
+def test_MG_Restriction_Prolongation_Shapes_even():
+    A = MatrixGenerator((100,100))
+    B = mg.restriction(A)
+    C = mg.prolongation(B, 0)
+
+    assert A.shape == C.shape
+
+
+def test_MG_Restriction_Prolongation_Shapes_odd():
+    A = MatrixGenerator((99,99))
+    B = mg.restriction(A)
+    C = mg.prolongation(B, 1)
+
+    assert A.shape == C.shape
+
+
 def test_MultiGrid_VS_GS_RB():
     eps = 1e-12
     # Variables
@@ -64,6 +80,6 @@ def test_MultiGrid_VS_GS_RB():
     # Gauss Seidel Red Black
     A = gs.GS_RB(-F, U, max_iter=500)
     # MultiGrid
-    B = mg.multigrid(F, U, 10, 3, 3, 1)
+    B = mg.multigrid(F, U, 500, 3, 3, 1)
 
     assert np.allclose(A, B, rtol=eps)
