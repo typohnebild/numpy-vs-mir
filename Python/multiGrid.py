@@ -29,11 +29,11 @@ def weighted_restriction(A):
         for i in range(B.shape[0] - 1):
             for j in range(B.shape[1] - 1):
                 B[i][j] = (A[2 * i][2 * j] / 2 +
-                           (A[2 * i + 1, 2 * j] + A[2 * i - 1, 2 * j] +
-                            A[2 * i, 2 * j + 1] + A[2 * i, 2 * j - 1]
+                           (A[2 * i + 1][2 * j] + A[2 * i - 1][2 * j] +
+                            A[2 * i][2 * j + 1] + A[2 * i][2 * j - 1]
                             ) / 4 +
-                           (A[2 * i + 1, 2 * j + 1] + A[2 * i + 1, 2 * j - 1] +
-                            A[2 * i - 1, 2 * j + 1] + A[2 * i - 1, 2 * j - 1]
+                           (A[2 * i + 1][2 * j + 1] + A[2 * i + 1][2 * j - 1] +
+                            A[2 * i - 1][2 * j + 1] + A[2 * i - 1][2 * j - 1]
                             ) / 8)
         return B
     if alpha == 3:
@@ -118,6 +118,7 @@ def multigrid(F, U, l, v1, v2, mu):
         r = F - residualize(U)
         # restriction
         r = weighted_restriction(r)
+        print(r)
 
         # recursive call
         e = np.zeros_like(r)
