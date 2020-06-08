@@ -28,11 +28,13 @@ def test_np_gs():
 def test_2D_heatMap():
     A = hm.simulate_2D(10, 500)
     # hm.draw2D(A)
+    return A
 
 
 def test_3D_heatMap():
     A = hm.simulate_3D(10, 500)
     # hm.draw3D(A)
+    return A
 
 
 def test_red_black_one_iter():

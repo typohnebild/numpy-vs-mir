@@ -46,7 +46,7 @@ def prolongation(e):
 def multigrid(U, F, l, v1, v2, mu):
     if l == 1:
         # solve
-        return np.linalg.solve(A, b)
+        return gs.GS_RB(F, U=U, max_iter=1000)
     else:
         # smoothing
         U = gs.GS_RB(F, U=U, max_iter=v1)

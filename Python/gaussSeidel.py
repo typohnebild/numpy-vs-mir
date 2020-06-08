@@ -14,7 +14,7 @@ def gauss_seidel(A, b, x=None, eps=1e-10, max_iter=1000):
     n, *_ = A.shape
     if x is None:
         x = np.zeros_like(b)
-    for it in range(max_iter):
+    for _ in range(max_iter):
         x_next = np.zeros_like(x)
         for i in range(n):
             left = np.dot(A[i, :i], x_next[:i])
