@@ -61,7 +61,6 @@ def GS_1D_RB(F, U, max_iter):
     # initialize dimensions
     n = F.shape[0]
 
-
     def sweep(color):
         """
         Does the sweeps
@@ -153,4 +152,3 @@ def GS_3D_RB(F, U, max_iter):
         sweep(0)
 
     return U
-

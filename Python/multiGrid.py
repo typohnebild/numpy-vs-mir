@@ -2,6 +2,7 @@
 import numpy as np
 import gaussSeidel as gs
 from operators import poisson_operator_2D
+import operators as op
 
 
 def restriction(A):
@@ -12,6 +13,31 @@ def restriction(A):
     if alpha == 2:
         return A[1::2, 1::2]
     if alpha == 3:
+        return A[1::2, 1::2, 1::2]
+    else:
+        raise ValueError('restriction: invalid dimension')
+
+
+def weighted_restriction(A):
+    alpha = len(A.shape)
+    B = np.zeros_like(np.array(A.shape) / 2)
+
+    if alpha == 1:
+        # TODO
+        return A[1::2]
+    if alpha == 2:
+        for i in range(A.shape[0] - 1):
+            for j in range(A.shape[1] - 1):
+                B[i][j] = (A[2 * i][2 * j] / 2 +
+                           (A[2 * i + 1, 2 * j] + A[2 * i - 1, 2 * j] +
+                            A[2 * i, 2 * j + 1] + A[2 * i, 2 * j - 1]
+                            ) / 4 +
+                           (A[2 * i + 1, 2 * j + 1] + A[2 * i + 1, 2 * j - 1] +
+                            A[2 * i - 1, 2 * j + 1] + A[2 * i - 1, 2 * j - 1]
+                            ) / 8)
+        return B
+    if alpha == 3:
+        # TODO
         return A[1::2, 1::2, 1::2]
     else:
         raise ValueError('restriction: invalid dimension')
@@ -36,27 +62,62 @@ def prolongation(e, plus):
                 w[2 * i][2 * j + 1] = (e[i][j] + e[i][j + 1]) / 4
                 w[2 * i + 1][2 * j + 1] = (e[i][j] + e[i][j + 1] +
                                            e[i + 1][j] + e[i + 1][j + 1]) / 8
+    elif alpha == 3:
+        # TODO
+        raise ValueError('prolongation: dimension not implemented')
     else:
         raise ValueError('prolongation: invalid dimension')
     return w
 
 
-def apply_poisson(U):
-    ret = poisson_operator_2D(U.shape[0]) @ U.flatten()
-    return ret.reshape(U.shape)
+def residualize(U):
+    alpha = len(U.shape)
+    x = np.zeros_like(U)
+    # print(x)
+    if alpha == 1:
+        x[0] = U[0]
+        x[-1] = U[-1]
+        for i in range(1, U.shape[0] - 1):
+            x[i] = (2.0 * U[i] - U[i - 1] - U[i + 1]) / 2.0
+    elif alpha == 2:
+        x[:, 0] = U[:, 0]
+        x[0, :] = U[0, :]
+        for i in range(1, U.shape[0] - 1):
+            for j in range(1, U.shape[1] - 1):
+                x[i, j] = (4.0 * U[i, j] -
+                           U[i - 1, j] - U[i + 1, j] -
+                           U[i, j - 1] - U[i, j + 1]) / 4.0
+    elif alpha == 3:
+        x[:, :, 0] = U[:, :, 0]
+        x[:, 0, :] = U[:, 0, :]
+        x[0, :, :] = U[0, :, :]
+        for i in range(1, U.shape[0] - 1):
+            for j in range(1, U.shape[1] - 1):
+                for k in range(1, U.shape[2] - 1):
+                    x[i, j] = (4.0 * U[i, j] -
+                               U[i - 1, j, k] - U[i + 1, j, k] -
+                               U[i, j - 1, k] - U[i, j + 1, k] -
+                               U[i, j, k - 1] - U[i, j, k + 1]) / 8.0
+    else:
+        raise ValueError('residual: invalid dimension')
+
+    return x
 
 
 def multigrid(F, U, l, v1, v2, mu):
+    # TODO: abfangen, dass level zu gross wird!!!
     if l == 1:
         # solve
         return gs.GS_RB(F, U=U, max_iter=1000)
+        # A = op.poisson_operator(U.shape[0])
+        # return np.linalg.solve(A, U)
     else:
         # smoothing
         U = gs.GS_RB(F, U=U, max_iter=v1)
         # residual
-        r = F - apply_poisson(U)
+        r = F - residualize(U)
         # restriction
-        r = restriction(r)
+        r = weighted_restriction(r)
 
         # recursive call
         e = np.zeros_like(r)
@@ -98,4 +159,3 @@ def test_2D():
 
     print(multigrid(np.zeros_like(b), b, 1, 1, 1, 1))
     print(multigrid(np.zeros_like(b), b, 2, 1, 1, 1))
-
