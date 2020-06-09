@@ -1,7 +1,9 @@
 #!/bin/usr/env python3
+
+
 import numpy as np
+import operators as op
 import gaussSeidel as gs
-from operators import poisson_operator_2D
 import operators as op
 
 
@@ -26,15 +28,15 @@ def weighted_restriction(A):
         # TODO
         return A[1::2]
     if alpha == 2:
-        for i in range(B.shape[0] - 1):
-            for j in range(B.shape[1] - 1):
-                B[i][j] = (A[2 * i][2 * j] / 2 +
+        for i in range(B.shape[0]):
+            for j in range(B.shape[1]):
+                B[i][j] = (A[2 * i][2 * j] / 4 +
                            (A[2 * i + 1][2 * j] + A[2 * i - 1][2 * j] +
                             A[2 * i][2 * j + 1] + A[2 * i][2 * j - 1]
-                            ) / 4 +
+                            ) / 8 +
                            (A[2 * i + 1][2 * j + 1] + A[2 * i + 1][2 * j - 1] +
                             A[2 * i - 1][2 * j + 1] + A[2 * i - 1][2 * j - 1]
-                            ) / 8)
+                            ) / 16)
         return B
     if alpha == 3:
         # TODO
@@ -60,8 +62,10 @@ def prolongation(e, plus):
                 w[2 * i][2 * j] = e[i][j] / 2
                 w[2 * i + 1][2 * j] = (e[i][j] + e[i + 1][j]) / 4
                 w[2 * i][2 * j + 1] = (e[i][j] + e[i][j + 1]) / 4
-                w[2 * i + 1][2 * j + 1] = (e[i][j] + e[i][j + 1] +
-                                           e[i + 1][j] + e[i + 1][j + 1]) / 8
+                w[2 * i + 1][2 * j + 1] = (e[i][j] +
+                                           e[i][j + 1] +
+                                           e[i + 1][j] +
+                                           e[i + 1][j + 1]) / 8
     elif alpha == 3:
         # TODO
         raise ValueError('prolongation: dimension not implemented')
@@ -109,28 +113,26 @@ def multigrid(F, U, l, v1, v2, mu):
     if l == 1:
         # solve
         return gs.GS_RB(F, U=U, max_iter=1000)
-        # A = op.poisson_operator(U.shape[0])
-        # return np.linalg.solve(A, U)
-    else:
-        # smoothing
-        U = gs.GS_RB(F, U=U, max_iter=v1)
-        # residual
-        r = F - residualize(U)
-        # restriction
-        r = weighted_restriction(r)
-        print(r)
 
-        # recursive call
-        e = np.zeros_like(r)
-        for _ in range(mu):
-            e = multigrid(e, np.copy(r), l - 1, v1, v2, mu)
-        # prolongation
-        e = prolongation(e, F.shape[0] % 2)
+    # smoothing
+    U = gs.GS_RB(F, U=U, max_iter=v1)
+    # residual
+    r = F - residualize(U)
+    # restriction
+    r = weighted_restriction(r)
+    print(r)
 
-        # correction
-        U = U + e
-        # post smoothing
-        return gs.GS_RB(F, U=U, max_iter=v2)
+    # recursive call
+    e = np.zeros_like(r)
+    for _ in range(mu):
+        e = multigrid(e, np.copy(r), l - 1, v1, v2, mu)
+    # prolongation
+    e = prolongation(e, F.shape[0] % 2)
+
+    # correction
+    U = U + e
+    # post smoothing
+    return gs.GS_RB(F, U=U, max_iter=v2)
 
 
 # --- Some minor Tests ---

@@ -1,5 +1,6 @@
-import pytest
 import numpy as np
+import pytest
+
 import gaussSeidel as gs
 import heatmap as hm
 import multiGrid as mg
@@ -26,7 +27,6 @@ def test_np_gs():
     assert np.allclose(x, x_opt, rtol=eps)
 
 
-
 def test_red_black_one_iter():
     U = np.ones((3, 3))
     F = np.zeros((3, 3))
@@ -51,8 +51,6 @@ def test_red_black_against_gauss_seidel():
                          max_iter=max_iter).reshape((N, N))
     U2 = gs.GS_RB(-F, U.copy(), max_iter=max_iter)
     assert np.allclose(U1, U2, rtol=eps)
-
-
 
 
 # --- MultiGrid TestCases ---
@@ -118,7 +116,6 @@ def test_residualize():
     assert np.allclose(C, B, rtol=eps)
 
 
-
 def test_MultiGrid_VS_GS_RB():
     eps = 1e-5
     # Variables
@@ -128,7 +125,6 @@ def test_MultiGrid_VS_GS_RB():
     A = gs.GS_RB(-F, U, max_iter=30)
 
     # hm.draw2D(A)
-
 
     # MultiGrid
     U = hm.initMap_2D(40)
