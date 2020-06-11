@@ -2,7 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import FormatStrFormatter, LinearLocator
 
-import gaussSeidel as gs
+from GaussSeidel.GaussSeidel import gauss_seidel
+from GaussSeidel.GaussSeidel_RB import GS_RB
 from multigrid import multigrid
 from operators import poisson_operator_2D
 
@@ -60,7 +61,7 @@ def run(dim, iter=500):
     F = heat_sources_2D(dim).flatten()
     # apply Gauss Seidel on it
     A = poisson_operator_2D(dim)
-    U = gs.gauss_seidel(A, F, U, max_iter=iter)
+    U = gauss_seidel(A, F, U, max_iter=iter)
     # draw result
     return U.reshape((dim, dim))
 
@@ -68,13 +69,13 @@ def run(dim, iter=500):
 def simulate_2D(N, max_iter=500):
     U = initMap_2D(N)
     F = heat_sources_2D(N)
-    return gs.GS_RB(-F, U, max_iter=max_iter)
+    return GS_RB(-F, U, max_iter=max_iter)
 
 
 def simulate_3D(N, max_iter=500):
     U = initMap_3D(N)
     F = np.zeros((N, N, N))
-    return gs.GS_RB(F, U, max_iter=max_iter)
+    return GS_RB(F, U, max_iter=max_iter)
 
 
 def simulate_2D_multigrid(N):

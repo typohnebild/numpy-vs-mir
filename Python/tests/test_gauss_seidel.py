@@ -1,9 +1,10 @@
 import numpy as np
 import pytest
 
-import gaussSeidel as gs
-import heatmap as hm
-import operators as op
+from ..GaussSeidel.GaussSeidel import gauss_seidel
+from ..GaussSeidel.GaussSeidel_RB import GS_RB
+from .. import heatmap as hm
+from .. import operators as op
 
 
 # --- GausSeidel TestCases ---
@@ -18,7 +19,7 @@ def test_np_gs():
     b = np.array([6., 25., -11., 15.])
     eps = 1e-10
     x_opt = np.linalg.solve(A, b)
-    x = gs.gauss_seidel(A, b, eps=eps)
+    x = gauss_seidel(A, b, eps=eps)
     assert np.allclose(x, x_opt, rtol=eps)
 
 
@@ -28,7 +29,7 @@ def test_red_black_one_iter():
     F[1, 1] = 1
     expected = np.ones((3, 3))
     expected[1, 1] = 0.75
-    actual = gs.GS_RB(F, U, max_iter=1)
+    actual = GS_RB(F, U, max_iter=1)
     assert np.allclose(expected, actual, rtol=1e-8)
 
 
@@ -39,10 +40,10 @@ def test_red_black_against_gauss_seidel():
     A = hm.poisson_operator_2D(N)
     U = hm.initMap_2D(N)
     F = hm.heat_sources_2D(N)
-    U1 = gs.gauss_seidel(A,
-                         F.flatten(),
-                         U.copy().flatten(),
-                         eps=eps,
-                         max_iter=max_iter).reshape((N, N))
-    U2 = gs.GS_RB(-F, U.copy(), max_iter=max_iter)
+    U1 = gauss_seidel(A,
+                      F.flatten(),
+                      U.copy().flatten(),
+                      eps=eps,
+                      max_iter=max_iter).reshape((N, N))
+    U2 = GS_RB(-F, U.copy(), max_iter=max_iter)
     assert np.allclose(U1, U2, rtol=eps)

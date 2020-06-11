@@ -1,10 +1,10 @@
 import numpy as np
 import pytest
 
-import multigrid as mg
-import heatmap as hm
-import gaussSeidel as gs
-import operators as op
+from ..import multigrid as mg
+from ..GaussSeidel.GaussSeidel_RB import GS_RB
+from ..import heatmap as hm
+from ..import operators as op
 
 
 def MatrixGenerator(dim, max_value=500):
@@ -82,7 +82,7 @@ def test_MultiGrid_VS_GS_RB():
     U = hm.initMap_2D(40)
     F = hm.heat_sources_2D(40)
     # Gauss Seidel Red Black
-    A = gs.GS_RB(-np.copy(F), np.copy(U), max_iter=30)
+    A = GS_RB(-np.copy(F), np.copy(U), max_iter=30)
 
     # hm.draw2D(A)
 

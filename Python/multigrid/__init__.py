@@ -2,7 +2,7 @@
 
 
 import numpy as np
-import ../GaussSeidel/gaussSeidel as gs
+from GaussSeidel.GaussSeidel_RB import GS_RB
 
 from .restriction import restriction
 from .prolongation import prolongation
@@ -24,10 +24,10 @@ def multigrid(F, U, l, v1, v2, mu):
     # abfangen, dass Level zu gross wird
     if l <= 1 or U.shape[0] <= 1:
         # solve
-        return gs.GS_RB(F, U=U, max_iter=1000)
+        return GS_RB(F, U=U, max_iter=1000)
 
     # smoothing
-    U = gs.GS_RB(F, U=U, max_iter=v1)
+    U = GS_RB(F, U=U, max_iter=v1)
     # residual
     r = F - apply_poisson(U)
     # restriction
@@ -46,4 +46,4 @@ def multigrid(F, U, l, v1, v2, mu):
     # correction
     U = U - e
     # post smoothing
-    return gs.GS_RB(F, U=U, max_iter=v2)
+    return GS_RB(F, U=U, max_iter=v2)
