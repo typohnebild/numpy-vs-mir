@@ -79,7 +79,7 @@ def simulate_3D(N, max_iter=500):
 def simulate_2D_multigrid(N):
     U = initMap_2D(N)
     F = heat_sources_2D(N)
-    return multigrid(-F, U, int(np.log(N)) - 1, 5, 5, 1)
+    return multigrid(-F, U, 2, 5, 5, 1)
 
 
 def test_2D_heatMap():

@@ -9,15 +9,32 @@ import operators as op
 
 def restriction(A):
     alpha = len(A.shape)
+    ret = np.zeros(np.array(A.shape) // 2 + 1)
+    end = ret.shape[0] - (A.shape[0] + 1) % 2
 
     if alpha == 1:
-        return A[1::2]
-    if alpha == 2:
-        return A[1::2, 1::2]
-    if alpha == 3:
-        return A[1::2, 1::2, 1::2]
+        ret[:end:] = A[::2]
+        ret[-1] = A[-1]
+    elif alpha == 2:
+        ret[:end:, :end:] = A[::2, ::2]
+        ret[:end, -1] = A[::2, -1]
+        ret[-1, :end] = A[-1, ::2]
+        ret[-1, -1] = A[-1, -1]
+    elif alpha == 3:
+        ret[:end:, :end:, :end:] = A[::2, ::2, ::2]
+
+        ret[:end, :end, -1] = A[::2, ::2, -1]
+        ret[-1, :end, :end] = A[-1, ::2, ::2]
+        ret[:end, -1, :end] = A[::2, -1, ::2]
+
+        ret[:end, -1, -1] = A[::2, -1, -1]
+        ret[-1, :end, -1] = A[-1, ::2, -1]
+        ret[-1, -1, :end] = A[-1, -1, ::2]
+
+        ret[-1, -1, -1] = A[-1, -1, -1]
     else:
         raise ValueError('restriction: invalid dimension')
+    return ret
 
 
 def weighted_restriction(A):
@@ -48,30 +65,50 @@ def weighted_restriction(A):
 def prolongation(e, fine_shape):
     alpha = len(e.shape)
     w = np.zeros(fine_shape)
+    end = e.shape[0] - (w.shape[0] + 1) % 2
+    wend = w.shape[0] - (w.shape[0] + 1) % 2
 
     if alpha == 1:
-        w[0] = e[0] / 2
-        w[1::2] = e
-        w[2:-1:2] = (e[1:] + e[:-1]) / 2
-        w[-1] = e[-1] / 2
+        # w[0] = e[0] / 2
+        w[:-1:2] = e[:-1]
+        w[1:-1:2] = (e[:end - 1] + e[1:end]) / 2
+        w[-1] = e[-1]
     elif alpha == 2:
-        e = np.pad(e, 1)
+        w[:-1:2, :-1:2] = e[:-1, :-1]
 
-        for i in range(e.shape[0] - 2):
-            for j in range(e.shape[1] - 2):
-                w[2 * i][2 * j] = e[i][j] / 2
-                w[2 * i + 1][2 * j] = (e[i][j] + e[i + 1][j]) / 4
-                w[2 * i][2 * j + 1] = (e[i][j] + e[i][j + 1]) / 4
-                w[2 * i + 1][2 * j + 1] = (e[i][j] +
-                                           e[i][j + 1] +
-                                           e[i + 1][j] +
-                                           e[i + 1][j + 1]) / 8
+        w[:-1:2, -1] = e[:-1, -1]
+        w[-1, :-1:2] = e[-1, :-1]
+        w[-1, -1] = e[-1, -1]
+
+        # horizontal
+        w[:-1:2, 1:-1:2] = (e[:-1, :end - 1] + e[:-1, 1:end]) / 2
+        w[-1, 1:-1:2] = (e[-1, :end - 1] + e[-1, 1:end]) / 2
+
+        # vertical
+        w[1:-1:2, :-1:2] = (e[:end - 1, :-1] + e[1:end, :-1]) / 2
+        w[1:-1:2, -1] = (e[:end - 1, -1] + e[1:end, -1]) / 2
+
+        w[1:-1:2, 1:-1:2] = (w[2:wend:2, 1:wend:2] +
+                             w[:wend - 1:2, 1:wend:2] +
+                             w[1:wend:2, :wend - 1:2] +
+                             w[1:wend:2, 2:wend:2]) / 4
+        # e = np.pad(e, 1)
+
+        # for i in range(e.shape[0] - 1):
+        #     for j in range(e.shape[1] - 1):
+        #         w[2 * i][2 * j] = e[i][j] / 2
+        #         w[2 * i + 1][2 * j] = (e[i][j] + e[i + 1][j]) / 4
+        #         w[2 * i][2 * j + 1] = (e[i][j] + e[i][j + 1]) / 4
+        #         w[2 * i + 1][2 * j + 1] = (e[i][j] +
+        #                                    e[i][j + 1] +
+        #                                    e[i + 1][j] +
+        #                                    e[i + 1][j + 1]) / 8
     elif alpha == 3:
         # TODO
         raise ValueError('prolongation: dimension not implemented')
     else:
         raise ValueError('prolongation: invalid dimension')
-    return w
+    return w/4
 
 
 def residualize(U):
@@ -119,7 +156,7 @@ def multigrid(F, U, l, v1, v2, mu):
     # residual
     r = F - residualize(U)
     # restriction
-    r = weighted_restriction(r)
+    r = restriction(r)
 
     # recursive call
     e = np.zeros_like(r)
@@ -165,8 +202,14 @@ def test_2D():
     print(multigrid(np.zeros_like(b), b, 1, 1, 1, 1))
     print(multigrid(np.zeros_like(b), b, 2, 1, 1, 1))
 
+
+def f(n):
+    return np.arange(n * n).reshape((n, n))
+
+
 if __name__ == "__main__":
-    A = np.ones((6, 6))
+    # A = f(7)
+    A = np.ones((7,7))
     B = restriction(A)
     print(B)
     C = prolongation(B, A.shape)
