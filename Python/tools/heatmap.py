@@ -81,7 +81,7 @@ def simulate_3D(N, max_iter=500):
 def simulate_2D_multigrid(N):
     U = initMap_2D(N)
     F = heat_sources_2D(N)
-    return poisson_multigrid(-F, U, 5, 5, 5, 1)
+    return poisson_multigrid(-F, U, 3, 5, 5, 1)
 
 
 def simulate_2D_gerneral_multigrid(N):

@@ -42,10 +42,10 @@ def poisson_multigrid(F, U, l, v1, v2, mu):
     e = prolongation(e, U.shape)
 
     # do not update border
-    e[0, :] = e[:, 0] = e[-1, :] = e[:, -1] = 0
+    # e[0, :] = e[:, 0] = e[-1, :] = e[:, -1] = 0
 
     # correction
-    U = U - e
+    U = U + e
     # post smoothing
     return GS_RB(F, U=U, max_iter=v2)
 
