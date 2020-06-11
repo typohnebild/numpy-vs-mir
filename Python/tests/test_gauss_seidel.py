@@ -45,5 +45,5 @@ def test_red_black_against_gauss_seidel():
                       U.copy().flatten(),
                       eps=eps,
                       max_iter=max_iter).reshape((N, N))
-    U2 = GS_RB(-F, U.copy(), max_iter=max_iter)
+    U2 = GS_RB(-F, U.copy(), eps=eps, max_iter=max_iter)
     assert np.allclose(U1, U2, rtol=eps)
