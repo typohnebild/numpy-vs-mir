@@ -13,18 +13,12 @@ def GS_RB(F, U=None, max_iter=1000):
         U = np.zeros_like(F)
 
     if len(F.shape) == 1:
-        # initialize dimensions
-        params = (F.shape[0])
         # do the sweep
         sweep = sweep_1D
     elif len(F.shape) == 2:
-        # initialize dimensions
-        params = F.shape
         # do the sweep
         sweep = sweep_2D
     elif len(F.shape) == 3:
-         # initialize dimensions
-        params = F.shape
         # Anzahl an Gauss-Seidel-Iterationen ausfuehren
         sweep = sweep_3D
     else:
@@ -33,20 +27,22 @@ def GS_RB(F, U=None, max_iter=1000):
     # Anzahl an Gauss-Seidel-Iterationen ausfuehren
     for _ in range(max_iter):
         # rote Halbiteration
-        sweep(1, F, U, *params)
+        sweep(1, F, U)
         # schwarze Halbiteration
-        sweep(0, F, U, *params)
+        sweep(0, F, U)
     return U
 
 
 
 
 # --- 1D Fall ---
-def sweep_1D(color, F, U, n):
+def sweep_1D(color, F, U):
     """
     Does the sweeps
     @param color 1 = red 0 for black
     """
+    n = F.shape[0]
+
     for i in range(1, n - 1):
         if i % 2 == color:
             U[i] = (U[i - 1] +
@@ -55,11 +51,14 @@ def sweep_1D(color, F, U, n):
 #----------------
 
 # --- 2D Fall ---
-def sweep_2D(color, F, U, n, m):
+def sweep_2D(color, F, U):
     """
     Does the sweeps
     @param color 1 = red 0 for black
     """
+
+    m, n = F.shape
+
     for j in range(1, n - 1):
         for i in range(1, m - 1):
             if (i + j) % 2 == color:
@@ -71,11 +70,14 @@ def sweep_2D(color, F, U, n, m):
 #----------------
 
 # --- 3D Fall ---
-def sweep_3D(color, F, U, n, m, o):
+def sweep_3D(color, F, U):
     """
     Does the sweeps
     @param color 1 = red 0 for black
     """
+
+    m, n, o = F.shape
+
     for k in range(1, o - 1):
         for j in range(1, n - 1):
             for i in range(1, m - 1):
