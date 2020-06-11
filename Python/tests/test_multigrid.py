@@ -87,7 +87,7 @@ def test_MultiGrid_VS_GS_RB():
     # hm.draw2D(A)
 
     # MultiGrid
-    B = mg.multigrid(-F, U, 2, 15, 15, 1)
+    B = mg.poisson_multigrid(-F, U, 2, 15, 15, 1)
 
     # hm.draw2D(B)
 

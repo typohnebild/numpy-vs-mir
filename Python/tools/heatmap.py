@@ -4,7 +4,7 @@ from matplotlib.ticker import FormatStrFormatter, LinearLocator
 
 from ..GaussSeidel.GaussSeidel import gauss_seidel
 from ..GaussSeidel.GaussSeidel_RB import GS_RB
-from ..multigrid import multigrid
+from ..multigrid import poisson_multigrid
 from .operators import poisson_operator_2D
 
 
@@ -81,7 +81,7 @@ def simulate_3D(N, max_iter=500):
 def simulate_2D_multigrid(N):
     U = initMap_2D(N)
     F = heat_sources_2D(N)
-    return multigrid(-F, U, 2, 5, 5, 1)
+    return poisson_multigrid(-F, U, 5, 5, 5, 1)
 
 
 def test_2D_heatMap():
