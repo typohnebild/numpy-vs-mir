@@ -129,7 +129,7 @@ def test_MultiGrid_VS_GS_RB():
     # MultiGrid
     U = hm.initMap_2D(40)
     F = hm.heat_sources_2D(40)
-    B = mg.multigrid(-F, U, 6, 15, 15, 3)
+    B = mg.multigrid(-F, U, 80, 15, 15, 3)
 
     hm.draw2D(B)
 
