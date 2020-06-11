@@ -30,13 +30,13 @@ def weighted_restriction(A):
     if alpha == 2:
         for i in range(B.shape[0]):
             for j in range(B.shape[1]):
-                B[i][j] = (A[2 * i][2 * j] / 4 +
+                B[i][j] = (A[2 * i][2 * j] / 2 +
                            (A[2 * i + 1][2 * j] + A[2 * i - 1][2 * j] +
                             A[2 * i][2 * j + 1] + A[2 * i][2 * j - 1]
-                            ) / 8 +
+                            ) / 4 +
                            (A[2 * i + 1][2 * j + 1] + A[2 * i + 1][2 * j - 1] +
                             A[2 * i - 1][2 * j + 1] + A[2 * i - 1][2 * j - 1]
-                            ) / 16)
+                            ) / 8)
         return B
     if alpha == 3:
         # TODO
@@ -45,9 +45,9 @@ def weighted_restriction(A):
         raise ValueError('weighted restriction: invalid dimension')
 
 
-def prolongation(e, plus):
+def prolongation(e, fine_shape):
     alpha = len(e.shape)
-    w = np.zeros(np.array(e.shape) * 2 + plus)
+    w = np.zeros(fine_shape)
 
     if alpha == 1:
         w[0] = e[0] / 2
@@ -120,17 +120,19 @@ def multigrid(F, U, l, v1, v2, mu):
     r = F - residualize(U)
     # restriction
     r = weighted_restriction(r)
-    print(r)
 
     # recursive call
     e = np.zeros_like(r)
     for _ in range(mu):
         e = multigrid(e, np.copy(r), l - 1, v1, v2, mu)
     # prolongation
-    e = prolongation(e, F.shape[0] % 2)
+    e = prolongation(e, U.shape)
+
+    # do not update border
+    e[0, :] = e[:, 0] = e[-1, :] = e[:, -1] = 0
 
     # correction
-    U = U + e
+    U = U - e
     # post smoothing
     return gs.GS_RB(F, U=U, max_iter=v2)
 
@@ -162,3 +164,10 @@ def test_2D():
 
     print(multigrid(np.zeros_like(b), b, 1, 1, 1, 1))
     print(multigrid(np.zeros_like(b), b, 2, 1, 1, 1))
+
+if __name__ == "__main__":
+    A = np.ones((6, 6))
+    B = restriction(A)
+    print(B)
+    C = prolongation(B, A.shape)
+    print(C)
