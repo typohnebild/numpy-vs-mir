@@ -3,8 +3,8 @@ import pytest
 
 from ..GaussSeidel.GaussSeidel import gauss_seidel
 from ..GaussSeidel.GaussSeidel_RB import GS_RB
-from .. import heatmap as hm
-from .. import operators as op
+from ..tools import heatmap as hm
+from ..tools import operators as op
 
 
 # --- GausSeidel TestCases ---

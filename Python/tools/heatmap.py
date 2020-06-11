@@ -2,10 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import FormatStrFormatter, LinearLocator
 
-from GaussSeidel.GaussSeidel import gauss_seidel
-from GaussSeidel.GaussSeidel_RB import GS_RB
-from multigrid import multigrid
-from operators import poisson_operator_2D
+from ..GaussSeidel.GaussSeidel import gauss_seidel
+from ..GaussSeidel.GaussSeidel_RB import GS_RB
+from ..multigrid import multigrid
+from .operators import poisson_operator_2D
 
 
 def initMap_2D(dimension):

@@ -1,10 +1,10 @@
 import numpy as np
 import pytest
 
-from ..import multigrid as mg
+from .. import multigrid as mg
 from ..GaussSeidel.GaussSeidel_RB import GS_RB
-from ..import heatmap as hm
-from ..import operators as op
+from ..tools import heatmap as hm
+from ..tools import operators as op
 
 
 def MatrixGenerator(dim, max_value=500):

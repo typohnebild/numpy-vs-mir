@@ -1,1 +1,1 @@
-__all__ = ["GaussSeidel", "multigrid", "util", "heatmap"]
+__all__ = ["GaussSeidel", "multigrid", "tools"]
