@@ -110,10 +110,7 @@ def residualize(U):
 
 def multigrid(F, U, l, v1, v2, mu):
     # abfangen, dass Level zu gross wird
-    if l > U.shape[0] // 2:
-        l = U.shape[0] // 2
-
-    if l == 1:
+    if l <= 1 and U.shape[0] <= 1:
         # solve
         return gs.GS_RB(F, U=U, max_iter=1000)
 
