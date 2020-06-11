@@ -85,6 +85,6 @@ def general_multigrid(A, F, U, l, v1, v2, mu):
     # e[0, :] = e[:, 0] = e[-1, :] = e[:, -1] = 0
 
     # correction
-    U = U - e
+    U = U + e
     # post smoothing
     return gauss_seidel(A, F, U, max_iter=v2)

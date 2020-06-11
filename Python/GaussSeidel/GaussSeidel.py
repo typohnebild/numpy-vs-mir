@@ -1,6 +1,7 @@
 #!/bin/usr/env python3
 import numpy as np
 
+
 def gauss_seidel(A, b, x=None, eps=1e-10, max_iter=1000):
     """Implementation of Gauss Seidl iterations
        should solve Ax = b
