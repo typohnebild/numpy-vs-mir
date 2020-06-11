@@ -13,16 +13,23 @@ def GS_RB(F, U=None, max_iter=1000):
         U = np.zeros_like(F)
 
     if len(F.shape) == 1:
-        return GS_1D_RB(F, U, max_iter)
-    if len(F.shape) == 2:
-        return GS_2D_RB(F, U, max_iter)
-    if len(F.shape) == 3:
-        return GS_3D_RB(F, U, max_iter)
+        # initialize dimensions
+        params = (F.shape[0])
+        # do the sweep
+        sweep = sweep_1D
+    elif len(F.shape) == 2:
+        # initialize dimensions
+        params = F.shape
+        # do the sweep
+        sweep = sweep_2D
+    elif len(F.shape) == 3:
+         # initialize dimensions
+        params = F.shape
+        # Anzahl an Gauss-Seidel-Iterationen ausfuehren
+        sweep = sweep_3D
+    else:
+        raise ValueError("Wrong Shape!!!")
 
-    raise ValueError("Wrong Shape!!!")
-
-
-def dothesweep(sweep, F, U, max_iter, params):
     # Anzahl an Gauss-Seidel-Iterationen ausfuehren
     for _ in range(max_iter):
         # rote Halbiteration
@@ -32,23 +39,9 @@ def dothesweep(sweep, F, U, max_iter, params):
     return U
 
 
+
+
 # --- 1D Fall ---
-def GS_1D_RB(F, U, max_iter):
-    """Implementation of 2D Red Black Gauss Seidl iterations
-       should solve AU = F
-       A poisson equation
-       @param F n vector
-       @return U n vector
-    """
-
-    # initialize dimensions
-    n = F.shape[0]
-    # do some sweep
-    U = dothesweep(sweep_1D, F, U, max_iter, (n))
-
-    return U
-
-
 def sweep_1D(color, F, U, n):
     """
     Does the sweeps
@@ -62,23 +55,7 @@ def sweep_1D(color, F, U, n):
 #----------------
 
 # --- 2D Fall ---
-def GS_2D_RB(F, U, max_iter):
-    """Implementation of 2D Red Black Gauss Seidl iterations
-       should solve AU = F
-       A poisson equation
-       @param F n vector
-       @return U n vector
-    """
-
-    # initialize dimensions
-    m, n = F.shape
-    # Anzahl an Gauss-Seidel-Iterationen ausfuehren
-    U = dothesweep(sweep_2D, F, U, max_iter, (n, m))
-
-    return U
-
-
-def sweep_2D(color, F, U, n, m, o):
+def sweep_2D(color, F, U, n, m):
     """
     Does the sweeps
     @param color 1 = red 0 for black
@@ -94,22 +71,6 @@ def sweep_2D(color, F, U, n, m, o):
 #----------------
 
 # --- 3D Fall ---
-def GS_3D_RB(F, U, max_iter):
-    """Implementation of 3D Red Black Gauss Seidl iterations
-       should solve AU = F
-       A poisson equation
-       @param F n vector
-       @return U n vector
-    """
-    # initialize dimensions
-    m, n, o = F.shape
-
-    # Anzahl an Gauss-Seidel-Iterationen ausfuehren
-    dothesweep(sweep_3D, F, U, max_iter, (n, m, o))
-
-    return U
-
-
 def sweep_3D(color, F, U, n, m, o):
     """
     Does the sweeps

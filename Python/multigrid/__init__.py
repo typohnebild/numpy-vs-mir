@@ -2,7 +2,7 @@
 
 
 import numpy as np
-import gaussSeidel as gs
+import ../GaussSeidel/gaussSeidel as gs
 
 from .restriction import restriction
 from .prolongation import prolongation
