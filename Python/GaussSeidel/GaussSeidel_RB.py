@@ -1,7 +1,8 @@
 import numpy as np
 
 
-def GS_RB(F, U=None, max_iter=1000):
+
+def GS_RB(F, U=None, max_iter=1000, eps=1e-10):
     """Implementation of Gauss Seidl Red Black iterations
        should solve AU = F
        A poisson equation
@@ -24,12 +25,19 @@ def GS_RB(F, U=None, max_iter=1000):
     else:
         raise ValueError("Wrong Shape!!!")
 
+    last_U = None
     # Anzahl an Gauss-Seidel-Iterationen ausfuehren
     for _ in range(max_iter):
         # rote Halbiteration
         sweep(1, F, U)
         # schwarze Halbiteration
         sweep(0, F, U)
+
+        # pruefe Abbruchkriterium
+        if last_U is not None and np.linalg.norm(U - last_U) < eps:
+            return U
+
+        last_U = U
     return U
 
 
