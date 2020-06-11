@@ -61,7 +61,7 @@ def weighted_restriction(A):
     else:
         raise ValueError('weighted restriction: invalid dimension')
 
-
+# in:
 def prolongation(e, fine_shape):
     alpha = len(e.shape)
     w = np.zeros(fine_shape)
@@ -92,17 +92,6 @@ def prolongation(e, fine_shape):
                              w[:wend - 1:2, 1:wend:2] +
                              w[1:wend:2, :wend - 1:2] +
                              w[1:wend:2, 2:wend:2]) / 4
-        # e = np.pad(e, 1)
-
-        # for i in range(e.shape[0] - 1):
-        #     for j in range(e.shape[1] - 1):
-        #         w[2 * i][2 * j] = e[i][j] / 2
-        #         w[2 * i + 1][2 * j] = (e[i][j] + e[i + 1][j]) / 4
-        #         w[2 * i][2 * j + 1] = (e[i][j] + e[i][j + 1]) / 4
-        #         w[2 * i + 1][2 * j + 1] = (e[i][j] +
-        #                                    e[i][j + 1] +
-        #                                    e[i + 1][j] +
-        #                                    e[i + 1][j + 1]) / 8
     elif alpha == 3:
         # TODO
         raise ValueError('prolongation: dimension not implemented')
@@ -146,6 +135,17 @@ def residualize(U):
 
 
 def multigrid(F, U, l, v1, v2, mu):
+    """Implementation of MultiGrid iterations
+       should solve AU = F
+       A is poisson equation
+       @param U n x n Matrix
+       @param U n x n Matrix
+       @param v1 Gauss Seidel iterations in pre smoothing
+       @param v2 Gauss Seidel iterations in post smoothing
+       @param mu iterations for recursive call
+       @return x n vector
+    """
+
     # abfangen, dass Level zu gross wird
     if l <= 1 or U.shape[0] <= 1:
         # solve
