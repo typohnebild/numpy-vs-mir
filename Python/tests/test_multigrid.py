@@ -65,7 +65,7 @@ def test_apply_poisson():
     # Variables
     U = hm.initMap_2D(40)
 
-    A = op.poisson_operator_2D(U.shape[0], 1)
+    A = op.poisson_operator_2D(U.shape[0])
     B = (A @ U.flatten()).reshape(U.shape)
     C = mg.apply_poisson(U)
 

@@ -53,6 +53,7 @@ def test_red_black_against_gauss_seidel():
                       eps=eps,
                       max_iter=max_iter).reshape((N, N))
     U2 = GS_RB(-F, U.copy(),h=h, eps=eps, max_iter=max_iter)
+    # TODO Warum ist das - hier wichtig???
 
     assert np.allclose(U1, U2, rtol=eps)
 
