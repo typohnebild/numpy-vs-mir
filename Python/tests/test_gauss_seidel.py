@@ -22,7 +22,7 @@ def test_np_gs():
     b = np.array([6., 25., -11., 15.])
     eps = 1e-10
     x_opt = np.linalg.solve(A, b)
-    x = gauss_seidel(A, b, h=1, eps=eps)
+    x = gauss_seidel(A, b, eps=eps)
     assert np.allclose(x, x_opt, rtol=eps)
 
 
@@ -40,15 +40,20 @@ def test_red_black_against_gauss_seidel():
     eps = 1e-12
     N = 20
     max_iter = 1000
-    A = hm.poisson_operator_2D(N)
+
+    h = 1/N
+
+    A = hm.poisson_operator_2D(N, h)
     U = hm.initMap_2D(N)
     F = hm.heat_sources_2D(N)
+
     U1 = gauss_seidel(A,
                       F.flatten(),
                       U.copy().flatten(),
                       eps=eps,
                       max_iter=max_iter).reshape((N, N))
-    U2 = GS_RB(-F, U.copy(), eps=eps, max_iter=max_iter)
+    U2 = GS_RB(-F, U.copy(),h=h, eps=eps, max_iter=max_iter)
+
     assert np.allclose(U1, U2, rtol=eps)
 
 
@@ -56,14 +61,14 @@ def test_sweep_1D_red():
     F = np.random.rand(10)
     U1 = np.random.rand(10)
     U2 = U1.copy()
-    h = 10
+    h = 1/10
     color = 1
     n = F.shape[0]
     for i in range(1, n - 1):
         if i % 2 == color:
             U1[i] = (U1[i - 1] +
                     U1[i + 1] -
-                    F[i] / h) / (2.0)
+                    F[i] * h * h) / (2.0)
 
     sweep_1D(color, F, U2, h)
 
@@ -74,14 +79,14 @@ def test_sweep_1D_black():
     F = np.random.rand(10)
     U1 = np.random.rand(10)
     U2 = U1.copy()
-    h = 10
+    h = 1/10
     color = 0
     n = F.shape[0]
     for i in range(1, n - 1):
         if i % 2 == color:
             U1[i] = (U1[i - 1] +
                     U1[i + 1] -
-                    F[i] / h) / (2.0)
+                    F[i] * h * h) / (2.0)
 
     sweep_1D(color, F, U2, h)
 
@@ -92,7 +97,7 @@ def test_sweep_2D_red():
     F = util.MatrixGenerator((10, 10))
     U1 = util.MatrixGenerator((10, 10))
     U2 = U1.copy()
-    h = 100
+    h = 1/100
     color = 1
     m, n = F.shape
     for j in range(1, n - 1):
@@ -102,7 +107,7 @@ def test_sweep_2D_red():
                            U1[i + 1, j] +
                            U1[i, j - 1] +
                            U1[i, j + 1] -
-                           F[i, j] / h) / (4.0)
+                           F[i, j] * h * h) / (4.0)
     sweep_2D(color, F, U2, h)
 
     assert np.allclose(U1, U2)
@@ -112,7 +117,7 @@ def test_sweep_2D_black():
     F = util.MatrixGenerator((10, 10))
     U1 = util.MatrixGenerator((10, 10))
     U2 = U1.copy()
-    h = 100
+    h = 1/100
     color = 0
     m, n = F.shape
     for j in range(1, n - 1):
@@ -122,7 +127,7 @@ def test_sweep_2D_black():
                            U1[i + 1, j] +
                            U1[i, j - 1] +
                            U1[i, j + 1] -
-                           F[i, j] / h) / (4.0)
+                           F[i, j] * h * h) / (4.0)
     sweep_2D(color, F, U2, h)
 
     assert np.allclose(U1, U2)
