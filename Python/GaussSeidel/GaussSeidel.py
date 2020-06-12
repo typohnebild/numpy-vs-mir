@@ -2,25 +2,28 @@
 import numpy as np
 
 
-def gauss_seidel(A, b, x=None, eps=1e-10, max_iter=1000):
+def gauss_seidel(A, F, U=None, h=None, eps=1e-10, max_iter=1000):
     """Implementation of Gauss Seidl iterations
-       should solve Ax = b
+       should solve AU = F
        @param A n x m Matrix
-       @param b n vector
-       @return x n vector
+       @param F n vector
+       @param h grid width
+       @return n vector
     """
     n, *_ = A.shape
-    if x is None:
-        x = np.zeros_like(b)
+    if U is None:
+        U = np.zeros_like(F)
+    if h is None:
+        h = np.prod(F.shape)
     for _ in range(max_iter):
-        x_next = np.zeros_like(x)
+        U_next = np.zeros_like(U)
         for i in range(n):
-            left = np.dot(A[i, :i], x_next[:i])
-            right = np.dot(A[i, i + 1:], x[i + 1:])
-            x_next[i] = (b[i] - left - right) / A[i, i]
+            left = np.dot(A[i, :i], U_next[:i])
+            right = np.dot(A[i, i + 1:], U[i + 1:])
+            U_next[i] = (F[i] / h - left - right) / (A[i, i])
 
-        x = x_next
-        if np.linalg.norm(b - A @ x) < eps:
+        U = U_next
+        if np.linalg.norm(F - A @ U) < eps:
             break
 
-    return x
+    return U

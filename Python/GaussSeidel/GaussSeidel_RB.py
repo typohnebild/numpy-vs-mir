@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def GS_RB(F, U=None, max_iter=1000, eps=1e-10):
+def GS_RB(F, U=None, h=None, max_iter=1000, eps=1e-10):
     """Implementation of Gauss Seidl Red Black iterations
        should solve AU = F
        A poisson equation
@@ -11,6 +11,8 @@ def GS_RB(F, U=None, max_iter=1000, eps=1e-10):
 
     if U is None:
         U = np.zeros_like(F)
+    if h is None:
+        h = np.prod(U.shape)
 
     if len(F.shape) == 1:
         # do the sweep
@@ -28,9 +30,9 @@ def GS_RB(F, U=None, max_iter=1000, eps=1e-10):
     # Anzahl an Gauss-Seidel-Iterationen ausfuehren
     for _ in range(max_iter):
         # rote Halbiteration
-        sweep(1, F, U)
+        sweep(1, F, U, h)
         # schwarze Halbiteration
-        sweep(0, F, U)
+        sweep(0, F, U, h)
 
         # pruefe Abbruchkriterium
         # if last_U is not None and np.linalg.norm(U - last_U) < eps:
@@ -41,24 +43,24 @@ def GS_RB(F, U=None, max_iter=1000, eps=1e-10):
 
 
 # --- 1D Fall ---
-def sweep_1D(color, F, U):
+def sweep_1D(color, F, U, h):
     """
     Does the sweeps
     @param color 1 = red 0 for black
     """
     n = F.shape[0]
-
-    for i in range(1, n - 1):
-        if i % 2 == color:
-            U[i] = (U[i - 1] +
-                    U[i + 1] -
-                    F[i]) / 2.0
+    if color == 1:
+        # red
+        U[1:n-1:2] = (U[0:n-2:2] + U[2::2] - F[1:n-1:2] / h) / (2.0)
+    else:
+        # black
+        U[2:n-1:2] = (U[1:n-2:2] + U[3::2] - F[2:n-1:2] / h) / (2.0)
 # ----------------
 
 # --- 2D Fall ---
 
 
-def sweep_2D(color, F, U):
+def sweep_2D(color, F, U, h):
     """
     Does the sweeps
     @param color 1 = red 0 for black
@@ -66,20 +68,46 @@ def sweep_2D(color, F, U):
 
     m, n = F.shape
 
-    for j in range(1, n - 1):
-        for i in range(1, m - 1):
-            if (i + j) % 2 == color:
-                U[i, j] = (U[i - 1, j] +
-                           U[i + 1, j] +
-                           U[i, j - 1] +
-                           U[i, j + 1] -
-                           F[i, j]) / 4.0
+    if color == 1:
+        # red
+        U[1:m-1:2, 2:n-1:2] = (U[0:m-2:2, 2:n-1:2] +
+                               U[2::2, 2:n-1:2] +
+                               U[1:m-1:2, 1:n-2:2] +
+                               U[1:m-1:2, 3::2] -
+                               F[1:m-1:2, 2:n-1:2] / h) / (4.0)
+        U[2:m-1:2, 1:n-1:2] = (U[1:m-2:2, 1:n-1:2] +
+                               U[3::2, 1:n-1:2] +
+                               U[2:m-1:2, 0:n-2:2] +
+                               U[2:m-1:2, 2::2] -
+                               F[2:m-1:2, 1:n-1:2] / h) / (4.0)
+    else:
+        # black
+        U[1:m-1:2, 1:n-1:2] = (U[0:m-2:2, 1:n-1:2] +
+                               U[2::2, 1:n-1:2] +
+                               U[1:m-1:2, 0:n-2:2] +
+                               U[1:m-1:2, 2::2] -
+                               F[1:m-1:2, 1:n-1:2] / h) / (4.0)
+        U[2:m-1:2, 2:n-1:2] = (U[1:m-2:2, 2:n-1:2] +
+                               U[3::2, 2:n-1:2] +
+                               U[2:m-1:2, 1:n-2:2] +
+                               U[2:m-1:2, 3::2] -
+                               F[2:m-1:2, 2:n-1:2] / h) / (4.0)
+
+
+    # for j in range(1, n - 1):
+    #     for i in range(1, m - 1):
+    #         if (i + j) % 2 == color:
+    #             U[i, j] = (U[i - 1, j] +
+    #                        U[i + 1, j] +
+    #                        U[i, j - 1] +
+    #                        U[i, j + 1] -
+    #                        F[i, j]) / 4.0
 # ----------------
 
 # --- 3D Fall ---
 
 
-def sweep_3D(color, F, U):
+def sweep_3D(color, F, U, h):
     """
     Does the sweeps
     @param color 1 = red 0 for black

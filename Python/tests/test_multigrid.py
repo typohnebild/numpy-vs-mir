@@ -5,16 +5,13 @@ from .. import multigrid as mg
 from ..GaussSeidel.GaussSeidel_RB import GS_RB
 from ..tools import heatmap as hm
 from ..tools import operators as op
-
-
-def MatrixGenerator(dim, max_value=500):
-    return np.random.rand(*dim) * np.random.randint(max_value)
+from ..tools import util
 
 # --- MultiGrid TestCases ---
 
 
 def test_MG_Restriction_Prolongation_Shapes_1D_even():
-    A = MatrixGenerator((100,))
+    A = util.MatrixGenerator((100,))
     B = mg.restriction(A)
     C = mg.prolongation(B, A.shape)
 
@@ -22,7 +19,7 @@ def test_MG_Restriction_Prolongation_Shapes_1D_even():
 
 
 def test_MG_Restriction_Prolongation_Shapes_1D_odd():
-    A = MatrixGenerator((99,))
+    A = util.MatrixGenerator((99,))
     B = mg.restriction(A)
     C = mg.prolongation(B, A.shape)
 
@@ -30,7 +27,7 @@ def test_MG_Restriction_Prolongation_Shapes_1D_odd():
 
 
 def test_MG_Restriction_Prolongation_Shapes_2D_even():
-    A = MatrixGenerator((100, 100))
+    A = util.MatrixGenerator((100, 100))
     B = mg.restriction(A)
     C = mg.prolongation(B, A.shape)
 
@@ -38,7 +35,7 @@ def test_MG_Restriction_Prolongation_Shapes_2D_even():
 
 
 def test_MG_Restriction_Prolongation_Shapes_2D_odd():
-    A = MatrixGenerator((99, 99))
+    A = util.MatrixGenerator((99, 99))
     B = mg.restriction(A)
     C = mg.prolongation(B, A.shape)
 
@@ -47,7 +44,7 @@ def test_MG_Restriction_Prolongation_Shapes_2D_odd():
 
 @pytest.mark.skip("Not yet implemented")
 def test_MG_Restriction_Prolongation_Shapes_3D_even():
-    A = MatrixGenerator((100, 100, 100))
+    A = util.MatrixGenerator((100, 100, 100))
     B = mg.restriction(A)
     C = mg.prolongation(B, A.shape)
 
@@ -56,7 +53,7 @@ def test_MG_Restriction_Prolongation_Shapes_3D_even():
 
 @pytest.mark.skip("Not yet implemented")
 def test_MG_Restriction_Prolongation_Shapes_3D_odd():
-    A = MatrixGenerator((99, 99, 99))
+    A = util.MatrixGenerator((99, 99, 99))
     B = mg.restriction(A)
     C = mg.prolongation(B, A.shape)
 

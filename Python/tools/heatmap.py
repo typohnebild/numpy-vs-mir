@@ -69,7 +69,7 @@ def run(dim, iter=500):
 def simulate_2D(N, max_iter=500):
     U = initMap_2D(N)
     F = heat_sources_2D(N)
-    return GS_RB(-F, U, max_iter=max_iter)
+    return GS_RB(-F, U, h=None, max_iter=max_iter)
 
 
 def simulate_3D(N, max_iter=500):
