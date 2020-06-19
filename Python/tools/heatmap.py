@@ -38,38 +38,18 @@ def heat_sources_2D(dimension):
     return F
 
 
-def run(dim, iter=500):
-    # get initial Heat Map
-    U = initMap_2D(dim).flatten()
-    F = heat_sources_2D(dim).flatten()
-    # apply Gauss Seidel on it
-    A = poisson_operator_2D(dim)
-    U = gauss_seidel(A, F, U, max_iter=iter)
-    # draw result
-    return U.reshape((dim, dim))
+def draw2D(map):
+    plt.imshow(map, cmap='RdBu_r', interpolation='nearest')
+    plt.show()
 
 
-def simulate_2D(N, max_iter=500):
-    U = initMap_2D(N)
-    F = heat_sources_2D(N)
-    return GS_RB(F, U, h=None, max_iter=max_iter)
+def draw3D(map):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
 
+    # Plot the surface.
+    for index, x in np.ndenumerate(map):
+        if x > 0.5:
+            ax.scatter(*index, c='black', alpha=max(x - 0.5, 0))
 
-def simulate_3D(N, max_iter=500):
-    U = initMap_3D(N)
-    F = np.zeros((N, N, N))
-    return GS_RB(F, U, max_iter=max_iter)
-
-
-def simulate_2D_multigrid(N):
-    U = initMap_2D(N)
-    F = heat_sources_2D(N)
-    return poisson_multigrid(F, U, 2, 10, 5, 1)
-
-
-def simulate_2D_gerneral_multigrid(N):
-    A = poisson_operator_2D(N)
-    U = initMap_2D(N).flatten()
-    F = heat_sources_2D(N).flatten()
-    U = general_multigrid(A, F, U, int(np.log(N)) - 1, 3, 3, 2)
-    return U.reshape((N, N))
+    fig.show()

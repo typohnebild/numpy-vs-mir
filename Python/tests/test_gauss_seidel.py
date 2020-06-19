@@ -43,7 +43,7 @@ def test_red_black_against_gauss_seidel():
     N = 20
     max_iter = 1000
 
-    h = 1/N
+    h = 1 / N
 
     A = hm.poisson_operator_2D(N, h)
     U = hm.initMap_2D(N)
@@ -64,7 +64,7 @@ def test_sweep_1D_red():
     F = np.random.rand(10)
     U1 = np.random.rand(10)
     U2 = U1.copy()
-    h = 1/10
+    h = 1 / 10
     color = 1
     n = F.shape[0]
     for i in range(1, n - 1):
@@ -82,7 +82,7 @@ def test_sweep_1D_black():
     F = np.random.rand(10)
     U1 = np.random.rand(10)
     U2 = U1.copy()
-    h = 1/10
+    h = 1 / 10
     color = 0
     n = F.shape[0]
     for i in range(1, n - 1):
@@ -100,7 +100,7 @@ def test_sweep_2D_red():
     F = util.MatrixGenerator((10, 10))
     U1 = util.MatrixGenerator((10, 10))
     U2 = U1.copy()
-    h = 1/100
+    h = 1 / 100
     color = 1
     m, n = F.shape
     for j in range(1, n - 1):
@@ -120,7 +120,7 @@ def test_sweep_2D_black():
     F = util.MatrixGenerator((10, 10))
     U1 = util.MatrixGenerator((10, 10))
     U2 = U1.copy()
-    h = 1/100
+    h = 1 / 100
     color = 0
     m, n = F.shape
     for j in range(1, n - 1):
