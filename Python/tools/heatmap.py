@@ -38,8 +38,13 @@ def heat_sources_2D(dimension):
     return F
 
 
-def draw2D(map):
-    plt.imshow(map, cmap='RdBu_r', interpolation='nearest')
+def draw2D(U):
+    if len(U.shape) == 1:
+        n = int(np.sqrt(U.shape[0]))
+        assert n * n == U.shape[0]
+        plt.imshow(U.reshape((n, n)), cmap='RdBu_r', interpolation='nearest')
+    else:
+        plt.imshow(U, cmap='RdBu_r', interpolation='nearest')
     plt.show()
 
 
