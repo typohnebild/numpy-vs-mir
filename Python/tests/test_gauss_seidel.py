@@ -7,10 +7,12 @@ from ..tools import heatmap as hm
 from ..tools import operators as op
 from ..tools import util
 
+
 def MatrixGenerator(dim, max_value=500):
     return np.random.rand(*dim) * np.random.randint(max_value)
 
 # --- GausSeidel TestCases ---
+
 
 def test_np_gs():
     """ some test stolen from wikipedia """
@@ -52,7 +54,7 @@ def test_red_black_against_gauss_seidel():
                       U.copy().flatten(),
                       eps=eps,
                       max_iter=max_iter).reshape((N, N))
-    U2 = GS_RB(-F, U.copy(),h=h, eps=eps, max_iter=max_iter)
+    U2 = GS_RB(-F, U.copy(), h=h, eps=eps, max_iter=max_iter)
     # TODO Warum ist das - hier wichtig???
 
     assert np.allclose(U1, U2, rtol=eps)
@@ -68,8 +70,8 @@ def test_sweep_1D_red():
     for i in range(1, n - 1):
         if i % 2 == color:
             U1[i] = (U1[i - 1] +
-                    U1[i + 1] -
-                    F[i] * h * h) / (2.0)
+                     U1[i + 1] -
+                     F[i] * h * h) / (2.0)
 
     sweep_1D(color, F, U2, h)
 
@@ -86,8 +88,8 @@ def test_sweep_1D_black():
     for i in range(1, n - 1):
         if i % 2 == color:
             U1[i] = (U1[i - 1] +
-                    U1[i + 1] -
-                    F[i] * h * h) / (2.0)
+                     U1[i + 1] -
+                     F[i] * h * h) / (2.0)
 
     sweep_1D(color, F, U2, h)
 
@@ -105,10 +107,10 @@ def test_sweep_2D_red():
         for i in range(1, m - 1):
             if (i + j) % 2 == color:
                 U1[i, j] = (U1[i - 1, j] +
-                           U1[i + 1, j] +
-                           U1[i, j - 1] +
-                           U1[i, j + 1] -
-                           F[i, j] * h * h) / (4.0)
+                            U1[i + 1, j] +
+                            U1[i, j - 1] +
+                            U1[i, j + 1] -
+                            F[i, j] * h * h) / (4.0)
     sweep_2D(color, F, U2, h)
 
     assert np.allclose(U1, U2)
@@ -125,10 +127,10 @@ def test_sweep_2D_black():
         for i in range(1, m - 1):
             if (i + j) % 2 == color:
                 U1[i, j] = (U1[i - 1, j] +
-                           U1[i + 1, j] +
-                           U1[i, j - 1] +
-                           U1[i, j + 1] -
-                           F[i, j] * h * h) / (4.0)
+                            U1[i + 1, j] +
+                            U1[i, j - 1] +
+                            U1[i, j + 1] -
+                            F[i, j] * h * h) / (4.0)
     sweep_2D(color, F, U2, h)
 
     assert np.allclose(U1, U2)

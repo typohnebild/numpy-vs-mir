@@ -39,7 +39,7 @@ def poisson_operator_2D(N, h=None):
     if h is None:
         h = 1/N
 
-    B = [poisson_operator(N,h)] * (N - 2)
+    B = [poisson_operator(N, h)] * (N - 2)
     I = np.eye(N)
     middle = block_diag(I, *B, I)
     upper = - np.eye(N, N) / (h * h)

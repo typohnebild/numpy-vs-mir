@@ -4,6 +4,7 @@
 import time as time
 import numpy as np
 
+
 def timer(func):
     def wrapper(*args, **kwargs):
         before = time.time()
