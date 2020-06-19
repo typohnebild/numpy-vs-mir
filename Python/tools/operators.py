@@ -21,12 +21,14 @@ def poisson_operator(N, h):
         returns a Matrix with  nxn -1 4 -1 on diagonal
         @param h is distance between grid points
     """
-    A = 4. * np.eye(N, N) / (h * h)
-    A[0, 0] = A[-1, -1] = 1
-    upper = -1. * np.eye(N, N - 1) / (h * h)
+    # A = 4. * np.eye(N, N) / (h * h)
+    A = 4. * np.eye(N, N)
+    # A[0, 0] = A[-1, -1] = 1
+    # upper = -1. * np.eye(N, N - 1) / (h * h)
+    upper = -1. * np.eye(N, N - 1)
     upper = np.concatenate((np.zeros((N, 1)), upper), axis=1)
     ret = A + upper + upper.T
-    ret[0, 1:] = ret[-1, :-1] = 0
+    # ret[0, 1:] = ret[-1, :-1] = 0
     return ret
 
 
