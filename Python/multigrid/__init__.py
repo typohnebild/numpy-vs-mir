@@ -74,6 +74,8 @@ def general_multigrid(A, F, U, l, v1, v2, mu):
     r = F - A @ U
     # restriction
     r = restriction(r)
+    # TODO What about distance between grid points
+    # r = 1 / (r.shape[0]**2) * r
 
     # recursive call
     e = np.zeros_like(r)
