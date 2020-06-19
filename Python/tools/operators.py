@@ -39,13 +39,37 @@ def poisson_operator_2D(N, h=None):
         @param h is distance between grid points
     """
     if h is None:
-        h = 1/N
+        h = 1 / N
 
-    B = [poisson_operator(N, h)] * (N - 2)
-    I = np.eye(N)
-    middle = block_diag(I, *B, I)
-    upper = - np.eye(N, N) / (h * h)
-    upper[0, 0] = upper[-1, -1] = 0
-    upper = block_diag(*[upper] * (N - 2))
-    upper = np.pad(upper, ((N, N), (2 * N, 0)))
-    return middle + upper + np.flip(upper)
+    # B = [poisson_operator(N, h)] * (N - 2)
+    # I = np.eye(N)
+    # middle = block_diag(I, *B, I)
+    # upper = - np.eye(N, N) / (h * h)
+    # upper[0, 0] = upper[-1, -1] = 0
+    # upper = block_diag(*[upper] * (N - 2))
+    # upper = np.pad(upper, ((N, N), (2 * N, 0)))
+    # return middle + upper + np.flip(upper)
+    B = poisson_operator(N, h)
+    # I = -np.eye(N)
+    middle = block_diag(*[B] * N)
+    upper = - np.eye(N * N, N * (N - 1))
+    upper = np.concatenate((np.zeros((N * N, N)), upper), axis=1)
+    return middle + upper + upper.T
+
+
+def poisson_operator_like(x):
+    assert len(x.shape) == 1
+    N = x.shape[0]
+    ret = 4 * np.eye(N, N)
+    ret[0, 1] = ret[-1, -2] = - 1
+    if 3 < N:
+        ret[0, 3] = ret[-1, -4] = -1
+    for i in range(1, N - 1):
+        ret[i, i + 1] = - 1
+        ret[i, i - 1] = - 1
+        if 3 <= i:
+            ret[i, i - 3] = - 1
+        if i < N - 3:
+            ret[i, i + 3] = - 1
+
+    return ret
