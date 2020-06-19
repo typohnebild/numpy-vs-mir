@@ -4,6 +4,7 @@
 import numpy as np
 from ..GaussSeidel.GaussSeidel_RB import GS_RB
 from ..GaussSeidel.GaussSeidel import gauss_seidel
+from ..tools.operators import poisson_operator_like
 
 from .restriction import restriction
 from .prolongation import prolongation
@@ -77,7 +78,15 @@ def general_multigrid(A, F, U, l, v1, v2, mu):
     # recursive call
     e = np.zeros_like(r)
     for _ in range(mu):
-        e = general_multigrid(restriction(A), e, np.copy(r), l - 1, v1, v2, mu)
+        e = general_multigrid(
+            poisson_operator_like(r),
+            np.copy(e),
+            np.copy(r),
+            l - 1,
+            v1,
+            v2,
+            mu)
+    print(np.linalg.norm(e), np.linalg.norm(r))
     # prolongation
     e = prolongation(e, U.shape)
 
