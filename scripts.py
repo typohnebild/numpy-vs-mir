@@ -16,6 +16,12 @@ def run(dim, iter=500):
     return U.reshape((dim, dim))
 
 
+def simulate_1D(N, max_iter=500):
+    U = hm.initMap_1D(N)
+    F = hm.heat_sources_1D(N)
+    return hm.GS_RB(F, U, h=None, max_iter=max_iter)
+
+
 def simulate_2D(N, max_iter=500):
     U = hm.initMap_2D(N)
     F = hm.heat_sources_2D(N)

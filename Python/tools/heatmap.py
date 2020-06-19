@@ -8,12 +8,19 @@ from ..multigrid import poisson_multigrid, general_multigrid
 from .operators import poisson_operator_2D
 
 
+def initMap_1D(dimension):
+    U = np.random.uniform(0, 1, (dimension))
+    U[0] = 0
+    U[-1] = 1
+    return U
+
+
 def initMap_2D(dimension):
     U = np.random.uniform(0, 1, (dimension, dimension))
-    U[:, -1] = 0
-    U[-1, :] = 0
-    U[:, 0] = 1
-    U[0, :] = 1
+    # U[:, -1] = 0
+    # U[-1, :] = 0
+    # U[:, 0] = 1
+    # U[0, :] = 1
     return U
 
 
@@ -28,13 +35,20 @@ def initMap_3D(dimension):
     return U
 
 
+def heat_sources_1D(dimension):
+    F = np.zeros((dimension))
+    F[0] = 1
+    F[1] = 0
+    return F
+
+
 def heat_sources_2D(dimension):
     F = np.zeros((dimension, dimension))
-    F[:, -1] = 0
-    F[-1, :] = 0
-    F[:, 0] = 1
-    F[0, :] = 1
-    F[dimension // 2, dimension // 2] = 1
+    # F[:, -1] = 0
+    # F[-1, :] = 0
+    # F[:, 0] = 1
+    # F[0, :] = 1
+    # F[dimension // 2, dimension // 2] = 1
     return F
 
 
