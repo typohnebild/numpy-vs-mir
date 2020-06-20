@@ -60,6 +60,7 @@ def test_MG_Restriction_Prolongation_Shapes_3D_odd():
     assert A.shape == C.shape
 
 
+@pytest.mark.skip("Not sure if this makes still sense")
 def test_apply_poisson():
     eps = 1e-12
     # Variables

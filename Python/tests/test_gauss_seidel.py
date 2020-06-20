@@ -47,15 +47,16 @@ def test_red_black_against_gauss_seidel():
 
     grid = hm.initMap_2D(N)
     rhs = hm.heat_sources_2D(N)
-    A, U, F = hm.reshape_grid(grid, rhs)
+    A, U, F = hm.reshape_grid(grid, rhs, h)
 
     U1 = gauss_seidel(A,
                       F,
                       U,
                       eps=eps,
                       max_iter=max_iter).reshape((N - 2, N - 2))
-    U2 = GS_RB(rhs, grid.copy(), h=h, eps=eps, max_iter=max_iter)
+    U2 = GS_RB(-rhs, grid.copy(), h=h, eps=eps, max_iter=max_iter)
     # TODO Warum ist das - hier wichtig???
+    # print(np.max(U1 - U2[1:-1, 1:-1]))
 
     assert np.allclose(U1, U2[1:-1, 1:-1], rtol=eps)
 
