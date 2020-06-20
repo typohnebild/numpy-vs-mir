@@ -49,7 +49,7 @@ def simulate_2D_general_multigrid(N):
     grid = hm.initMap_2D(N)
     rhs = hm.heat_sources_2D(N)
     A, U, F = hm.reshape_grid(grid, rhs)
-    U = hm.general_multigrid(A, F, U, 2, 3, 3, 2)
+    U = hm.general_multigrid(A, F, U, 4, 5, 5, 1)
     grid[1:-1, 1:-1] = U.reshape((N - 2, N - 2))
     return grid
 
