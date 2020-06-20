@@ -54,7 +54,7 @@ def test_gauss_seidel_vs_linalg():
                       U,
                       eps=eps,
                       max_iter=max_iter)
-    U2 = np.linalg.solve(A,F)
+    U2 = np.linalg.solve(A, F)
 
     assert np.allclose(U1, U2, rtol=1e-5)
 
@@ -68,12 +68,19 @@ def test_red_black_vs_linalg():
 
     grid = hm.initMap_2D(N)
     rhs = hm.heat_sources_2D(N)
-    A, _, F = hm.reshape_grid(grid, rhs)
+    A, _, F = hm.reshape_grid(grid, rhs, h)
 
     # Linalg
     U1 = np.linalg.solve(A, F)
     # Red Black
-    U2 = GS_RB(rhs, grid.copy(), h=h, eps=eps, max_iter=max_iter)[1:-1, 1:-1].flatten()
+    U2 = GS_RB(
+        rhs,
+        grid.copy(),
+        h=h,
+        eps=eps,
+        max_iter=max_iter)[
+        1:-1,
+        1:-1].flatten()
 
     assert np.allclose(U1, U2, rtol=1e-2)
 
@@ -83,7 +90,7 @@ def test_red_black_against_gauss_seidel():
     N = 30
     max_iter = 1000
 
-    h = 1 / N
+    h = 1. / N
 
     grid = hm.initMap_2D(N)
     rhs = hm.heat_sources_2D(N)
@@ -96,9 +103,9 @@ def test_red_black_against_gauss_seidel():
                       max_iter=max_iter).reshape((N - 2, N - 2))
     U2 = GS_RB(-rhs, grid.copy(), h=h, eps=eps, max_iter=max_iter)
     # TODO Warum ist das - hier wichtig???
-    # print(np.max(U1 - U2[1:-1, 1:-1]))
+    print(np.max(U1 - U2[1:-1, 1:-1]))
 
-    assert np.allclose(U1, U2[1:-1, 1:-1], rtol=1e-6)
+    assert np.allclose(U1, U2[1:-1, 1:-1], rtol=1e-5)
 
 
 def test_sweep_1D_red():
