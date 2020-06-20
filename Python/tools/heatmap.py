@@ -86,14 +86,21 @@ def boundary_condition(U):
     return ret
 
 
-def reshape_grid(grid, rhs):
+def reshape_grid(grid, rhs, h=None):
     """
         Takes a grid and a rhs and reformulates it to
         AU = F with A as poisson operator
+        @param h is the distance between the grid points
     """
     assert grid.shape == rhs.shape
     N = grid.shape[0]
+    if h is None:
+        h = 1 / N
     A = poisson_operator_2D(N - 2)
     U = grid[1:-1, 1:-1].flatten()
-    F = 1 / (N * N) * rhs[1:-1, 1:-1].flatten() + boundary_condition(grid)
+    F = h * h * rhs[1:-1, 1:-1].flatten() + boundary_condition(grid)
     return A, U, F
+
+
+def create_problem_2D(N):
+    return initMap_2D(N), heat_sources_2D(N)
