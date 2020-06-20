@@ -9,7 +9,14 @@ def run(N, iter=500):
     grid = hm.initMap_2D(N)
     A, U, F = hm.reshape_grid(grid, hm.heat_sources_2D(N))
     U = hm.gauss_seidel(A, F, U, max_iter=iter)
-    # draw result
+    grid[1:-1, 1:-1] = U.reshape((N - 2, N - 2))
+    return grid
+
+
+def solve(N):
+    grid = hm.initMap_2D(N)
+    A, U, F = hm.reshape_grid(grid, hm.heat_sources_2D(N))
+    U = np.linalg.solve(A, F)
     grid[1:-1, 1:-1] = U.reshape((N - 2, N - 2))
     return grid
 
@@ -23,7 +30,7 @@ def simulate_1D(N, max_iter=500):
 def simulate_2D(N, max_iter=500):
     U = hm.initMap_2D(N)
     F = hm.heat_sources_2D(N)
-    return hm.GS_RB(F, U, h=None, max_iter=max_iter)
+    return hm.GS_RB(-F, U, h=None, max_iter=max_iter)
 
 
 def simulate_3D(N, max_iter=500):
@@ -35,10 +42,10 @@ def simulate_3D(N, max_iter=500):
 def simulate_2D_multigrid(N):
     U = hm.initMap_2D(N)
     F = hm.heat_sources_2D(N)
-    return hm.poisson_multigrid(F, U, 2, 3, 3, 1)
+    return hm.poisson_multigrid(-F, U, 2, 3, 3, 1)
 
 
-def simulate_2D_gerneral_multigrid(N):
+def simulate_2D_general_multigrid(N):
     grid = hm.initMap_2D(N)
     rhs = hm.heat_sources_2D(N)
     A, U, F = hm.reshape_grid(grid, rhs)
