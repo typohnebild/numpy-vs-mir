@@ -31,9 +31,9 @@ def GS_RB(F, U=None, h=None, max_iter=1000, eps=1e-10):
     # Anzahl an Gauss-Seidel-Iterationen ausfuehren
     for _ in range(max_iter):
         # rote Halbiteration
-        sweep(1, F, U, h)
-        # schwarze Halbiteration
         sweep(0, F, U, h)
+        # schwarze Halbiteration
+        sweep(1, F, U, h)
 
         # pruefe Abbruchkriterium
         # if last_U is not None and np.linalg.norm(U - last_U) < eps:

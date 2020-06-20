@@ -74,7 +74,7 @@ def test_red_black_vs_linalg():
     U1 = np.linalg.solve(A, F)
     # Red Black
     U2 = GS_RB(
-        rhs,
+        -rhs,
         grid.copy(),
         h=h,
         eps=eps,
@@ -82,7 +82,7 @@ def test_red_black_vs_linalg():
         1:-1,
         1:-1].flatten()
 
-    assert np.allclose(U1, U2, rtol=1e-2)
+    assert np.allclose(U1, U2, rtol=1e-5)
 
 
 def test_red_black_against_gauss_seidel():
