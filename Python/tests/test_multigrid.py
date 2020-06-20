@@ -60,17 +60,18 @@ def test_MG_Restriction_Prolongation_Shapes_3D_odd():
     assert A.shape == C.shape
 
 
-@pytest.mark.skip("Not sure if this makes still sense")
+# @pytest.mark.skip("Not sure if this makes still sense")
 def test_apply_poisson():
     eps = 1e-12
     # Variables
     U = hm.initMap_2D(40)
 
-    A = op.poisson_operator_2D(U.shape[0])
-    B = (A @ U.flatten()).reshape(U.shape)
+    A = op.poisson_operator_2D(U.shape[0] - 2)
+    B = (A @ U[1:-1, 1:-1].flatten() - hm.boundary_condition(U)
+         ).reshape(np.array(U.shape) - 2)
     C = mg.apply_poisson(U)
 
-    assert np.allclose(C, B, rtol=eps)
+    assert np.allclose(C[1:-1, 1:-1], B, rtol=eps)
 
 
 @pytest.mark.skip("Not yet implemented")
