@@ -54,7 +54,7 @@ def test_gauss_seidel_vs_linalg():
                       U,
                       eps=eps,
                       max_iter=max_iter)
-    U2 = np.linalg.solve(A,F)
+    U2 = np.linalg.solve(A, F)
 
     assert np.allclose(U1, U2, rtol=1e-5)
 
@@ -73,9 +73,10 @@ def test_red_black_vs_linalg():
     # Linalg
     U1 = np.linalg.solve(A, F)
     # Red Black
-    U2 = GS_RB(rhs, grid.copy(), h=h, eps=eps, max_iter=max_iter)[1:-1, 1:-1].flatten()
+    U2 = GS_RB(-rhs, grid.copy(), h=h, eps=eps,
+               max_iter=max_iter)[1:-1, 1:-1].flatten()
 
-    assert np.allclose(U1, U2, rtol=1e-2)
+    assert np.allclose(U1, U2, rtol=1e-5)
 
 
 def test_red_black_against_gauss_seidel():
@@ -98,7 +99,7 @@ def test_red_black_against_gauss_seidel():
     # TODO Warum ist das - hier wichtig???
     # print(np.max(U1 - U2[1:-1, 1:-1]))
 
-    assert np.allclose(U1, U2[1:-1, 1:-1], rtol=1e-6)
+    assert np.allclose(U1, U2[1:-1, 1:-1], rtol=1e-5)
 
 
 def test_sweep_1D_red():
