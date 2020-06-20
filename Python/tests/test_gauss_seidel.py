@@ -38,9 +38,49 @@ def test_red_black_one_iter():
     assert np.allclose(expected, actual, rtol=1e-8)
 
 
+def test_gauss_seidel_vs_linalg():
+    eps = 1e-12
+    N = 30
+    max_iter = 1000
+
+    # h = 1 / N
+
+    grid = hm.initMap_2D(N)
+    rhs = hm.heat_sources_2D(N)
+    A, U, F = hm.reshape_grid(grid, rhs)
+
+    U1 = gauss_seidel(A,
+                      F,
+                      U,
+                      eps=eps,
+                      max_iter=max_iter)
+    U2 = np.linalg.solve(A,F)
+
+    assert np.allclose(U1, U2, rtol=1e-5)
+
+
+def test_red_black_vs_linalg():
+    eps = 1e-12
+    N = 30
+    max_iter = 1000
+
+    h = 1 / N
+
+    grid = hm.initMap_2D(N)
+    rhs = hm.heat_sources_2D(N)
+    A, _, F = hm.reshape_grid(grid, rhs)
+
+    # Linalg
+    U1 = np.linalg.solve(A, F)
+    # Red Black
+    U2 = GS_RB(rhs, grid.copy(), h=h, eps=eps, max_iter=max_iter)[1:-1, 1:-1].flatten()
+
+    assert np.allclose(U1, U2, rtol=1e-2)
+
+
 def test_red_black_against_gauss_seidel():
     eps = 1e-12
-    N = 20
+    N = 30
     max_iter = 1000
 
     h = 1 / N
@@ -54,10 +94,10 @@ def test_red_black_against_gauss_seidel():
                       U,
                       eps=eps,
                       max_iter=max_iter).reshape((N - 2, N - 2))
-    U2 = GS_RB(rhs, grid.copy(), h=h, eps=eps, max_iter=max_iter)
+    U2 = GS_RB(-rhs, grid.copy(), h=h, eps=eps, max_iter=max_iter)
     # TODO Warum ist das - hier wichtig???
 
-    assert np.allclose(U1, U2[1:-1, 1:-1], rtol=eps)
+    assert np.allclose(U1, U2[1:-1, 1:-1], rtol=1e-6)
 
 
 def test_sweep_1D_red():
