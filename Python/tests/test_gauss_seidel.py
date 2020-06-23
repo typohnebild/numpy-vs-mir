@@ -6,6 +6,7 @@ from ..GaussSeidel.GaussSeidel_RB import GS_RB, sweep_1D, sweep_2D, sweep_3D
 from ..tools import heatmap as hm
 from ..tools import operators as op
 from ..tools import util
+from ..multigrid import helper
 
 
 def MatrixGenerator(dim, max_value=500):
@@ -25,7 +26,7 @@ def test_np_gs():
     eps = 1e-10
     x_opt = np.linalg.solve(A, b)
     x = gauss_seidel(A, b, eps=eps)
-    assert np.allclose(x, x_opt, rtol=eps)
+    assert np.allclose(x, x_opt, atol=eps)
 
 
 def test_red_black_one_iter():
@@ -35,7 +36,7 @@ def test_red_black_one_iter():
     expected = np.ones((3, 3))
     expected[1, 1] = 0.75
     actual = GS_RB(F, U, h=1, max_iter=1)
-    assert np.allclose(expected, actual, rtol=1e-8)
+    assert np.allclose(expected, actual, atol=1e-8)
 
 
 def test_gauss_seidel_vs_linalg():
@@ -56,7 +57,27 @@ def test_gauss_seidel_vs_linalg():
                       max_iter=max_iter)
     U2 = np.linalg.solve(A, F)
 
-    assert np.allclose(U1, U2, rtol=1e-5)
+    assert np.allclose(U1, U2, atol=1e-8)
+
+
+def test_gauss_seidel_vs_F():
+    eps = 1e-12
+    N = 50
+    max_iter = 1000
+
+    # h = 1 / N
+
+    grid = hm.initMap_2D(N)
+    rhs = hm.heat_sources_2D(N)
+    A, U, F = hm.reshape_grid(grid, rhs)
+
+    U1 = gauss_seidel(A,
+                      F,
+                      U,
+                      eps=eps,
+                      max_iter=max_iter)
+    X = A @ U1
+    assert np.allclose(X, F, atol=1e-7)
 
 
 def test_red_black_vs_linalg():
@@ -82,7 +103,35 @@ def test_red_black_vs_linalg():
         1:-1,
         1:-1].flatten()
 
-    assert np.allclose(U1, U2, rtol=1e-5)
+    assert np.allclose(U1, U2, atol=1e-8)
+
+
+def test_red_black_vs_F():
+    eps = 1e-12
+    N = 30
+    max_iter = 1000
+
+    h = 1 / N
+
+    grid = hm.initMap_2D(N)
+    rhs = hm.heat_sources_2D(N)
+    A, _, F = hm.reshape_grid(grid, rhs, h)
+
+    # Red Black
+    U1 = GS_RB(
+        -rhs,
+        grid.copy(),
+        h=h,
+        eps=eps,
+        max_iter=max_iter)[
+        1:-1,
+        1:-1].flatten()
+    X = A @ U1
+    Y = F
+    # X = helper.apply_poisson(U1)[1:-1, 1:-1]
+    # Y = (rhs * h * h) [1:-1, 1:-1]
+    print(np.max(np.abs(X-Y)))
+    assert np.allclose(X, Y, atol=1e-7)
 
 
 def test_red_black_against_gauss_seidel():
@@ -105,7 +154,7 @@ def test_red_black_against_gauss_seidel():
     # TODO Warum ist das - hier wichtig???
     print(np.max(U1 - U2[1:-1, 1:-1]))
 
-    assert np.allclose(U1, U2[1:-1, 1:-1], rtol=1e-5)
+    assert np.allclose(U1, U2[1:-1, 1:-1], atol=1e-8)
 
 
 def test_sweep_1D_red():

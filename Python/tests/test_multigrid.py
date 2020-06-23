@@ -71,7 +71,7 @@ def test_apply_poisson():
          ).reshape(np.array(U.shape) - 2)
     C = mg.apply_poisson(U)
 
-    assert np.allclose(C[1:-1, 1:-1], B, rtol=eps)
+    assert np.allclose(C[1:-1, 1:-1], B, atol=eps)
 
 
 @pytest.mark.skip("Not yet implemented")
@@ -90,4 +90,4 @@ def test_MultiGrid_VS_GS_RB():
 
     # hm.draw2D(B)
 
-    assert np.allclose(A, B, rtol=eps)
+    assert np.allclose(A, B, atol=eps)
