@@ -3,8 +3,10 @@ from matplotlib.ticker import FormatStrFormatter, LinearLocator
 
 import Python.tools.heatmap as hm
 import numpy as np
+import Python.tools.util as util
 
 
+@util.timer
 def run(N, iter=500):
     grid = hm.initMap_2D(N)
     A, U, F = hm.reshape_grid(grid, hm.heat_sources_2D(N))
@@ -13,6 +15,7 @@ def run(N, iter=500):
     return grid
 
 
+@util.timer
 def solve(N):
     grid = hm.initMap_2D(N)
     A, U, F = hm.reshape_grid(grid, hm.heat_sources_2D(N))
@@ -21,39 +24,45 @@ def solve(N):
     return grid
 
 
+@util.timer
 def simulate_1D(N, max_iter=500):
     U = hm.initMap_1D(N)
     F = hm.heat_sources_1D(N)
     return hm.GS_RB(F, U, h=None, max_iter=max_iter)
 
 
-def simulate_2D(N, max_iter=500):
+@util.timer
+def simulate_2D(N, max_iter=1000):
     U = hm.initMap_2D(N)
     F = hm.heat_sources_2D(N)
     return hm.GS_RB(-F, U, h=None, max_iter=max_iter)
 
 
+@util.timer
 def simulate_3D(N, max_iter=500):
     U = hm.initMap_3D(N)
     F = np.zeros((N, N, N))
     return hm.GS_RB(F, U, max_iter=max_iter)
 
 
+@util.timer
 def simulate_2D_multigrid(N):
     U = hm.initMap_2D(N)
     F = hm.heat_sources_2D(N)
-    return hm.poisson_multigrid(-F, U, 2, 3, 3, 1)
+    return hm.poisson_multigrid(-F, U, 4, 5, 5, 1)
 
 
+@util.timer
 def simulate_2D_general_multigrid(N):
     grid = hm.initMap_2D(N)
     rhs = hm.heat_sources_2D(N)
     A, U, F = hm.reshape_grid(grid, rhs)
-    U = hm.general_multigrid(A, F, U, 4, 5, 5, 1)
+    U = hm.general_multigrid(A, F, U, 10, 5, 5, 1)
     grid[1:-1, 1:-1] = U.reshape((N - 2, N - 2))
     return grid
 
 
+@util.timer
 def compare():
     N = 10
     max_iter = 500
