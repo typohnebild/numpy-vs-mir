@@ -62,8 +62,8 @@ def test_gauss_seidel_vs_linalg():
 
 def test_gauss_seidel_vs_F():
     eps = 1e-12
-    N = 50
-    max_iter = 1000
+    N = 30
+    max_iter = 10000
 
     # h = 1 / N
 
