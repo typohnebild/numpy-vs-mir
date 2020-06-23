@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import FormatStrFormatter, LinearLocator
 
@@ -44,30 +43,12 @@ def heat_sources_1D(dimension):
 
 def heat_sources_2D(dimension):
     F = np.zeros((dimension, dimension))
-    F[dimension // 2, dimension // 2] = dimension ** 2
+    # F[dimension // 2, dimension // 2] = dimension ** 2
+    # F[:, -1] = 0
+    # F[-1, :] = 0
+    # F[:, 0] = 1
+    # F[0, :] = 1
     return F
-
-
-def draw2D(U):
-    if len(U.shape) == 1:
-        n = int(np.sqrt(U.shape[0]))
-        assert n * n == U.shape[0]
-        plt.imshow(U.reshape((n, n)), cmap='RdBu_r', interpolation='nearest')
-    else:
-        plt.imshow(U, cmap='RdBu_r', interpolation='nearest')
-    plt.show()
-
-
-def draw3D(map):
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-
-    # Plot the surface.
-    for index, x in np.ndenumerate(map):
-        if x > 0.5:
-            ax.scatter(*index, c='black', alpha=max(x - 0.5, 0))
-
-    fig.show()
 
 
 def boundary_condition(U):
