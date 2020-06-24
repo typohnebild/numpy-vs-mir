@@ -24,6 +24,7 @@ def poisson_multigrid(F, U, l, v1, v2, mu):
        @return x n vector
     """
     # abfangen, dass Level zu gross wird
+    h = 1 / U.shape[0]
     if l <= 1 or U.shape[0] <= 1:
         # solve
         return GS_RB(F, U=U, max_iter=10000)
@@ -31,7 +32,7 @@ def poisson_multigrid(F, U, l, v1, v2, mu):
     # smoothing
     U = GS_RB(F, U=U, max_iter=v1)
     # residual
-    r = F - apply_poisson(U)
+    r = F - apply_poisson(U, h)
     # restriction
     r = restriction(r)
     # do not update border
@@ -40,9 +41,10 @@ def poisson_multigrid(F, U, l, v1, v2, mu):
     # recursive call
     e = np.zeros_like(r)
     for _ in range(mu):
-        e = poisson_multigrid(e, np.copy(r), l - 1, v1, v2, mu)
+        e = poisson_multigrid(np.copy(r), e, l - 1, v1, v2, mu)
     # prolongation
     e = prolongation(e, U.shape)
+    # print(np.max(e), np.min(e))
 
     # temp
     # draw2D(e)
@@ -86,8 +88,8 @@ def general_multigrid(A, F, U, l, v1, v2, mu):
     for _ in range(mu):
         e = general_multigrid(
             poisson_operator_like(r),
-            np.copy(e),
             np.copy(r),
+            np.copy(e),
             l - 1,
             v1,
             v2,
@@ -104,4 +106,3 @@ def general_multigrid(A, F, U, l, v1, v2, mu):
 
     # post smoothing
     return gauss_seidel(A, F, U, max_iter=v2)
-
