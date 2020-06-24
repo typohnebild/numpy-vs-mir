@@ -1,10 +1,13 @@
 import numpy as np
 
 
-def apply_poisson(U):
+def apply_poisson(U, h=None):
     """ applies the 2D poisson operator to U """
     alpha = len(U.shape)
     x = np.zeros_like(U)
+
+    if h is None:
+        h = 1 / U.shape[0]
 
     if alpha == 1:
         x[0] = U[0]
@@ -16,9 +19,12 @@ def apply_poisson(U):
         x[0, :] = U[0, :]
         for i in range(1, U.shape[0] - 1):
             for j in range(1, U.shape[1] - 1):
-                x[i, j] = (4.0 * U[i, j] -
-                           U[i - 1, j] - U[i + 1, j] -
-                           U[i, j - 1] - U[i, j + 1])
+                x[i, j] = (-4.0 *
+                           U[i, j] +
+                           U[i - 1, j] +
+                           U[i + 1, j] +
+                           U[i, j - 1] +
+                           U[i, j + 1]) / (h * h)
     elif alpha == 3:
         x[:, :, 0] = U[:, :, 0]
         x[:, 0, :] = U[:, 0, :]
