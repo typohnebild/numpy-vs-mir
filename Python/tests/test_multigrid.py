@@ -69,7 +69,7 @@ def test_apply_poisson():
     A = op.poisson_operator_2D(U.shape[0] - 2)
     B = (A @ U[1:-1, 1:-1].flatten() - hm.boundary_condition(U)
          ).reshape(np.array(U.shape) - 2)
-    C = mg.apply_poisson(U)
+    C = mg.apply_poisson(-U, 1)
 
     assert np.allclose(C[1:-1, 1:-1], B, atol=eps)
 

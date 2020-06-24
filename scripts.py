@@ -5,6 +5,8 @@ import Python.tools.heatmap as hm
 import numpy as np
 import Python.tools.util as util
 
+np.set_printoptions(precision=4, linewidth=180)
+
 
 @util.timer
 def run(N, iter=500):
@@ -49,7 +51,7 @@ def simulate_3D(N, max_iter=500):
 def simulate_2D_multigrid(N):
     U = hm.initMap_2D(N)
     F = hm.heat_sources_2D(N)
-    return hm.poisson_multigrid(-F, U, 4, 5, 5, 1)
+    return hm.poisson_multigrid(F, U, 2, 5, 5, 1)
 
 
 @util.timer
@@ -57,7 +59,7 @@ def simulate_2D_general_multigrid(N):
     grid = hm.initMap_2D(N)
     rhs = hm.heat_sources_2D(N)
     A, U, F = hm.reshape_grid(grid, rhs)
-    U = hm.general_multigrid(A, F, U, 10, 5, 5, 1)
+    U = hm.general_multigrid(A, F, U, 2, 5, 5, 2)
     grid[1:-1, 1:-1] = U.reshape((N - 2, N - 2))
     return grid
 
