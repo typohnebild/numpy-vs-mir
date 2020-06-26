@@ -5,11 +5,10 @@ import numpy as np
 from ..GaussSeidel.GaussSeidel_RB import GS_RB
 from ..GaussSeidel.GaussSeidel import gauss_seidel
 from ..tools.operators import poisson_operator_like
-# from ..tools.util import draw2D
+from ..tools.apply_poisson import apply_poisson
 
 from .restriction import restriction
 from .prolongation import prolongation
-from .helper import apply_poisson
 
 
 def poisson_multigrid(F, U, l, v1, v2, mu):
@@ -27,16 +26,16 @@ def poisson_multigrid(F, U, l, v1, v2, mu):
     h = 1 / U.shape[0]
     if l <= 1 or U.shape[0] <= 1:
         # solve
-        return GS_RB(F, U=U, max_iter=10000)
+        return GS_RB(F, U=U, max_iter=20000)
 
     # smoothing
     U = GS_RB(F, U=U, max_iter=v1)
     # residual
-    r = F - apply_poisson(U, h)
+    r = F - apply_poisson(U, 2 * h)
     # restriction
     r = restriction(r)
     # do not update border
-    r[0, :] = r[:, 0] = r[-1, :] = r[:, -1] = 0
+    # r[0, :] = r[:, 0] = r[-1, :] = r[:, -1] = 0
 
     # recursive call
     e = np.zeros_like(r)
@@ -44,7 +43,7 @@ def poisson_multigrid(F, U, l, v1, v2, mu):
         e = poisson_multigrid(np.copy(r), e, l - 1, v1, v2, mu)
     # prolongation
     e = prolongation(e, U.shape)
-    # print(np.max(e), np.min(e))
+    print(np.max(e), np.min(e))
 
     # temp
     # draw2D(e)

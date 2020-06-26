@@ -11,7 +11,8 @@ def restriction(A):
     alpha = len(A.shape)
     # initialize result with respect to the wanted shape
     ret = np.zeros(np.array(A.shape) // 2 + 1)
-    # Index of the second to the last element to mention in ret (depends on the shape of A)
+    # Index of the second to the last element to mention in ret (depends on
+    # the shape of A)
     end = ret.shape[0] - (A.shape[0] + 1) % 2
 
     # Case: Dimension 1

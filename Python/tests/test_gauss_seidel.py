@@ -6,7 +6,6 @@ from ..GaussSeidel.GaussSeidel_RB import GS_RB, sweep_1D, sweep_2D, sweep_3D
 from ..tools import heatmap as hm
 from ..tools import operators as op
 from ..tools import util
-from ..multigrid import helper
 
 
 def MatrixGenerator(dim, max_value=500):
@@ -128,9 +127,6 @@ def test_red_black_vs_F():
         1:-1].flatten()
     X = A @ U1
     Y = F
-    # X = helper.apply_poisson(U1)[1:-1, 1:-1]
-    # Y = (rhs * h * h) [1:-1, 1:-1]
-    print(np.max(np.abs(X-Y)))
     assert np.allclose(X, Y, atol=1e-7)
 
 

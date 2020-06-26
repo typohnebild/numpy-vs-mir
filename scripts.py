@@ -34,7 +34,7 @@ def simulate_1D(N, max_iter=500):
 
 
 @util.timer
-def simulate_2D(N, max_iter=1000):
+def simulate_2D(N, max_iter=20000):
     U = hm.initMap_2D(N)
     F = hm.heat_sources_2D(N)
     return hm.GS_RB(-F, U, h=None, max_iter=max_iter)
