@@ -2,7 +2,7 @@ import numpy as np
 from ..tools.apply_poisson import apply_poisson
 
 
-def GS_RB(F, U=None, h=None, max_iter=10000000, eps=1e-10):
+def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-10):
     """Implementation of Gauss Seidl Red Black iterations
        should solve AU = F
        A poisson equation

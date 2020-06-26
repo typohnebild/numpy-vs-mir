@@ -14,34 +14,28 @@ def apply_poisson(U, h=None):
     if alpha == 1:
         x[0] = U[0]
         x[-1] = U[-1]
-        for i in range(1, U.shape[0] - 1):
-            x[i] = (-2.0 * U[i] + U[i - 1] + U[i + 1]) / (h * h)
+        x[1:-1] = (-2.0 * U[1:-1] + U[:-2] + U[2:]) / (h * h)
     elif alpha == 2:
         x[:, 0] = U[:, 0]
         x[0, :] = U[0, :]
-        for i in range(1, U.shape[0] - 1):
-            for j in range(1, U.shape[1] - 1):
+        x[1:-1, 1:-1] = (-4.0 *
+                         U[1:-1, 1:-1] +
+                         U[:-2, 1:-1] +
+                         U[2:, 1:-1] +
+                         U[1:-1, :-2] +
+                         U[1:-1, 2:]) / (h * h)
 
-                x[i, j] = (-4.0 *
-                           U[i, j] +
-                           U[i - 1, j] +
-                           U[i + 1, j] +
-                           U[i, j - 1] +
-                           U[i, j + 1]) / (h * h)
     elif alpha == 3:
         x[:, :, 0] = U[:, :, 0]
         x[:, 0, :] = U[:, 0, :]
         x[0, :, :] = U[0, :, :]
-        for i in range(1, U.shape[0] - 1):
-            for j in range(1, U.shape[1] - 1):
-                for k in range(1, U.shape[2] - 1):
-                    x[i, j] = (-4.0 * U[i, j] +
-                               U[i - 1, j, k] +
-                               U[i + 1, j, k] +
-                               U[i, j - 1, k] +
-                               U[i, j + 1, k] +
-                               U[i, j, k - 1] +
-                               U[i, j, k + 1]) / (h * h)
+        x[1:-1, 1:-1, 1:-1] = (-6.0 * U[1:-1, 1:-1, 1:-1] +
+                               U[:-2, 1:-1, 1:-1] +
+                               U[2:, 1:-1, 1:-1] +
+                               U[1:-1, :-2, 1:-1] +
+                               U[1:-1, 2:, 1:-1] +
+                               U[1:-1, 1:-1, :-2] +
+                               U[1:-1, 1:-1, 2:]) / (h * h)
     else:
         raise ValueError('residual: invalid dimension')
 
