@@ -1,8 +1,6 @@
 import numpy as np
-from .util import timer
 
 
-@timer
 def apply_poisson(U, h=None):
     """ applies the 2D poisson operator to U """
     alpha = len(U.shape)

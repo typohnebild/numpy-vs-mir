@@ -2,7 +2,7 @@ import numpy as np
 from ..tools.apply_poisson import apply_poisson
 
 
-def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-10):
+def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-8):
     """Implementation of Gauss Seidl Red Black iterations
        should solve AU = F
        A poisson equation
@@ -30,17 +30,17 @@ def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-10):
 
     # Anzahl an Gauss-Seidel-Iterationen ausfuehren
     for it in range(max_iter):
-        # rote Halbiteration
-        sweep(0, F, U, h)
-        # schwarze Halbiteration
-        sweep(1, F, U, h)
-
         # check sometimes if solutions converges
         if it % 1000 == 0:
             r = F - apply_poisson(U, h)
             if np.linalg.norm(r[1:-1, 1:-1]) <= eps:
                 print(f"close enough after {it} iterations")
                 break
+
+        # rote Halbiteration
+        sweep(0, F, U, h)
+        # schwarze Halbiteration
+        sweep(1, F, U, h)
 
     return U
 

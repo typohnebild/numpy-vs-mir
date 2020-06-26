@@ -5,12 +5,18 @@ import time as time
 import numpy as np
 import matplotlib.pyplot as plt
 
+TIME_STATS = {}
+
 
 def timer(func):
     def wrapper(*args, **kwargs):
         before = time.time()
         value = func(*args, **kwargs)
         after = time.time() - before
+        if func.__name__ not in TIME_STATS:
+            TIME_STATS[func.__name__] = 0
+        TIME_STATS[func.__name__] += 1
+
         print(f"{func.__name__} took {after}")
 
         return value
@@ -41,3 +47,4 @@ def draw3D(map):
             ax.scatter(*index, c='black', alpha=max(x - 0.5, 0))
 
     fig.show()
+

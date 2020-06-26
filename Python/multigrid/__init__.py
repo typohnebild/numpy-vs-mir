@@ -9,6 +9,7 @@ from ..tools.apply_poisson import apply_poisson
 
 from .restriction import restriction
 from .prolongation import prolongation
+from .cycle import Cycle
 
 
 def poisson_multigrid(F, U, l, v1, v2, mu):
@@ -22,37 +23,18 @@ def poisson_multigrid(F, U, l, v1, v2, mu):
        @param mu iterations for recursive call
        @return x n vector
     """
-    # abfangen, dass Level zu gross wird
+    cycle = Cycle(v1, v2, mu)
     h = 1 / U.shape[0]
-    if l <= 1 or U.shape[0] <= 1:
-        # solve
-        return GS_RB(F, U=U, max_iter=20000)
 
-    # smoothing
-    U = GS_RB(F, U=U, max_iter=v1)
-    # residual
-    r = F - apply_poisson(U, 2 * h)
-    # restriction
-    r = restriction(r)
-    # do not update border
-    # r[0, :] = r[:, 0] = r[-1, :] = r[:, -1] = 0
-
-    # recursive call
-    e = np.zeros_like(r)
-    for _ in range(mu):
-        e = poisson_multigrid(np.copy(r), e, l - 1, v1, v2, mu)
-    # prolongation
-    e = prolongation(e, U.shape)
-    print(np.max(e), np.min(e))
-
-    # temp
-    # draw2D(e)
-
-    # correction
-    U = U + e
-
-    # post smoothing
-    return GS_RB(F, U=U, max_iter=v2)
+    for i in range(10):
+        U = cycle(F, U, l, h)
+        residual = F - apply_poisson(U, h)
+        norm = np.linalg.norm(residual[1:-1, 1:-1])
+        print(f"{norm:.12f} after one mgcycle")
+        if norm <= 1e-3:
+            print(f"mg converged after {i} iterations")
+            break
+    return U
 
 
 def general_multigrid(A, F, U, l, v1, v2, mu):
