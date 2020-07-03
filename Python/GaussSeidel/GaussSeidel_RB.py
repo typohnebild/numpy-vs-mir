@@ -3,7 +3,7 @@ from ..tools.apply_poisson import apply_poisson
 from ..tools.util import timer
 
 
-@timer
+# @timer
 def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-8):
     """Implementation of Gauss Seidl Red Black iterations
        should solve AU = F

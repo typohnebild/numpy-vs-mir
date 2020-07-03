@@ -38,11 +38,11 @@ class Cycle:
 
         if l <= 1 or U.shape[0] <= 1:
             # solve
-            return GS_RB(F, U=U, h=h, max_iter=5000)
+            return GS_RB(F=F, U=U, h=h, max_iter=5000)
 
-        U = self._presmooth(F, U=U, h=h)
+        U = self._presmooth(F=F, U=U, h=h)
 
-        r = self._compute_residual(F, U, h)
+        r = self._compute_residual(F=F, U=U, h=h)
 
         r = restriction(r)
 
@@ -55,4 +55,4 @@ class Cycle:
         U = U + e
 
         # post smoothing
-        return self._postsmooth(F, U=U, h=h)
+        return self._postsmooth(F=F, U=U, h=h)

@@ -48,7 +48,8 @@ def simulate_3D(N, max_iter=500):
     return hm.GS_RB(F, U, max_iter=max_iter)
 
 
-@util.timer
+# @util.timer
+@util.profiling
 def simulate_2D_multigrid(N, iter_cycle=5):
     U = hm.initMap_2D(N)
     F = hm.heat_sources_2D(N)

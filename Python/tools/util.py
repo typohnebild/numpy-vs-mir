@@ -8,11 +8,21 @@ import cProfile
 
 TIME_STATS = {}
 
+# TODO: ggf. auch mal mit PERF was machen
+
+def profiling(profunc):
+    def prof_wrapper(*args, **kwargs):
+        with cProfile.Profile() as pr:
+            value = profunc(*args, **kwargs)
+        pr.print_stats()
+        return value
+    return prof_wrapper
+
 
 def timer(func):
     def wrapper(*args, **kwargs):
         before = time.time()
-        value = cProfile.runctx("func(*args, **kwargs)", globals(), locals())
+        value = func(*args, **kwargs)
         after = time.time() - before
         if func.__name__ not in TIME_STATS:
             TIME_STATS[func.__name__] = [0, 0]
