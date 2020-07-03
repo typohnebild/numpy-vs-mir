@@ -12,7 +12,7 @@ from .prolongation import prolongation
 from .cycle import Cycle
 
 
-def poisson_multigrid(F, U, l, v1, v2, mu):
+def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle):
     """Implementation of MultiGrid iterations
        should solve AU = F
        A is poisson equation
@@ -26,7 +26,7 @@ def poisson_multigrid(F, U, l, v1, v2, mu):
     cycle = Cycle(v1, v2, mu)
     h = 1 / U.shape[0]
 
-    for i in range(10):
+    for i in range(iter_cycle):
         U = cycle(F, U, l, h)
         residual = F - apply_poisson(U, h)
         norm = np.linalg.norm(residual[1:-1, 1:-1])
