@@ -26,7 +26,7 @@ def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle):
     cycle = Cycle(v1, v2, mu)
     h = 1 / U.shape[0]
 
-    for i in range(iter_cycle):
+    for _ in range(iter_cycle):
         U = cycle(F, U, l, h)
         residual = F - apply_poisson(U, h)
         norm = np.linalg.norm(residual[1:-1, 1:-1])
