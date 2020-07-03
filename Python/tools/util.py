@@ -1,12 +1,17 @@
 """
     Util functions
 """
+import logging
 import time as time
 import numpy as np
 import matplotlib.pyplot as plt
 import cProfile
 
 TIME_STATS = {}
+
+
+logger = logging.getLogger('time')
+logger.setLevel(logging.WARNING)
 
 # TODO: ggf. auch mal mit PERF was machen
 
@@ -29,7 +34,7 @@ def timer(func):
         TIME_STATS[func.__name__][0] += 1
         TIME_STATS[func.__name__][1] += after
 
-        # print(f"{func.__name__} took {after:.6} s")
+        logger.info(f"{func.__name__} took {after:.6} s")
 
         return value
     return wrapper

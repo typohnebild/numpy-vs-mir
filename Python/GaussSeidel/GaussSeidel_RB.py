@@ -1,6 +1,12 @@
+import logging
+
 import numpy as np
+
 from ..tools.apply_poisson import apply_poisson
 from ..tools.util import timer
+
+logger = logging.getLogger('GS')
+logger.setLevel(logging.WARNING)
 
 
 # @timer
@@ -37,7 +43,8 @@ def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-8):
             r = F - apply_poisson(U, h)
             norm = np.linalg.norm(r[1:-1, 1:-1])
             if norm <= eps:
-                print(f"GS_RB converged after {it} iterations with {norm:.4}")
+                logger.info(
+                    f"converged after {it} iterations with {norm:.4}")
                 break
 
         # rote Halbiteration

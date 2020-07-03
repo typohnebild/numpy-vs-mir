@@ -1,15 +1,16 @@
-#!/bin/usr/env python3
-
+import logging
 
 import numpy as np
-from ..GaussSeidel.GaussSeidel_RB import GS_RB
-from ..GaussSeidel.GaussSeidel import gauss_seidel
-from ..tools.operators import poisson_operator_like
-from ..tools.apply_poisson import apply_poisson
 
-from .restriction import restriction
-from .prolongation import prolongation
+from ..GaussSeidel.GaussSeidel import gauss_seidel
+from ..GaussSeidel.GaussSeidel_RB import GS_RB
+from ..tools.apply_poisson import apply_poisson
+from ..tools.operators import poisson_operator_like
 from .cycle import Cycle
+from .prolongation import prolongation
+from .restriction import restriction
+
+logger = logging.getLogger('MG')
 
 
 def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle):
@@ -31,9 +32,10 @@ def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle):
         U = cycle(F, U, l, h)
         residual = F - apply_poisson(U, h)
         norm = np.linalg.norm(residual[1:-1, 1:-1])
-        print(f"Residual has a L2-Norm of {norm:.4} after {i} MGcycle")
+        logger.info(f"Residual has a L2-Norm of {norm:.4} after {i} MGcycle")
         if norm <= eps:
-            print(f"MG converged after {i} iterations with {norm:.4} error")
+            logger.info(
+                f"MG converged after {i} iterations with {norm:.4} error")
             break
     return U
 
