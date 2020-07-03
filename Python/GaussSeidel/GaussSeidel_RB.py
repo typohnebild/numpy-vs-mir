@@ -1,7 +1,9 @@
 import numpy as np
 from ..tools.apply_poisson import apply_poisson
+from ..tools.util import timer
 
 
+@timer
 def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-8):
     """Implementation of Gauss Seidl Red Black iterations
        should solve AU = F
@@ -31,10 +33,11 @@ def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-8):
     # Anzahl an Gauss-Seidel-Iterationen ausfuehren
     for it in range(max_iter):
         # check sometimes if solutions converges
-        if it % 1000 == 0:
+        if it % 10000 == 0:
             r = F - apply_poisson(U, h)
-            if np.linalg.norm(r[1:-1, 1:-1]) <= eps:
-                # print(f"close enough after {it} iterations")
+            norm = np.linalg.norm(r[1:-1, 1:-1])
+            if norm <= eps:
+                print(f"GS_RB converged after {it} iterations with {norm:.4}")
                 break
 
         # rote Halbiteration

@@ -49,7 +49,7 @@ def simulate_3D(N, max_iter=500):
 
 
 @util.timer
-def simulate_2D_multigrid(N, iter_cycle = 5):
+def simulate_2D_multigrid(N, iter_cycle=5):
     U = hm.initMap_2D(N)
     F = hm.heat_sources_2D(N)
     return hm.poisson_multigrid(F, U, 5, 2, 2, 2, iter_cycle)

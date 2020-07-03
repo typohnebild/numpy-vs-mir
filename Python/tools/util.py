@@ -15,10 +15,11 @@ def timer(func):
         value = cProfile.runctx("func(*args, **kwargs)", globals(), locals())
         after = time.time() - before
         if func.__name__ not in TIME_STATS:
-            TIME_STATS[func.__name__] = 0
-        TIME_STATS[func.__name__] += 1
+            TIME_STATS[func.__name__] = [0, 0]
+        TIME_STATS[func.__name__][0] += 1
+        TIME_STATS[func.__name__][1] += after
 
-        print(f"{func.__name__} took {after}")
+        # print(f"{func.__name__} took {after:.6} s")
 
         return value
     return wrapper
@@ -48,4 +49,3 @@ def draw3D(map):
             ax.scatter(*index, c='black', alpha=max(x - 0.5, 0))
 
     fig.show()
-
