@@ -30,9 +30,9 @@ def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle):
         U = cycle(F, U, l, h)
         residual = F - apply_poisson(U, h)
         norm = np.linalg.norm(residual[1:-1, 1:-1])
-        print(f"{norm:.12f} after one mgcycle")
+        # print(f"{norm:.12f} after one mgcycle")
         if norm <= 1e-3:
-            print(f"mg converged after {i} iterations")
+            # print(f"mg converged after {i} iterations")
             break
     return U
 

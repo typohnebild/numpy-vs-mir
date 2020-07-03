@@ -4,6 +4,7 @@
 import time as time
 import numpy as np
 import matplotlib.pyplot as plt
+import cProfile
 
 TIME_STATS = {}
 
@@ -11,7 +12,7 @@ TIME_STATS = {}
 def timer(func):
     def wrapper(*args, **kwargs):
         before = time.time()
-        value = func(*args, **kwargs)
+        value = cProfile.runctx("func(*args, **kwargs)", globals(), locals())
         after = time.time() - before
         if func.__name__ not in TIME_STATS:
             TIME_STATS[func.__name__] = 0

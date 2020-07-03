@@ -34,7 +34,7 @@ def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-8):
         if it % 1000 == 0:
             r = F - apply_poisson(U, h)
             if np.linalg.norm(r[1:-1, 1:-1]) <= eps:
-                print(f"close enough after {it} iterations")
+                # print(f"close enough after {it} iterations")
                 break
 
         # rote Halbiteration
