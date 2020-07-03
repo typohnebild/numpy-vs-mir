@@ -1,10 +1,13 @@
+import logging
+
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.ticker import FormatStrFormatter, LinearLocator
 
 import Python.tools.heatmap as hm
-import numpy as np
 import Python.tools.util as util
 
+logging.basicConfig(level=logging.INFO)
 np.set_printoptions(precision=4, linewidth=180)
 
 
@@ -51,7 +54,7 @@ def simulate_3D(N, max_iter=500):
 def simulate_2D_multigrid(N, iter_cycle=5):
     U = hm.initMap_2D(N)
     F = hm.heat_sources_2D(N)
-    return hm.poisson_multigrid(F, U, 5, 2, 2, 2, iter_cycle)
+    return hm.poisson_multigrid(F, U, 3, 2, 2, 2, iter_cycle)
 
 
 @util.timer
