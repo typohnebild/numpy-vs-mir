@@ -11,7 +11,7 @@ from .prolongation import prolongation
 from .restriction import restriction
 
 logger = logging.getLogger('MG')
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 
 def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle):

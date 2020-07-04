@@ -1,14 +1,14 @@
 """
     Util functions
 """
-import logging
-import time as time
-import numpy as np
-import matplotlib.pyplot as plt
 import cProfile
+import logging
 import pstats
+import time as time
 from pstats import SortKey
 
+import matplotlib.pyplot as plt
+import numpy as np
 
 TIME_STATS = {}
 
@@ -17,12 +17,14 @@ logger.setLevel(logging.WARNING)
 
 # TODO: ggf. auch mal mit PERF was machen
 
+
 def profiling(profunc):
     def prof_wrapper(*args, **kwargs):
         with cProfile.Profile() as pr:
             value = profunc(*args, **kwargs)
         p = pstats.Stats(pr)
-        p.sort_stats(SortKey.TIME).dump_stats("python_profiling.dmp")
+        p.sort_stats(SortKey.TIME).dump_stats(
+            f"{profunc.__name__}_{args[0]}.prof")
         return value
     return prof_wrapper
 

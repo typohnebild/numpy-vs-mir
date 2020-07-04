@@ -1,8 +1,6 @@
 import logging
 
-import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.ticker import FormatStrFormatter, LinearLocator
 
 import multipy.tools.heatmap as hm
 import multipy.tools.util as util
@@ -14,8 +12,7 @@ np.set_printoptions(precision=4, linewidth=180)
 
 
 @util.profiling
-def profile_2D_multigrid():
-    N = 10
+def profile_2D_multigrid(N):
     iter_cycle = 1000
     U = hm.initMap_2D(N)
     F = hm.heat_sources_2D(N)
@@ -30,5 +27,7 @@ def profile_2D_general_multigrid():
     A, U, F = hm.reshape_grid(grid, rhs)
     U = hm.general_multigrid(A, F, U, 2, 5, 5, 1)
     grid[1:-1, 1:-1] = U.reshape((N - 2, N - 2))
-    # return grid
 
+
+if __name__ == "__main__":
+    profile_2D_multigrid(128)
