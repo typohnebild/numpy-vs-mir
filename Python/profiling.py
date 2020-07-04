@@ -30,4 +30,5 @@ def profile_2D_general_multigrid():
 
 
 if __name__ == "__main__":
-    profile_2D_multigrid(128)
+    for i in range(8, 12):
+        profile_2D_multigrid(2**i)
