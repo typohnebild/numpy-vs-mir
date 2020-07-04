@@ -11,6 +11,7 @@ from .prolongation import prolongation
 from .restriction import restriction
 
 logger = logging.getLogger('MG')
+logger.setLevel(logging.INFO)
 
 
 def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle):
@@ -32,7 +33,7 @@ def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle):
         U = cycle(F, U, l, h)
         residual = F - apply_poisson(U, h)
         norm = np.linalg.norm(residual[1:-1, 1:-1])
-        logger.info(f"Residual has a L2-Norm of {norm:.4} after {i} MGcycle")
+        logger.debug(f"Residual has a L2-Norm of {norm:.4} after {i} MGcycle")
         if norm <= eps:
             logger.info(
                 f"MG converged after {i} iterations with {norm:.4} error")
