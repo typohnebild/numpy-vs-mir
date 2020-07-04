@@ -60,20 +60,13 @@ def test_MG_Restriction_Prolongation_Shapes_3D_odd():
     assert A.shape == C.shape
 
 
-@pytest.mark.skip("Not yet implemented")
 def test_MultiGrid_VS_GS_RB():
-    eps = 1e-5
+    eps = 1e-3
     # Variables
     U = hm.initMap_2D(40)
     F = hm.heat_sources_2D(40)
-    # Gauss Seidel Red Black
-    A = GS_RB(-np.copy(F), np.copy(U), max_iter=30)
 
-    # hm.draw2D(A)
-
-    # MultiGrid
-    B = mg.poisson_multigrid(-F, U, 2, 15, 15, 1)
-
-    # hm.draw2D(B)
+    A = GS_RB(np.copy(F), np.copy(U), eps=eps)
+    B = mg.poisson_multigrid(F, U, 2, 2, 2, 2, 10)
 
     assert np.allclose(A, B, atol=eps)
