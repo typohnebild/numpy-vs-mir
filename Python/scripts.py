@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import FormatStrFormatter, LinearLocator
 
-import Python.tools.heatmap as hm
-import Python.tools.util as util
+import multipy.tools.heatmap as hm
+import multipy.tools.util as util
 
 
 logging.basicConfig(level=logging.INFO)
@@ -52,8 +52,7 @@ def simulate_3D(N, max_iter=500):
     return hm.GS_RB(F, U, max_iter=max_iter)
 
 
-# @util.timer
-@util.profiling
+@util.timer
 def simulate_2D_multigrid(N, iter_cycle=5):
     U = hm.initMap_2D(N)
     F = hm.heat_sources_2D(N)

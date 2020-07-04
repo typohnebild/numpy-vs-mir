@@ -6,9 +6,11 @@ import time as time
 import numpy as np
 import matplotlib.pyplot as plt
 import cProfile
+import pstats
+from pstats import SortKey
+
 
 TIME_STATS = {}
-
 
 logger = logging.getLogger('time')
 logger.setLevel(logging.WARNING)
@@ -19,7 +21,8 @@ def profiling(profunc):
     def prof_wrapper(*args, **kwargs):
         with cProfile.Profile() as pr:
             value = profunc(*args, **kwargs)
-        pr.print_stats()
+        p = pstats.Stats(pr)
+        p.sort_stats(SortKey.TIME).dump_stats("python_profiling.dmp")
         return value
     return prof_wrapper
 
