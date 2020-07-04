@@ -1,8 +1,16 @@
+import logging
+
 import numpy as np
+
 from ..tools.apply_poisson import apply_poisson
+from ..tools.util import timer
+
+logger = logging.getLogger('GS')
+logger.setLevel(logging.WARNING)
 
 
-def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-10):
+# @timer
+def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-8):
     """Implementation of Gauss Seidl Red Black iterations
        should solve AU = F
        A poisson equation
@@ -30,17 +38,19 @@ def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-10):
 
     # Anzahl an Gauss-Seidel-Iterationen ausfuehren
     for it in range(max_iter):
+        # check sometimes if solutions converges
+        if it % 10000 == 0:
+            r = F - apply_poisson(U, h)
+            norm = np.linalg.norm(r[1:-1, 1:-1])
+            if norm <= eps:
+                logger.info(
+                    f"converged after {it} iterations with {norm:.4}")
+                break
+
         # rote Halbiteration
         sweep(0, F, U, h)
         # schwarze Halbiteration
         sweep(1, F, U, h)
-
-        # check sometimes if solutions converges
-        if it % 1000 == 0:
-            r = F - apply_poisson(U, h)
-            if np.linalg.norm(r[1:-1, 1:-1]) <= eps:
-                print(f"close enough after {it} iterations")
-                break
 
     return U
 

@@ -1,17 +1,19 @@
-#!/bin/usr/env python3
-
+import logging
 
 import numpy as np
-from ..GaussSeidel.GaussSeidel_RB import GS_RB
+
 from ..GaussSeidel.GaussSeidel import gauss_seidel
-from ..tools.operators import poisson_operator_like
+from ..GaussSeidel.GaussSeidel_RB import GS_RB
 from ..tools.apply_poisson import apply_poisson
-
-from .restriction import restriction
+from ..tools.operators import poisson_operator_like
+from .cycle import Cycle
 from .prolongation import prolongation
+from .restriction import restriction
+
+logger = logging.getLogger('MG')
 
 
-def poisson_multigrid(F, U, l, v1, v2, mu):
+def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle):
     """Implementation of MultiGrid iterations
        should solve AU = F
        A is poisson equation
@@ -22,37 +24,20 @@ def poisson_multigrid(F, U, l, v1, v2, mu):
        @param mu iterations for recursive call
        @return x n vector
     """
-    # abfangen, dass Level zu gross wird
+    cycle = Cycle(v1, v2, mu)
     h = 1 / U.shape[0]
-    if l <= 1 or U.shape[0] <= 1:
-        # solve
-        return GS_RB(F, U=U, max_iter=20000)
+    eps = 1e-3
 
-    # smoothing
-    U = GS_RB(F, U=U, max_iter=v1)
-    # residual
-    r = F - apply_poisson(U, 2 * h)
-    # restriction
-    r = restriction(r)
-    # do not update border
-    # r[0, :] = r[:, 0] = r[-1, :] = r[:, -1] = 0
-
-    # recursive call
-    e = np.zeros_like(r)
-    for _ in range(mu):
-        e = poisson_multigrid(np.copy(r), e, l - 1, v1, v2, mu)
-    # prolongation
-    e = prolongation(e, U.shape)
-    print(np.max(e), np.min(e))
-
-    # temp
-    # draw2D(e)
-
-    # correction
-    U = U + e
-
-    # post smoothing
-    return GS_RB(F, U=U, max_iter=v2)
+    for i in range(1, iter_cycle + 1):
+        U = cycle(F, U, l, h)
+        residual = F - apply_poisson(U, h)
+        norm = np.linalg.norm(residual[1:-1, 1:-1])
+        logger.info(f"Residual has a L2-Norm of {norm:.4} after {i} MGcycle")
+        if norm <= eps:
+            logger.info(
+                f"MG converged after {i} iterations with {norm:.4} error")
+            break
+    return U
 
 
 def general_multigrid(A, F, U, l, v1, v2, mu):

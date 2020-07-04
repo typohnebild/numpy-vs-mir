@@ -1,9 +1,27 @@
 """
     Util functions
 """
+import logging
 import time as time
 import numpy as np
 import matplotlib.pyplot as plt
+import cProfile
+
+TIME_STATS = {}
+
+
+logger = logging.getLogger('time')
+logger.setLevel(logging.WARNING)
+
+# TODO: ggf. auch mal mit PERF was machen
+
+def profiling(profunc):
+    def prof_wrapper(*args, **kwargs):
+        with cProfile.Profile() as pr:
+            value = profunc(*args, **kwargs)
+        pr.print_stats()
+        return value
+    return prof_wrapper
 
 
 def timer(func):
@@ -11,7 +29,12 @@ def timer(func):
         before = time.time()
         value = func(*args, **kwargs)
         after = time.time() - before
-        print(f"{func.__name__} took {after}")
+        if func.__name__ not in TIME_STATS:
+            TIME_STATS[func.__name__] = [0, 0]
+        TIME_STATS[func.__name__][0] += 1
+        TIME_STATS[func.__name__][1] += after
+
+        logger.info(f"{func.__name__} took {after:.6} s")
 
         return value
     return wrapper

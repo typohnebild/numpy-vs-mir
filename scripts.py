@@ -1,9 +1,14 @@
+import logging
+
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.ticker import FormatStrFormatter, LinearLocator
 
 import Python.tools.heatmap as hm
-import numpy as np
 import Python.tools.util as util
+
+
+logging.basicConfig(level=logging.INFO)
 
 np.set_printoptions(precision=4, linewidth=180)
 
@@ -47,11 +52,12 @@ def simulate_3D(N, max_iter=500):
     return hm.GS_RB(F, U, max_iter=max_iter)
 
 
-@util.timer
-def simulate_2D_multigrid(N):
+# @util.timer
+@util.profiling
+def simulate_2D_multigrid(N, iter_cycle=5):
     U = hm.initMap_2D(N)
     F = hm.heat_sources_2D(N)
-    return hm.poisson_multigrid(F, U, 2, 5, 5, 1)
+    return hm.poisson_multigrid(F, U, 3, 2, 2, 2, iter_cycle)
 
 
 @util.timer
@@ -59,7 +65,7 @@ def simulate_2D_general_multigrid(N):
     grid = hm.initMap_2D(N)
     rhs = hm.heat_sources_2D(N)
     A, U, F = hm.reshape_grid(grid, rhs)
-    U = hm.general_multigrid(A, F, U, 2, 5, 5, 2)
+    U = hm.general_multigrid(A, F, U, 2, 5, 5, 1)
     grid[1:-1, 1:-1] = U.reshape((N - 2, N - 2))
     return grid
 
