@@ -27,10 +27,13 @@ class Cycle:
     def _compute_residual(self, F, U, h):
         return F - apply_poisson(U, 2 * h)
 
+    def _solve(self, F, U, h):
+        return GS_RB(F=F, U=U, h=h, max_iter=5_000, eps=1e-3)
+
     def _compute_correction(self, r, l, h):
         e = np.zeros_like(r)
         for _ in range(self.mu):
-            e = self.do_cycle(r, e, l, h)
+            e = self.do_cycle(r.copy(), e, l, h)
         return e
 
     def do_cycle(self, F, U, l, h=None):
@@ -38,8 +41,7 @@ class Cycle:
             h = 1 / U.shape[0]
 
         if l <= 1 or U.shape[0] <= 1:
-            # solve
-            return GS_RB(F=F, U=U, h=h, max_iter=5000)
+            return self._solve(F, U, h)
 
         U = self._presmooth(F=F, U=U, h=h)
 
@@ -49,11 +51,9 @@ class Cycle:
 
         e = self._compute_correction(r, l - 1, 2 * h)
 
-        # prolongation
         e = prolongation(e, U.shape)
 
         # correction
         U = U + e
 
-        # post smoothing
         return self._postsmooth(F=F, U=U, h=h)
