@@ -13,7 +13,7 @@ import numpy as np
 TIME_STATS = {}
 
 logger = logging.getLogger('time')
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging.INFO)
 
 # TODO: ggf. auch mal mit PERF was machen
 
