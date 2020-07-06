@@ -79,3 +79,27 @@ class PoissonCycle(AbstractCycle):
 
     def _solve(self, F, U, h):
         return GS_RB(F=F, U=U, h=h, max_iter=5_000, eps=1e-3)
+
+
+# TODO atm it is not really general because of the poisson operator calls
+# and in this version it will not work i guess because of the missing h
+class GeneralCycle(AbstractCycle):
+    def __init__(self, A, F, v1, v2, mu):
+        super().__init__(F, v1, v2, mu)
+        self.A = A
+
+    def _presmooth(self, F, U):
+        A = poisson_operator_like(F)
+        return gauss_seidel(A, F, U, max_iter=self.v1)
+
+    def _postsmooth(self, F, U):
+        A = poisson_operator_like(F)
+        return gauss_seidel(A, F, U, max_iter=self.v2)
+
+    def _compute_residual(self, F, U):
+        A = poisson_operator_like(F)
+        return F - (A @ U)
+
+    def _solve(self, F, U, h):
+        A = poisson_operator_like(F)
+        return np.linalg.solve(A, F)
