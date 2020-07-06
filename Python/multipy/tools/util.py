@@ -24,7 +24,7 @@ def profiling(profunc):
             value = profunc(*args, **kwargs)
         p = pstats.Stats(pr)
         p.sort_stats(SortKey.TIME).dump_stats(
-            f"{profunc.__name__}_{args[0]}.prof")
+            f"profiles/{profunc.__name__}_{args[0]}.prof")
         return value
     return prof_wrapper
 
