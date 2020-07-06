@@ -6,7 +6,7 @@ from ..GaussSeidel.GaussSeidel import gauss_seidel
 from ..GaussSeidel.GaussSeidel_RB import GS_RB
 from ..tools.apply_poisson import apply_poisson
 from ..tools.operators import poisson_operator_like
-from .cycle import Cycle
+from .cycle import PoissonCycle
 from .prolongation import prolongation
 from .restriction import restriction
 
@@ -25,13 +25,15 @@ def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle):
        @param mu iterations for recursive call
        @return x n vector
     """
-    cycle = Cycle(v1, v2, mu)
-    h = 1 / U.shape[0]
+    cycle = PoissonCycle(F, v1, v2, mu)
     eps = 1e-3
+    return multigrid(cycle, U, l, eps, iter_cycle)
 
+
+def multigrid(cycle, U, l, eps, iter_cycle):
     for i in range(1, iter_cycle + 1):
-        U = cycle(F, U, l, h)
-        residual = F - apply_poisson(U, h)
+        U = cycle(U, l)
+        residual = cycle.residual(U)
         norm = np.linalg.norm(residual[1:-1, 1:-1])
         logger.debug(f"Residual has a L2-Norm of {norm:.4} after {i} MGcycle")
         if norm <= eps:
@@ -71,8 +73,8 @@ def general_multigrid(A, F, U, l, v1, v2, mu):
     e = np.zeros_like(r)
     for _ in range(mu):
         e = general_multigrid(
-            poisson_operator_like(r) / (4 * h * h),
-            np.copy(r),
+            poisson_operator_like(r),
+            np.copy(r) * (4 * h * h),
             np.copy(e),
             l - 1,
             v1,
