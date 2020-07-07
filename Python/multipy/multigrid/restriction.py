@@ -51,31 +51,52 @@ def restriction(A):
     return ret
 
 
-# in work... will be done later... maybe :)
 def weighted_restriction(A):
+    # indicator for Dimension
     alpha = len(A.shape)
-    B = np.zeros(np.array(A.shape) // 2)
+    # initialize result with respect to the wanted shape
+    ret = restriction(A)
+
+    # min length is 3
+    assert(A.shape[0] >= 3)
 
     if alpha == 1:
-        # TODO
-        return A[1::2]
-    if alpha == 2:
-        for i in range(B.shape[0]):
-            for j in range(B.shape[1]):
-                B[i][j] = (A[2 * i][2 * j] / 2 +
-                           (A[2 * i + 1][2 * j] +
-                            A[2 * i - 1][2 * j] +
-                            A[2 * i][2 * j + 1] +
-                            A[2 * i][2 * j - 1]
-                            ) / 4 +
-                           (A[2 * i + 1][2 * j + 1] +
-                            A[2 * i + 1][2 * j - 1] +
-                            A[2 * i - 1][2 * j + 1] +
-                            A[2 * i - 1][2 * j - 1]
-                            ) / 8)
-        return B
-    if alpha == 3:
-        # TODO
-        return A[1::2, 1::2, 1::2]
+        # core
+        ret[1:-1] /= 2
+        # corner
+        ret[1:-1] += (A[1:-2:2] + A[3::2]) / 4
+    elif alpha == 2:
+        # core
+        ret[1:-1, 1:-1] /= 4
+        # edges
+        ret[1:-1, 1:-1] += (A[2:-1:2, 1:-2:2] + A[1:-2:2, 2:-1:2] +
+                            A[2:-1:2, 3::2] + A[3::2, 2:-1:2]) / 8
+        # corners
+        ret[1:-1, 1:-1] += (A[1:-2:2, 1:-2:2] + A[1:-2:2, 3::2] +
+                            A[3::2, 1:-2:2] + A[3::2, 3::2]) / 16
+    elif alpha == 3:
+        # OBACHT: not tested!!!
+        # core
+        ret[1:-1, 1:-1, 1:-1] /= 8
+        # edges
+        ret[1:-1, 1:-1, 1:-1] += (
+            A[2:-1:2, 2:-1:2, 1:-2:2] + A[2:-1:2, 2:-1:2, 3::2] +
+            A[2:-1:2, 1:-2:2, 2:-1:2] + A[2:-1:2, 3::2, 2:-1:2] +
+            A[1:-2:2, 2:-1:2, 2:-1:2] + A[3::2, 2:-1:2, 2:-1:2] +
+            A[2:-1:2, 1:-2:2, 3::2] + A[2:-1:2, 3::2, 1:-2:2] +
+            A[2:-1:2, 1:-2:2, 1:-2:2] + A[2:-1:2, 3::2, 3::2] +
+            A[1:-2:2, 2:-1:2, 3::2] + A[3::2, 2:-1:2, 0::-2] +
+            A[1:-2:2, 2:-1:2, 1:-2:2] + A[3::2, 2:-1:2, 3::2] +
+            A[1:-2:2, 3::2, 2:-1:2] + A[3::2, 1:-2:2, 2:-1:2] +
+            A[1:-2:2, 1:-2:2, 2:-1:2] + A[3::2, 3::2, 2:-1:2]) / 16
+
+        # corners
+        ret[1:-1, 1:-1, 1:-1] += (
+            A[3::2, 1:-2:2, 1:-2:2] + A[3::2, 3::2, 1:-2:2] +
+            A[3::2, 3::2, 3::2] + A[3::2, 1:-2:2, 3::2] +
+            A[1:-2:2, 1:-2:2, 1:-2:2] + A[1:-2:2, 1:-2:2, 3::2] +
+            A[1:-2:2, 3::2, 3::2] + A[1:-2:2, 3::2, 1:-2:2]) / 32
     else:
         raise ValueError('weighted restriction: invalid dimension')
+
+    return ret

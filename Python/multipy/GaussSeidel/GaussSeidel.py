@@ -2,7 +2,7 @@
 import numpy as np
 
 
-def gauss_seidel(A, F, U=None, eps=1e-10, max_iter=1000):
+def gauss_seidel(A, F, U=None, eps=1e-10, max_iter=1_000_000):
     """Implementation of Gauss Seidl iterations
        should solve AU = F
        @param A n x m Matrix

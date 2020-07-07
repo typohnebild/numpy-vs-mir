@@ -60,11 +60,11 @@ def simulate_2D_multigrid(N, iter_cycle=5):
 
 
 @util.timer
-def simulate_2D_general_multigrid(N):
+def simulate_2D_general_multigrid(N, iter_cycle=5):
     grid = hm.initMap_2D(N)
     rhs = hm.heat_sources_2D(N)
     A, U, F = hm.reshape_grid(grid, rhs)
-    U = hm.general_multigrid(A, F, U, 3, 2, 2, 2)
+    U = hm.general_multigrid(A, F, U, 3, 2, 2, 2, iter_cycle)
     grid[1:-1, 1:-1] = U.reshape((N - 2, N - 2))
     return grid
 
@@ -86,3 +86,7 @@ def compare():
     U5 = np.linalg.solve(A, F.copy())
     U6 = np.linalg.solve(A, -F.copy())
     return U1, U2, U3, U4, U5, U6
+
+
+if __name__ == "__main__":
+    simulate_2D_multigrid(40, 10)
