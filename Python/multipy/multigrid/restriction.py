@@ -56,15 +56,10 @@ def weighted_restriction(A):
     alpha = len(A.shape)
     # initialize result with respect to the wanted shape
     ret = restriction(A)
-    # Index of the second to the last element to mention in ret (depends on
-    # the shape of A)
-    end = ret.shape[0] - (A.shape[0] + 1) % 2
 
     # min length is 3
     assert(A.shape[0] >= 3)
-    # 0:-2  -> 1:-2:2
-    # 2::   -> 3::2
-    # 1:-1  -> 2:-1:2
+
     if alpha == 1:
         # core
         ret[1:-1] /= 2
@@ -80,8 +75,9 @@ def weighted_restriction(A):
         ret[1:-1, 1:-1] += (A[1:-2:2, 1:-2:2] + A[1:-2:2, 3::2] +
                             A[3::2, 1:-2:2] + A[3::2, 3::2]) / 16
     elif alpha == 3:
+        # OBACHT: not tested!!!
         # core
-        ret /= 8
+        ret[1:-1, 1:-1, 1:-1] /= 8
         # edges
         ret[1:-1, 1:-1, 1:-1] += (
             A[2:-1:2, 2:-1:2, 1:-2:2] + A[2:-1:2, 2:-1:2, 3::2] +
