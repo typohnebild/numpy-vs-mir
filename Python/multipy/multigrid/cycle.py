@@ -5,21 +5,25 @@ from ..GaussSeidel.GaussSeidel import gauss_seidel
 from ..tools.operators import poisson_operator_like
 from ..tools.apply_poisson import apply_poisson
 
-from .restriction import restriction
+from .restriction import restriction, weighted_restriction
 from .prolongation import prolongation
 
 
 class AbstractCycle:
-    def __init__(self, F, v1, v2, mu):
+    def __init__(self, F, v1, v2, mu, l):
         self.v1 = v1
         self.v2 = v2
         self.mu = mu
         self.F = F
+        self.l = l
         self.eps = 1e-30
         self.h = 1 / F.shape[0]
+        # ceck if l is plausible
+        if np.log2(self.F.shape[0]) < self.l:
+            raise ValueError('false value of levels')
 
-    def __call__(self, U, l, h=None):
-        return self.do_cycle(self.F, U, l, h)
+    def __call__(self, U, h=None):
+        return self.do_cycle(self.F, U, self.l, h)
 
     @abstractmethod
     def _presmooth(self, F, U, h):
@@ -37,7 +41,11 @@ class AbstractCycle:
     def _solve(self, F, U, h):
         pass
 
-    def residual(self, U):
+    @abstractmethod
+    def norm(self, U):
+        pass
+
+    def _residual(self, U):
         return self._compute_residual(self.F, U, self.h)
 
     def _compute_correction(self, r, l, h):
@@ -70,8 +78,8 @@ class AbstractCycle:
 
 
 class PoissonCycle(AbstractCycle):
-    def __init__(self, F, v1, v2, mu):
-        super().__init__(F, v1, v2, mu)
+    def __init__(self, F, v1, v2, mu, l):
+        super().__init__(F, v1, v2, mu, l)
 
     def _presmooth(self, F, U, h=None):
         return GS_RB(F, U=U, h=h, max_iter=self.v1, eps=self.eps)
@@ -85,26 +93,39 @@ class PoissonCycle(AbstractCycle):
     def _solve(self, F, U, h):
         return GS_RB(F=F, U=U, h=h, max_iter=5_000, eps=1e-3)
 
+    def norm(self, U):
+        residual = self._residual(U)
+        return np.linalg.norm(residual[1:-1, 1:-1])
 
-# TODO atm it is not really general because of the poisson operator calls
-# and in this version it will not work i guess because of the missing h
+
 class GeneralCycle(AbstractCycle):
-    def __init__(self, A, F, v1, v2, mu):
-        super().__init__(F, v1, v2, mu)
-        self.A = A
+    def __init__(self, A, F, v1, v2, mu, l):
+        super().__init__(F, v1, v2, mu, l)
+        self.curl = self.l
+        # self.A is Array of As for each level
+        self.A = [None] * self.l
+        # save As with respect to the corresponding level at index of that level
+        self.A[self.l - 1] = A
+        for level in range(self.l - 1, 0, -1):
+            self.A[level-1] = weighted_restriction(self.A[level])
 
-    def _presmooth(self, F, U):
-        A = poisson_operator_like(F)
-        return gauss_seidel(A, F, U, max_iter=self.v1)
+    def _presmooth(self, F, U, h=None):
+        return gauss_seidel(self.A[self.curl - 1], F, U, max_iter=self.v1)
 
-    def _postsmooth(self, F, U):
-        A = poisson_operator_like(F)
-        return gauss_seidel(A, F, U, max_iter=self.v2)
+    def _postsmooth(self, F, U, h=None):
+        self.curl += 1
+        return gauss_seidel(self.A[self.curl - 1], F, U, max_iter=self.v2)
 
-    def _compute_residual(self, F, U):
-        A = poisson_operator_like(F)
-        return F - (A @ U)
+    def _compute_residual(self, F, U, h):
+        return F - (self.A[self.curl - 1] @ U)
 
     def _solve(self, F, U, h):
-        A = poisson_operator_like(F)
-        return np.linalg.solve(A, F)
+        return np.linalg.solve(self.A[self.curl - 1], F)
+
+    def norm(self, U):
+        residual = self._residual(U)
+        return np.linalg.norm(residual)
+
+    def do_cycle(self, F, U, l, h=None):
+        self.curl = l
+        return super().do_cycle(F, U, l, h)
