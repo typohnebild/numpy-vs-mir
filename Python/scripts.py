@@ -86,3 +86,7 @@ def compare():
     U5 = np.linalg.solve(A, F.copy())
     U6 = np.linalg.solve(A, -F.copy())
     return U1, U2, U3, U4, U5, U6
+
+
+if __name__ == "__main__":
+    simulate_2D_multigrid(40, 10)
