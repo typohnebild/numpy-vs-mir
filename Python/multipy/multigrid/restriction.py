@@ -51,31 +51,46 @@ def restriction(A):
     return ret
 
 
-# in work... will be done later... maybe :)
 def weighted_restriction(A):
+    # indicator for Dimension
     alpha = len(A.shape)
-    B = np.zeros(np.array(A.shape) // 2)
+    # initialize result with respect to the wanted shape
+    ret = np.zeros(np.array(A.shape) // 2)
+
+    # min length is 3
+    assert(A.shape[0] >= 3)
 
     if alpha == 1:
-        # TODO
-        return A[1::2]
-    if alpha == 2:
-        for i in range(B.shape[0]):
-            for j in range(B.shape[1]):
-                B[i][j] = (A[2 * i][2 * j] / 2 +
-                           (A[2 * i + 1][2 * j] +
-                            A[2 * i - 1][2 * j] +
-                            A[2 * i][2 * j + 1] +
-                            A[2 * i][2 * j - 1]
-                            ) / 4 +
-                           (A[2 * i + 1][2 * j + 1] +
-                            A[2 * i + 1][2 * j - 1] +
-                            A[2 * i - 1][2 * j + 1] +
-                            A[2 * i - 1][2 * j - 1]
-                            ) / 8)
-        return B
-    if alpha == 3:
-        # TODO
-        return A[1::2, 1::2, 1::2]
+        # core
+        ret = A[1:-1] / 2
+        # corner
+        ret += (A[0:-2:] + A[2::]) / 4
+    elif alpha == 2:
+        # core
+        ret = (A[1:-1, 1:-1]) / 4
+        # edges
+        ret += (A[1:-1, 0:-2] + A[0:-2, 1:-1] + A[1:-1, 2::] + A[2::, 1:-1]) / 8
+        # corners
+        ret += (A[0:-2:, 0:-2] + A[0:-2, 2::] + A[2::, 0:-2] + A[2::, 2::]) / 16
+    elif alpha == 3:
+        # core
+        ret = A[1:-1, 1:-1, 1:-1] / 8
+        # edges
+        ret += (A[1:-1, 1:-1, 0:-2] + A[1:-1, 1:-1, 2::] +
+                A[1:-1, 0:-2, 1:-1] + A[1:-1, 2::, 1:-1] +
+                A[0:-2, 1:-1, 1:-1] + A[2::, 1:-1, 1:-1] +
+                A[1:-1, 0:-2, 2::] + A[1:-1, 2::, 0:-2] +
+                A[1:-1, 0:-2, 0:-2] + A[1:-1, 2::, 2::] +
+                A[0:-2, 1:-1, 2::] + A[2::, 1:-1, 0::-2] +
+                A[0:-2, 1:-1, 0:-2] + A[2::, 1:-1, 2::] +
+                A[0:-2, 2::, 1:-1] + A[2::, 0:-2, 1:-1] +
+                A[0:-2, 0:-2, 1:-1] + A[2::, 2::, 1:-1]) / 16
+        # corners
+        ret += (A[2::, 0:-2, 0:-2] + A[2::, 2::, 0:-2] +
+                A[2::, 2::, 2::] + A[2::, 0:-2, 2::] +
+                A[0:-2, 0:-2, 0:-2] + A[0:-2, 0:-2, 2::] +
+                A[0:-2, 2::, 2::] + A[0:-2, 2::, 0:-2]) /32
     else:
         raise ValueError('weighted restriction: invalid dimension')
+
+    return ret
