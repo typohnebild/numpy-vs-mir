@@ -1,8 +1,9 @@
 import numpy as np
+from abc import abstractmethod
 from ..GaussSeidel.GaussSeidel_RB import GS_RB
 from ..GaussSeidel.GaussSeidel import gauss_seidel
 from ..tools.operators import poisson_operator_like
-from ..tools.apply_poisson import apply_poisson, poisson_operator_like
+from ..tools.apply_poisson import apply_poisson
 
 from .restriction import restriction
 from .prolongation import prolongation
@@ -20,16 +21,20 @@ class AbstractCycle:
     def __call__(self, U, l, h=None):
         return self.do_cycle(self.F, U, l, h)
 
-    def _presmooth(self):
+    @abstractmethod
+    def _presmooth(self, F, U, h):
         pass
 
-    def _postsmooth(self):
+    @abstractmethod
+    def _postsmooth(self, F, U, h):
         pass
 
-    def _compute_residual(self):
+    @abstractmethod
+    def _compute_residual(self, F, U, h):
         pass
 
-    def _solve(self):
+    @abstractmethod
+    def _solve(self, F, U, h):
         pass
 
     def residual(self, U):
