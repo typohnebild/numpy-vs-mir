@@ -23,6 +23,7 @@ def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-8):
         U = np.zeros_like(F)
     if h is None:
         h = 1 / (U.shape[0])
+    h2 = h * h
 
     if len(F.shape) == 1:
         # do the sweep
@@ -48,37 +49,37 @@ def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-8):
                 break
 
         # rote Halbiteration
-        sweep(0, F, U, h)
+        sweep(0, F, U, h2)
         # schwarze Halbiteration
-        sweep(1, F, U, h)
+        sweep(1, F, U, h2)
 
     return U
 
 
 # --- 1D Fall ---
-def sweep_1D(color, F, U, h):
+def sweep_1D(color, F, U, h2):
     """
     Does the sweeps
     @param color 1 = red 0 for black
-    @param h is distance between grid points
+    @param h2 is distance between grid points squared
     """
     n = F.shape[0]
     if color == 1:
         # red
-        U[1:n - 1:2] = (U[0:n - 2:2] + U[2::2] - F[1:n - 1:2] * h * h) / (2.0)
+        U[1:n - 1:2] = (U[0:n - 2:2] + U[2::2] - F[1:n - 1:2] * h2) / (2.0)
     else:
         # black
-        U[2:n - 1:2] = (U[1:n - 2:2] + U[3::2] - F[2:n - 1:2] * h * h) / (2.0)
+        U[2:n - 1:2] = (U[1:n - 2:2] + U[3::2] - F[2:n - 1:2] * h2) / (2.0)
 # ----------------
 
 # --- 2D Fall ---
 
 
-def sweep_2D(color, F, U, h):
+def sweep_2D(color, F, U, h2):
     """
     Does the sweeps
     @param color 1 = red 0 for black
-    @param h is distance between grid points
+    @param h2 is distance between grid points squared
     """
 
     m, n = F.shape
@@ -89,24 +90,24 @@ def sweep_2D(color, F, U, h):
                                    U[2::2, 2:n - 1:2] +
                                    U[1:m - 1:2, 1:n - 2:2] +
                                    U[1:m - 1:2, 3::2] -
-                                   F[1:m - 1:2, 2:n - 1:2] * h * h) / (4.0)
+                                   F[1:m - 1:2, 2:n - 1:2] * h2) / (4.0)
         U[2:m - 1:2, 1:n - 1:2] = (U[1:m - 2:2, 1:n - 1:2] +
                                    U[3::2, 1:n - 1:2] +
                                    U[2:m - 1:2, 0:n - 2:2] +
                                    U[2:m - 1:2, 2::2] -
-                                   F[2:m - 1:2, 1:n - 1:2] * h * h) / (4.0)
+                                   F[2:m - 1:2, 1:n - 1:2] * h2) / (4.0)
     else:
         # black
         U[1:m - 1:2, 1:n - 1:2] = (U[0:m - 2:2, 1:n - 1:2] +
                                    U[2::2, 1:n - 1:2] +
                                    U[1:m - 1:2, 0:n - 2:2] +
                                    U[1:m - 1:2, 2::2] -
-                                   F[1:m - 1:2, 1:n - 1:2] * h * h) / (4.0)
+                                   F[1:m - 1:2, 1:n - 1:2] * h2) / (4.0)
         U[2:m - 1:2, 2:n - 1:2] = (U[1:m - 2:2, 2:n - 1:2] +
                                    U[3::2, 2:n - 1:2] +
                                    U[2:m - 1:2, 1:n - 2:2] +
                                    U[2:m - 1:2, 3::2] -
-                                   F[2:m - 1:2, 2:n - 1:2] * h * h) / (4.0)
+                                   F[2:m - 1:2, 2:n - 1:2] * h2) / (4.0)
 # ----------------
 
 # --- 3D Fall ---
