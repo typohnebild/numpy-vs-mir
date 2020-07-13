@@ -57,3 +57,4 @@ def general_multigrid(A, F, U, l, v1, v2, mu, iter_cycle):
     cycle = GeneralCycle(A, F, v1, v2, mu, l)
     eps = 1e-3
     return multigrid(cycle, U, eps, iter_cycle)
+

@@ -31,15 +31,15 @@ def profiling(profunc):
 
 def timer(func):
     def wrapper(*args, **kwargs):
-        before = time.time()
+        before = time.perf_counter()
         value = func(*args, **kwargs)
-        after = time.time() - before
+        after = time.perf_counter() - before
         if func.__name__ not in TIME_STATS:
             TIME_STATS[func.__name__] = [0, 0]
         TIME_STATS[func.__name__][0] += 1
         TIME_STATS[func.__name__][1] += after
 
-        logger.info(f"{func.__name__} took {after:.6} s")
+        logger.info(f"{func.__name__} took {after:.6}")
 
         return value
     return wrapper

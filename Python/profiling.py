@@ -29,6 +29,13 @@ def profile_2D_general_multigrid():
     grid[1:-1, 1:-1] = U.reshape((N - 2, N - 2))
 
 
+@util.timer
+def time_multigrid(N):
+    U, F = hm.create_problem_2D(N)
+    iter_cycle = 100
+    hm.poisson_multigrid(F, U, 5, 2, 2, 2, iter_cycle)
+
+
 if __name__ == "__main__":
-    for i in range(8, 13):
+    for i in range(8, 14):
         profile_2D_multigrid(2**i)
