@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 
-import logging
+# import logging
 from multipy.tools.heatmap import create_problem_2D
 from multipy.multigrid import poisson_multigrid
 import sys
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 
 def measure(N):
