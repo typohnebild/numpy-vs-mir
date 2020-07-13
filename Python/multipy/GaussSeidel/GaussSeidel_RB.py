@@ -10,7 +10,7 @@ logger.setLevel(logging.WARNING)
 
 
 # @timer
-def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-8):
+def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-8, norm_iter=10000):
     """Implementation of Gauss Seidl Red Black iterations
        should solve AU = F
        A poisson equation
@@ -40,7 +40,7 @@ def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-8):
     # Anzahl an Gauss-Seidel-Iterationen ausfuehren
     for it in range(max_iter):
         # check sometimes if solutions converges
-        if it % 10000 == 0:
+        if it % norm_iter == 0:
             r = F - apply_poisson(U, h)
             norm = np.linalg.norm(r[1:-1, 1:-1])
             if norm <= eps:
