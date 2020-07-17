@@ -1,5 +1,5 @@
 #!/usr/bin/sh
-OUTFILE="outfile_$(hostname)"
+OUTFILE="outfile_$(hostname)_$(date +%d%m)"
 N=1000
 for _ in $(seq 12)
 do

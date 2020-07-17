@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 # import logging
 from multipy.tools.heatmap import create_problem_2D
