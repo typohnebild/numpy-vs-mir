@@ -76,7 +76,7 @@ def sweep_1D(color, F, U, h2):
 # --- 2D Fall ---
 
 
-@jit(nopython=True)
+@jit(nopython=True, fastmath=True)
 def sweep_2D(color, F, U, h2):
     """
     Does the sweeps
