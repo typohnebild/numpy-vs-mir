@@ -10,7 +10,8 @@ def read_file(filepath):
             ret[0].append(float(N))
             ret[1].append(sum([float(x.replace(',', '')) for x in flop]))
             ret[2].append(float(time))
-    return ret
+    # this assures that we have that sorted by N
+    return list(zip(*sorted(zip(*ret), key=lambda x: x[0])))
 
 
 def draw(input_data):

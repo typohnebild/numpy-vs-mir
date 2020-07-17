@@ -10,3 +10,4 @@ __dummy.html
 *.swo
 __pycache__
 *.pytest_cache
+venv

@@ -39,7 +39,7 @@ def timer(func):
         TIME_STATS[func.__name__][0] += 1
         TIME_STATS[func.__name__][1] += after
 
-        logger.info(f"{func.__name__} took {after:.6}")
+        logger.info(f"{func.__name__}({args}) took {after:.6}")
 
         return value
     return wrapper
