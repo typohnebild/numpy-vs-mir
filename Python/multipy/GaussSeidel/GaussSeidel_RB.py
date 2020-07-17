@@ -1,6 +1,7 @@
 import logging
 
 import numpy as np
+from numba import jit
 
 from ..tools.apply_poisson import apply_poisson
 from ..tools.util import timer
@@ -75,6 +76,7 @@ def sweep_1D(color, F, U, h2):
 # --- 2D Fall ---
 
 
+@jit(nopython=True)
 def sweep_2D(color, F, U, h2):
     """
     Does the sweeps
