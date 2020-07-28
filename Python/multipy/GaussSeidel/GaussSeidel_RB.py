@@ -24,6 +24,7 @@ def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-8, norm_iter=10000):
         U = np.zeros_like(F)
     if h is None:
         h = 1 / (U.shape[0])
+
     h2 = h * h
 
     if len(F.shape) == 1:
@@ -71,9 +72,6 @@ def sweep_1D(color, F, U, h2):
     else:
         # black
         U[2:n - 1:2] = (U[1:n - 2:2] + U[3::2] - F[2:n - 1:2] * h2) / (2.0)
-# ----------------
-
-# --- 2D Fall ---
 
 
 @jit(nopython=True, fastmath=True)

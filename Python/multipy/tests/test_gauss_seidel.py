@@ -154,10 +154,11 @@ def test_red_black_against_gauss_seidel():
 
 
 def test_sweep_1D_red():
-    F = np.random.rand(10)
-    U1 = np.random.rand(10)
+    N = 10
+    F = np.random.rand(N)
+    U1 = np.random.rand(N)
     U2 = U1.copy()
-    h = 1 / 10
+    h = 1 / N
     color = 1
     n = F.shape[0]
     for i in range(1, n - 1):
@@ -172,10 +173,11 @@ def test_sweep_1D_red():
 
 
 def test_sweep_1D_black():
-    F = np.random.rand(10)
-    U1 = np.random.rand(10)
+    N = 10
+    F = np.random.rand(N)
+    U1 = np.random.rand(N)
     U2 = U1.copy()
-    h = 1 / 10
+    h = 1 / N
     color = 0
     n = F.shape[0]
     for i in range(1, n - 1):
@@ -190,10 +192,11 @@ def test_sweep_1D_black():
 
 
 def test_sweep_2D_red():
-    F = util.MatrixGenerator((10, 10))
-    U1 = util.MatrixGenerator((10, 10))
+    N = 10
+    F = util.MatrixGenerator((N, N))
+    U1 = util.MatrixGenerator((N, N))
     U2 = U1.copy()
-    h = 1 / 100
+    h = 1 / N
     color = 1
     m, n = F.shape
     for j in range(1, n - 1):
@@ -210,10 +213,11 @@ def test_sweep_2D_red():
 
 
 def test_sweep_2D_black():
-    F = util.MatrixGenerator((10, 10))
-    U1 = util.MatrixGenerator((10, 10))
+    N = 10
+    F = util.MatrixGenerator((N, N))
+    U1 = util.MatrixGenerator((N, N))
     U2 = U1.copy()
-    h = 1 / 100
+    h = 1 / N
     color = 0
     m, n = F.shape
     for j in range(1, n - 1):
@@ -225,5 +229,6 @@ def test_sweep_2D_black():
                             U1[i, j + 1] -
                             F[i, j] * h * h) / (4.0)
     sweep_2D(color, F, U2, h)
+    print(np.linalg.norm(U1 - U2))
 
     assert np.allclose(U1, U2)
