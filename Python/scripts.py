@@ -4,6 +4,7 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import FormatStrFormatter, LinearLocator
+import matplotlib.pyplot as plt
 
 import multipy.tools.heatmap as hm
 import multipy.tools.util as util
@@ -87,6 +88,28 @@ def compare():
     U5 = np.linalg.solve(A, F.copy())
     U6 = np.linalg.solve(A, -F.copy())
     return U1, U2, U3, U4, U5, U6
+
+
+def draw2D(U):
+    if len(U.shape) == 1:
+        n = int(np.sqrt(U.shape[0]))
+        assert n * n == U.shape[0]
+        plt.imshow(U.reshape((n, n)), cmap='RdBu_r', interpolation='nearest')
+    else:
+        plt.imshow(U, cmap='RdBu_r', interpolation='nearest')
+    plt.show()
+
+
+def draw3D(map):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Plot the surface.
+    for index, x in np.ndenumerate(map):
+        if x > 0.5:
+            ax.scatter(*index, c='black', alpha=max(x - 0.5, 0))
+
+    fig.show()
 
 
 if __name__ == "__main__":
