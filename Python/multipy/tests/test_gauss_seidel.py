@@ -167,7 +167,7 @@ def test_sweep_1D_red():
                      U1[i + 1] -
                      F[i] * h * h) / (2.0)
 
-    sweep_1D(color, F, U2, h)
+    sweep_1D(color, F, U2, h * h)
 
     assert np.allclose(U1, U2)
 
@@ -186,7 +186,7 @@ def test_sweep_1D_black():
                      U1[i + 1] -
                      F[i] * h * h) / (2.0)
 
-    sweep_1D(color, F, U2, h)
+    sweep_1D(color, F, U2, h * h)
 
     assert np.allclose(U1, U2)
 
@@ -207,7 +207,7 @@ def test_sweep_2D_red():
                             U1[i, j - 1] +
                             U1[i, j + 1] -
                             F[i, j] * h * h) / (4.0)
-    sweep_2D(color, F, U2, h)
+    sweep_2D(color, F, U2, h * h)
 
     assert np.allclose(U1, U2)
 
@@ -228,7 +228,7 @@ def test_sweep_2D_black():
                             U1[i, j - 1] +
                             U1[i, j + 1] -
                             F[i, j] * h * h) / (4.0)
-    sweep_2D(color, F, U2, h)
+    sweep_2D(color, F, U2, h * h)
     print(np.linalg.norm(U1 - U2))
 
     assert np.allclose(U1, U2)
