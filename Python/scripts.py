@@ -3,8 +3,6 @@ import logging
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.ticker import FormatStrFormatter, LinearLocator
-import matplotlib.pyplot as plt
 
 import multipy.tools.heatmap as hm
 import multipy.tools.util as util
@@ -91,6 +89,7 @@ def compare():
 
 
 def draw2D(U):
+    import matplotlib.pyplot as plt
     if len(U.shape) == 1:
         n = int(np.sqrt(U.shape[0]))
         assert n * n == U.shape[0]
@@ -101,6 +100,7 @@ def draw2D(U):
 
 
 def draw3D(map):
+    import matplotlib.pyplot as plt
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
