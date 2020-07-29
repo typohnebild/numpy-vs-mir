@@ -10,7 +10,7 @@ import sys
 
 def measure(N):
     U, F = create_problem_2D(N)
-    poisson_multigrid(F, U, 5, 2, 2, 2, 100)
+    poisson_multigrid(F, U, 2, 2, 2, 2, 100)
 
 
 if __name__ == "__main__":
