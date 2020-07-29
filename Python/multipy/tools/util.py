@@ -1,11 +1,8 @@
 """
     Util functions
 """
-import cProfile
 import logging
-import pstats
 import time as time
-from pstats import SortKey
 
 import numpy as np
 
@@ -18,10 +15,14 @@ logger.setLevel(logging.INFO)
 
 
 def profiling(profunc):
+
+    import cProfile
+    from pstats import SortKey, Stats
+
     def prof_wrapper(*args, **kwargs):
         with cProfile.Profile() as pr:
             value = profunc(*args, **kwargs)
-        p = pstats.Stats(pr)
+        p = Stats(pr)
         p.sort_stats(SortKey.TIME).dump_stats(
             f"profiles/{profunc.__name__}_{args[0]}.prof")
         return value
