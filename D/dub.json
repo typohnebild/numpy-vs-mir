@@ -1,0 +1,8 @@
+{
+	"name": "multid",
+	"dependencies": {
+		"mir-algorithm": "~>3.9.6",
+		"mir-random": "~>2.2.14"
+	},
+	"dflags-ldc": ["-mcpu=native"]
+}
