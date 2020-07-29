@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import logging
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 import multipy.tools.heatmap as hm
