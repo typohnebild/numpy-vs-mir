@@ -147,8 +147,6 @@ def test_red_black_against_gauss_seidel():
                       eps=eps,
                       max_iter=max_iter).reshape((N - 2, N - 2))
     U2 = GS_RB(-rhs, grid.copy(), h=h, eps=eps, max_iter=max_iter)
-    # TODO Warum ist das - hier wichtig???
-    print(np.max(U1 - U2[1:-1, 1:-1]))
 
     assert np.allclose(U1, U2[1:-1, 1:-1], atol=1e-8)
 
@@ -229,6 +227,5 @@ def test_sweep_2D_black():
                             U1[i, j + 1] -
                             F[i, j] * h * h) / (4.0)
     sweep_2D(color, F, U2, h * h)
-    print(np.linalg.norm(U1 - U2))
 
     assert np.allclose(U1, U2)

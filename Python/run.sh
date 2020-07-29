@@ -21,7 +21,7 @@ if [ "$paranoid" -lt 3 ]  && perf list eventgroups | grep -q FLOPS
 then
     for _ in $(seq "$iter")
     do
-        x=$(perf stat -M FLOPS ./measure.py $N 2>&1 | grep -i 'fp\|elapsed' | awk '{ print $1}' | tr '\n' ':')
+        x=$(perf stat -M GFLOPS ./measure.py $N 2>&1 | grep -i 'fp\|elapsed' | awk '{ print $1}' | tr '\n' ':')
         printf "%b:%b\\n" "$N" "$x" >> "$OUTFILE"
         N=$((N + 1000))
     done
