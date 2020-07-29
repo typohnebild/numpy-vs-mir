@@ -1,3 +1,7 @@
+"""
+    A example problem
+    solves the heat distribution in NxN grid
+"""
 import numpy as np
 
 from ..GaussSeidel.GaussSeidel import gauss_seidel
@@ -42,7 +46,7 @@ def heat_sources_1D(dimension):
 
 def heat_sources_2D(dimension):
     F = np.zeros((dimension, dimension))
-    F[dimension // 2, dimension // 2] = 1
+    # F[dimension // 2, dimension // 2] = 1
     return F
 
 
