@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 OUTFILE="outfile_$(hostname)_$(date +%d%m)"
 
 get_infos(){
