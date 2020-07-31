@@ -2,6 +2,7 @@ module multid.gaussseidel.redblack;
 
 import std.stdio;
 import mir.ndslice;
+import std.traits : isFloatingPoint;
 
 /++
     red is for even indicies
@@ -18,8 +19,8 @@ This is a Gauss Seidel Red Black implementation for 1D
 +/
 Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000,
         size_t norm_iter = 10_000, double eps = 1e-8)(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T h)
+        if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 {
-    static assert(1 <= Dim && Dim <= 3);
 
     const T h2 = h * h;
 
@@ -46,7 +47,7 @@ This is a sweep implementation for 1D
 void sweep(T, size_t Dim : 1)(in Color color, Slice!(T*, 1) F, Slice!(T*, 1) U, T h2)
 {
     const auto n = F.shape[0];
-    for (uint i = 1u + color; i < n - 1u; i += 2u)
+    for (size_t i = 1u + color; i < n - 1u; i += 2u)
     {
         U[i] = (U[i - 1u] + U[i + 1u] - F[i] * h2) / 2.0;
 
@@ -57,14 +58,13 @@ void sweep(T, size_t Dim : 1)(in Color color, Slice!(T*, 1) F, Slice!(T*, 1) U, 
 /++
 This is a sweep implementation for 2D
 +/
-
 void sweep(T, size_t Dim : 2)(Color color, Slice!(T*, 2) F, Slice!(T*, 2) U, T h2)
 {
     const auto n = F.shape[0];
     const auto m = F.shape[1];
-    for (uint i = 1u; i < n - 1u; i++)
+    for (size_t i = 1u; i < n - 1u; i++)
     {
-        for (uint j = 1u; j < m - 1u; j++)
+        for (size_t j = 1u; j < m - 1u; j++)
         {
             if ((i + j) % 2 == color)
             {
@@ -82,11 +82,11 @@ void sweep(T, size_t Dim : 3)(Color color, Slice!(T*, 3) F, Slice!(T*, 3) U, T h
     const auto n = F.shape[0];
     const auto m = F.shape[1];
     const auto l = F.shape[1];
-    for (uint i = 1u; i < n - 1u; i++)
+    for (size_t i = 1u; i < n - 1u; i++)
     {
-        for (uint j = 1u; j < m - 1u; j++)
+        for (size_t j = 1u; j < m - 1u; j++)
         {
-            for (uint k = 1u; k < l - 1u; k++)
+            for (size_t k = 1u; k < l - 1u; k++)
             {
                 if ((i + j) % 2 == color)
                 {
