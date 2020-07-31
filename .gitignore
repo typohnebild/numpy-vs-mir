@@ -11,5 +11,5 @@ __dummy.html
 __pycache__
 *.pytest_cache
 venv
-.multid
-.multid-test-library
+multid
+multid-test-library
