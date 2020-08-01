@@ -13,7 +13,8 @@ get_infos(){
 [ -e "$OUTFILE" ] || get_infos >> "$OUTFILE" || exit 1
 
 
-N=1000
+N=500
+step=500
 paranoid=$(cat /proc/sys/kernel/perf_event_paranoid)
 
 iter=${1:-2}
@@ -23,14 +24,14 @@ then
     do
         x=$(perf stat -M GFLOPS ./measure.py $N 2>&1 | grep -i 'fp\|elapsed' | awk '{ print $1}' | tr '\n' ':')
         printf "%b:%b\\n" "$N" "$x" >> "$OUTFILE"
-        N=$((N + 1000))
+        N=$((N + step))
     done
 else
     for _ in $(seq "$iter")
     do
         x=$(/usr/bin/time -f %e ./measure.py $N 2>&1)
         printf "%b:%b\\n" "$N" "$x" >> "$OUTFILE"
-        N=$((N + 1000))
+        N=$((N + step))
     done
 fi
 
