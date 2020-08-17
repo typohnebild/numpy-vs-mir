@@ -1,8 +1,11 @@
 module multid.gaussseidel.redblack;
 
+import apply_poisson;
+
 import std.stdio;
 import mir.ndslice;
 import std.traits : isFloatingPoint;
+import mir.blas : nrm2;
 
 /++
     red is for even indicies
@@ -28,6 +31,13 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000,
     {
         if (it % norm_iter == 0)
         {
+            auto r = F - apply_poisson(U, h);
+            auto norm = nrm2(r);
+            if (norm <= eps)
+            {
+                break;
+            }
+
             //TODO: implemenent apply_poisson
             // r = F - apply_poisson(U, h)
             // ...
