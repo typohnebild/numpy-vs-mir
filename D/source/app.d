@@ -4,17 +4,24 @@ import std.random : uniform;
 import std.array;
 import std.algorithm;
 import mir.ndslice;
+import pretty_array;
 
 import multid.gaussseidel.redblack;
 
 void main()
 {
-    auto U = slice!double(10);
+    const size_t N = 100;
+    auto U = slice!double(N, N);
     auto fun = generate!(() => uniform(0.0, 1.0));
     U.field.fill(fun);
-    auto F = slice!double([10], 0.0);
-    const double h = 1 / 10;
-    // auto F = generate!(() => uniform(0, 0.99)).take(10).array.sliced;
-    // F = F.reshape([5,2]);
-    writeln(GS_RB!(double, 1, 666)(F, U, h));
+    U[0][0 .. $] = 1.0;
+    U[1 .. $, 0] = 1.0;
+    U[$ - 1][1 .. $] = 0.0;
+    U[1 .. $, $ - 1] = 0.0;
+    U.prettyArr.writeln;
+
+    auto F = slice!double([N, N], 0.0);
+    const double h = 1 / N;
+    GS_RB!(double, 2, 666)(F, U, h);
+    U.prettyArr.writeln;
 }
