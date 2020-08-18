@@ -6,8 +6,6 @@ import std.stdio;
 import mir.ndslice;
 import std.traits : isFloatingPoint;
 import std.range;
-import mir.math.sum;
-import std.math : sqrt;
 import std.stdio : writeln;
 import pretty_array;
 
@@ -35,9 +33,8 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000,
     {
         if (it % norm_iter == 0)
         {
-            auto r = (F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1, 1 .. $ - 1];
-            auto norm = r.map!(x => x * x).sum;
-            if (sqrt(norm) <= eps)
+            const auto norm = residual_norm!(T, Dim)(F, U, h);
+            if (norm <= eps)
             {
                 it.writeln;
                 break;
@@ -109,6 +106,33 @@ void sweep(T, size_t Dim : 3)(in Color color, const Slice!(T*, 3) F, Slice!(T*, 
             }
         }
     }
+}
+
+/++
+    Computes the L2 norm of the residual
++/
+T residual_norm(T, size_t Dim)(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T h)
+{
+    import mir.math.sum : sum;
+
+    T norm;
+    static if (Dim == 1)
+    {
+        norm = (F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1].map!(x => x * x).sum;
+    }
+    else static if (Dim == 2)
+    {
+        norm = (F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1, 1 .. $ - 1].map!(x => x * x).sum;
+    }
+    else static if (Dim == 3)
+    {
+        norm = (F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1, 1 .. $ - 1, 1 .. $ - 1].map!(x => x * x)
+            .sum;
+    }
+    import std.math : sqrt;
+
+    return norm.sqrt;
+
 }
 
 unittest
