@@ -31,31 +31,31 @@ def solve(N):
 
 
 @util.timer
-def simulate_1D(N, max_iter=500):
+def simulate_1D(N, max_iter=500, numba=True):
     U = hm.initMap_1D(N)
     F = hm.heat_sources_1D(N)
-    return hm.GS_RB(F, U, h=None, max_iter=max_iter)
+    return hm.GS_RB(F, U, h=None, max_iter=max_iter, numba=numba)
 
 
 @util.timer
-def simulate_2D(N, max_iter=20000):
+def simulate_2D(N, max_iter=20000, numba=True):
     U = hm.initMap_2D(N)
     F = hm.heat_sources_2D(N)
-    return hm.GS_RB(-F, U, h=None, max_iter=max_iter)
+    return hm.GS_RB(-F, U, h=None, max_iter=max_iter, numba=numba)
 
 
 @util.timer
-def simulate_3D(N, max_iter=500):
+def simulate_3D(N, max_iter=500, numba=True):
     U = hm.initMap_3D(N)
     F = np.zeros((N, N, N))
-    return hm.GS_RB(F, U, max_iter=max_iter)
+    return hm.GS_RB(F, U, max_iter=max_iter, numba=numba)
 
 
 @util.timer
-def simulate_2D_multigrid(N, iter_cycle=5):
+def simulate_2D_multigrid(N, iter_cycle=5, numba=True):
     U = hm.initMap_2D(N)
     F = hm.heat_sources_2D(N)
-    return hm.poisson_multigrid(F, U, 3, 2, 2, 2, iter_cycle)
+    return hm.poisson_multigrid(F, U, 3, 2, 2, 2, iter_cycle, numba=numba)
 
 
 @util.timer

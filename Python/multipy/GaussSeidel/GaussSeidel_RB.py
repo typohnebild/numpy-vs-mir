@@ -11,7 +11,7 @@ logger.setLevel(logging.WARNING)
 
 
 # @timer
-def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-8, norm_iter=10000):
+def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-8, norm_iter=10000, numba=True):
     """Implementation of Gauss Seidl Red Black iterations
        should solve AU = F
        A poisson equation
@@ -29,13 +29,13 @@ def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-8, norm_iter=10000):
 
     if len(F.shape) == 1:
         # do the sweep
-        sweep = sweep_1D
+        sweep = sweep_1D if numba else sweep_1D.py_func
     elif len(F.shape) == 2:
         # do the sweep
-        sweep = sweep_2D
+        sweep = sweep_2D if numba else sweep_2D.py_func
     elif len(F.shape) == 3:
         # Anzahl an Gauss-Seidel-Iterationen ausfuehren
-        sweep = sweep_3D
+        sweep = sweep_3D if numba else sweep_3D.py_func
     else:
         raise ValueError("Wrong Shape!!!")
 
@@ -59,6 +59,7 @@ def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-8, norm_iter=10000):
 
 
 # --- 1D Fall ---
+@jit(nopython=True, fastmath=True)
 def sweep_1D(color, F, U, h2):
     """
     Does the sweeps
@@ -110,9 +111,9 @@ def sweep_2D(color, F, U, h2):
                                    F[2:m - 1:2, 2:n - 1:2] * h2) / (4.0)
 # ----------------
 
+
 # --- 3D Fall ---
-
-
+@jit(nopython=True, fastmath=True)
 def sweep_3D(color, F, U, h):
     """
     Does the sweeps
