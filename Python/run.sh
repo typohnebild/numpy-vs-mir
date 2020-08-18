@@ -13,30 +13,29 @@ get_infos(){
 [ -e "$OUTFILE" ] || get_infos >> "$OUTFILE" || exit 1
 
 
-N=500
 step=500
 paranoid=$(cat /proc/sys/kernel/perf_event_paranoid)
 
-intel=[true, false]
+# intel=[true, false]
 
-numba=["True", "False"]
-for iter_numba in $(seq "$numba")
+for numba in "True" "False" 
 do
+    N=500
 
     iter=${1:-2}
     if [ "$paranoid" -lt 3 ]  && perf list eventgroups | grep -q FLOPS
     then
         for _ in $(seq "$iter")
         do
-            x=$(perf stat -M GFLOPS ./measure.py $N $iter_numba 2>&1 | grep -i 'fp\|elapsed' | awk '{ print $1}' | tr '\n' ':')
-            printf "%b:%b\\n" "$N" "$x" >> "$OUTFILE"
+            x=$(perf stat -M GFLOPS ./measure.py $N "$numba" 2>&1 | grep -i 'fp\|elapsed' | awk '{ print $1}' | tr '\n' ':')
+            printf "%b:%b:%b\\n" "$numba" "$N" "$x" >> "$OUTFILE"
             N=$((N + step))
         done
     else
         for _ in $(seq "$iter")
         do
-            x=$(/usr/bin/time -f %e ./measure.py $N $iter_numba 2>&1)
-            printf "%b:%b\\n" "$N" "$x" >> "$OUTFILE"
+            x=$(/usr/bin/time -f %e ./measure.py $N "$numba" 2>&1)
+            printf "%b:%b:%b\\n" "$numba" "$N" "$x" >> "$OUTFILE"
             N=$((N + step))
         done
     fi
