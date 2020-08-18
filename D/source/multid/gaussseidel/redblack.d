@@ -6,8 +6,6 @@ import std.stdio;
 import mir.ndslice;
 import std.traits : isFloatingPoint;
 import std.range;
-import mir.math.sum;
-import std.math : sqrt;
 import std.stdio : writeln;
 import pretty_array;
 
@@ -35,9 +33,8 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000,
     {
         if (it % norm_iter == 0)
         {
-            auto r = (F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1, 1 .. $ - 1];
-            auto norm = r.map!(x => x * x).sum;
-            if (sqrt(norm) <= eps)
+            const auto norm = residual_norm!(T, Dim)(F, U, h);
+            if (norm <= eps)
             {
                 it.writeln;
                 break;
@@ -103,7 +100,7 @@ void sweep(T, size_t Dim : 3)(in Color color, const Slice!(T*, 3) F, Slice!(T*, 
                 if ((i + j) % 2 == color)
                 {
                     U[i, j, k] = (U[i - 1, j, k] + U[i + 1, j, k] + U[i, j - 1,
-                            k] + U[i, j + 1, k] + U[i, j, k - 1] + U[i, j, k + 1] - h2 * F[i, j, k]) / 4.0;
+                            k] + U[i, j + 1, k] + U[i, j, k - 1] + U[i, j, k + 1] - h2 * F[i, j, k]) / 6.0;
 
                 }
             }
@@ -111,15 +108,57 @@ void sweep(T, size_t Dim : 3)(in Color color, const Slice!(T*, 3) F, Slice!(T*, 
     }
 }
 
+/++
+    Computes the L2 norm of the residual
++/
+T residual_norm(T, size_t Dim)(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T h)
+{
+    import mir.math.sum : sum;
+
+    T norm;
+    static if (Dim == 1)
+    {
+        norm = (F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1].map!(x => x * x).sum;
+    }
+    else static if (Dim == 2)
+    {
+        norm = (F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1, 1 .. $ - 1].map!(x => x * x).sum;
+    }
+    else static if (Dim == 3)
+    {
+        norm = (F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1, 1 .. $ - 1, 1 .. $ - 1].map!(x => x * x)
+            .sum;
+    }
+    import std.math : sqrt;
+
+    return norm.sqrt;
+
+}
+
 unittest
 {
-    auto U = slice!double([3, 3], 1.0);
-    auto F = slice!double([3, 3], 0.0);
-    F[1, 1] = 1;
+    const size_t N = 3;
+    auto U1 = slice!double([N], 1.0);
+    auto F1 = slice!double([N], 0.0);
+    F1[1] = 1;
+    GS_RB!(double, 1, 1)(F1, U1, 1.0);
+    assert(U1 == [1.0, 1.0 / 2.0, 1.0].sliced);
+
+    auto U2 = slice!double([N, N], 1.0);
+    auto F2 = slice!double([N, N], 0.0);
+    F2[1, 1] = 1;
 
     auto expected = slice!double([3, 3], 1.0);
-    expected[1, 1] = 0.75;
-    GS_RB!(double, 2, 1)(F, U, 1.0);
-    assert(expected == U);
+    expected[1, 1] = 3.0 / 4.0;
+    GS_RB!(double, 2, 1)(F2, U2, 1.0);
+    assert(expected == U2);
+
+    auto U3 = slice!double([N, N, N], 1.0);
+    auto F3 = slice!double([N, N, N], 0.0);
+    F3[1, 1, 1] = 1;
+    GS_RB!(double, 3, 1)(F3, U3, 1.0);
+    auto expected3 = slice!double([N, N, N], 1.0);
+    expected3[1, 1, 1] = 5.0 / 6.0;
+    assert(expected3 == U3);
 
 }
