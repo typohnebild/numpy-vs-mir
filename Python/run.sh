@@ -27,16 +27,22 @@ do
     then
         for _ in $(seq "$iter")
         do
-            x=$(perf stat -M GFLOPS ./measure.py $N "$numba" 2>&1 | grep -i 'fp\|elapsed' | awk '{ print $1}' | tr '\n' ':')
-            printf "%b:%b:%b\\n" "$numba" "$N" "$x" >> "$OUTFILE"
-            N=$((N + step))
+	    for _ in $(seq 5)
+	    do
+                x=$(perf stat -M GFLOPS ./measure.py $N "$numba" 2>&1 | grep -i 'fp\|elapsed' | awk '{ print $1}' | tr '\n' ':')
+                printf "%b:%b:%b\\n" "$numba" "$N" "$x" >> "$OUTFILE"
+	    done
+	    N=$((N + step))
         done
     else
         for _ in $(seq "$iter")
         do
+	    for _ in $(seq 5)
+ 	    do
             x=$(/usr/bin/time -f %e ./measure.py $N "$numba" 2>&1)
             printf "%b:%b:%b\\n" "$numba" "$N" "$x" >> "$OUTFILE"
-            N=$((N + step))
+	    done 
+	    N=$((N + step))
         done
     fi
 
