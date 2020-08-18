@@ -17,22 +17,30 @@ N=500
 step=500
 paranoid=$(cat /proc/sys/kernel/perf_event_paranoid)
 
-iter=${1:-2}
-if [ "$paranoid" -lt 3 ]  && perf list eventgroups | grep -q FLOPS
-then
-    for _ in $(seq "$iter")
-    do
-        x=$(perf stat -M GFLOPS ./measure.py $N 2>&1 | grep -i 'fp\|elapsed' | awk '{ print $1}' | tr '\n' ':')
-        printf "%b:%b\\n" "$N" "$x" >> "$OUTFILE"
-        N=$((N + step))
-    done
-else
-    for _ in $(seq "$iter")
-    do
-        x=$(/usr/bin/time -f %e ./measure.py $N 2>&1)
-        printf "%b:%b\\n" "$N" "$x" >> "$OUTFILE"
-        N=$((N + step))
-    done
-fi
+intel=[true, false]
+
+numba=["True", "False"]
+for iter_numba in $(seq "$numba")
+do
+
+    iter=${1:-2}
+    if [ "$paranoid" -lt 3 ]  && perf list eventgroups | grep -q FLOPS
+    then
+        for _ in $(seq "$iter")
+        do
+            x=$(perf stat -M GFLOPS ./measure.py $N $iter_numba 2>&1 | grep -i 'fp\|elapsed' | awk '{ print $1}' | tr '\n' ':')
+            printf "%b:%b\\n" "$N" "$x" >> "$OUTFILE"
+            N=$((N + step))
+        done
+    else
+        for _ in $(seq "$iter")
+        do
+            x=$(/usr/bin/time -f %e ./measure.py $N $iter_numba 2>&1)
+            printf "%b:%b\\n" "$N" "$x" >> "$OUTFILE"
+            N=$((N + step))
+        done
+    fi
+
+done
 
 exit 0

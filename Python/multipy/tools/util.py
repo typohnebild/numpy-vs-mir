@@ -47,3 +47,7 @@ def timer(func):
 
 def MatrixGenerator(dim, max_value=500):
     return np.random.rand(*dim) * np.random.randint(max_value)
+
+
+def str2bool(v):
+  return v.lower() in ("yes", "true", "t", "1")
