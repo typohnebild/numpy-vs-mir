@@ -56,7 +56,7 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000,
 /++
 This is a sweep implementation for 1D
 +/
-void sweep(T, size_t Dim : 1)(in Color color, Slice!(T*, 1) F, Slice!(T*, 1) U, T h2)
+void sweep(T, size_t Dim : 1)(in Color color, const Slice!(T*, 1) F, Slice!(T*, 1) U, T h2)
 {
     const auto n = F.shape[0];
     for (size_t i = 1u + color; i < n - 1u; i += 2u)
@@ -70,7 +70,7 @@ void sweep(T, size_t Dim : 1)(in Color color, Slice!(T*, 1) F, Slice!(T*, 1) U, 
 /++
 This is a sweep implementation for 2D
 +/
-void sweep(T, size_t Dim : 2)(Color color, Slice!(T*, 2) F, Slice!(T*, 2) U, T h2)
+void sweep(T, size_t Dim : 2)(in Color color, const Slice!(T*, 2) F, Slice!(T*, 2) U, T h2)
 {
     const auto n = F.shape[0];
     const auto m = F.shape[1];
@@ -89,7 +89,7 @@ void sweep(T, size_t Dim : 2)(Color color, Slice!(T*, 2) F, Slice!(T*, 2) U, T h
 /++
 This is a sweep implementation for 3D
 +/
-void sweep(T, size_t Dim : 3)(Color color, Slice!(T*, 3) F, Slice!(T*, 3) U, T h2)
+void sweep(T, size_t Dim : 3)(in Color color, const Slice!(T*, 3) F, Slice!(T*, 3) U, T h2)
 {
     const auto n = F.shape[0];
     const auto m = F.shape[1];
