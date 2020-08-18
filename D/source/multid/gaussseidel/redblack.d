@@ -1,11 +1,15 @@
 module multid.gaussseidel.redblack;
 
-import apply_poisson;
+import multid.tools.apply_poisson;
 
 import std.stdio;
 import mir.ndslice;
 import std.traits : isFloatingPoint;
-import mir.blas : nrm2;
+import std.range;
+import mir.math.sum;
+import std.math : sqrt;
+import std.stdio : writeln;
+import pretty_array;
 
 /++
     red is for even indicies
@@ -31,16 +35,14 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000,
     {
         if (it % norm_iter == 0)
         {
-            auto r = F - apply_poisson(U, h);
-            auto norm = nrm2(r);
-            if (norm <= eps)
+            auto r = (F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1, 1 .. $ - 1];
+            auto norm = r.map!(x => x * x).sum;
+            if (sqrt(norm) <= eps)
             {
+                it.writeln;
                 break;
             }
 
-            //TODO: implemenent apply_poisson
-            // r = F - apply_poisson(U, h)
-            // ...
         }
         // rote Halbiteration
         sweep!(T, Dim)(Color.red, F, U, h2);
