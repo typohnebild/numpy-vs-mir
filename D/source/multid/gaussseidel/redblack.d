@@ -97,7 +97,7 @@ void sweep(T, size_t Dim : 3)(in Color color, const Slice!(T*, 3) F, Slice!(T*, 
         {
             for (size_t k = 1u; k < l - 1u; k++)
             {
-                if ((i + j) % 2 == color)
+                if ((i + j + k) % 2 == color)
                 {
                     U[i, j, k] = (U[i - 1, j, k] + U[i + 1, j, k] + U[i, j - 1,
                             k] + U[i, j + 1, k] + U[i, j, k - 1] + U[i, j, k + 1] - h2 * F[i, j, k]) / 6.0;
