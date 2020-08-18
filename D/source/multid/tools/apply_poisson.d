@@ -42,21 +42,19 @@ Slice!(T*, Dim) apply_poisson(T, size_t Dim)(Slice!(T*, Dim) U, T h)
         {
             for (size_t j = 1; j < U.shape[1] - 1; j++)
             {
-                for (size_t k = 1; k < U.shape[1] - 1; k++)
+                for (size_t k = 1; k < U.shape[2] - 1; k++)
                 {
-                    x[i, j, k] = (-4.0 * U[i, j, k] + U[i - 1, j, k] + U[i + 1,
+                    x[i, j, k] = (-6.0 * U[i, j, k] + U[i - 1, j, k] + U[i + 1,
                             j, k] + U[i, j - 1, k] + U[i, j + 1, k] + U[i, j, k - 1] + U[i, j, k + 1]) / h2;
 
                 }
 
             }
         }
-
     }
     else
     {
         static assert(false, Dim.stringof ~ " is not a supported dimension!");
-
     }
 
     return x;
