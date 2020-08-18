@@ -18,6 +18,7 @@ def initMap_1D(dimension):
 
 
 def initMap_2D(dimension):
+    np.random.seed(500)
     U = np.random.uniform(0, 1, (dimension, dimension))
     U[:, -1] = 0
     U[-1, :] = 0
