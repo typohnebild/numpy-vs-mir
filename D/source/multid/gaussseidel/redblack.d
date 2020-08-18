@@ -148,7 +148,7 @@ unittest
     auto F2 = slice!double([N, N], 0.0);
     F2[1, 1] = 1;
 
-    auto expected = slice!double([3, 3], 1.0);
+    auto expected = slice!double([N, N], 1.0);
     expected[1, 1] = 3.0 / 4.0;
     GS_RB!(double, 2, 1)(F2, U2, 1.0);
     assert(expected == U2);

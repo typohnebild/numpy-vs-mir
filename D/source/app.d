@@ -20,7 +20,7 @@ void main()
     U[1 .. $, $ - 1] = 0.0;
 
     auto F = slice!double([N, N], 0.0);
-    const double h = 1 / double(N);
+    const double h = 1.0 / double(N);
     GS_RB!(double, 2)(F, U, h);
     U.prettyArr.writeln;
 }
