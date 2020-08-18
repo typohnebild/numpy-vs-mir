@@ -1,5 +1,5 @@
 #!/bin/sh
-OUTFILE="outfile_$(hostname)_$(date +%d%m)"
+OUTFILE="results/outfile_$(hostname -s)_$(date +%d%m)_${2}"
 
 get_infos(){
 
@@ -10,7 +10,10 @@ get_infos(){
     echo "############ END INFOS"
 }
 
-[ -e "$OUTFILE" ] || get_infos >> "$OUTFILE" || exit 1
+[ -e "${OUTFILE}_1_numba" ] || get_infos >> "${OUTFILE}_1_numba" || exit 1
+[ -e "${OUTFILE}_8_numba" ] || get_infos >> "${OUTFILE}_8_numba" || exit 1
+[ -e "${OUTFILE}_1_nonumba" ] || get_infos >> "${OUTFILE}_1_nonumba" || exit 1
+[ -e "${OUTFILE}_8_nonumba" ] || get_infos >> "${OUTFILE}_8_nonumba" || exit 1
 
 
 step=500
@@ -18,34 +21,44 @@ paranoid=$(cat /proc/sys/kernel/perf_event_paranoid)
 
 # intel=[true, false]
 
-for numba in "True" "False" 
+for threads in 1 8
 do
-    N=500
-
-    iter=${1:-2}
-    if [ "$paranoid" -lt 3 ]  && perf list eventgroups | grep -q FLOPS
-    then
-        for _ in $(seq "$iter")
-        do
-	    for _ in $(seq 5)
-	    do
-                x=$(perf stat -M GFLOPS ./measure.py $N "$numba" 2>&1 | grep -i 'fp\|elapsed' | awk '{ print $1}' | tr '\n' ':')
-                printf "%b:%b:%b\\n" "$numba" "$N" "$x" >> "$OUTFILE"
-	    done
-	    N=$((N + step))
-        done
-    else
-        for _ in $(seq "$iter")
-        do
-	    for _ in $(seq 5)
- 	    do
-            x=$(/usr/bin/time -f %e ./measure.py $N "$numba" 2>&1)
-            printf "%b:%b:%b\\n" "$numba" "$N" "$x" >> "$OUTFILE"
-	    done 
-	    N=$((N + step))
-        done
-    fi
-
+    export OPENBLAS_NUM_THREADS=$threads
+    export MKL_NUM_THREADS=$threads
+    export NUMEXPR_NUM_THREADS=$threads
+    export VECLIB_MAXIMUM_THREADS=$threads 
+    export OMP_NUM_THREADS=$threads
+    
+    for numba in "True" "False" 
+    do
+        N=500
+    
+        iter=${1:-2}
+        if [ "$paranoid" -lt 3 ]  && perf list eventgroups | grep -q FLOPS
+        then
+            for _ in $(seq "$iter")
+            do
+    	    for _ in $(seq 5)
+    	    do
+                    x=$(perf stat -M GFLOPS ./measure.py $N "$numba" 2>&1 | grep -i 'fp\|elapsed' | awk '{ print $1}' | tr '\n' ':')
+    		EXTENSION=$([ $numba = "True" ] && echo "numba" || echo "nonumba")
+                    printf "%b:%b\\n" "$N" "$x" >> "${OUTFILE}_${threads}_${EXTENSION}" 
+    	    done
+    	    N=$((N + step))
+            done
+        else
+            for _ in $(seq "$iter")
+            do
+    	    for _ in $(seq 5)
+     	    do
+                    x=$(/usr/bin/time -f %e ./measure.py $N "$numba" 2>&1)
+    		EXTENSION=$([ $numba = "True" ] && echo "numba" || echo "nonumba")
+		printf "%b:%b\\n" "$N" "$x" >> "${OUTFILE}_${threads}_${EXTENSION}"
+    	    done 
+    	    N=$((N + step))
+            done
+        fi
+    done
 done
 
 exit 0

@@ -1,0 +1,25 @@
+############ INFOS
+Tue Aug 18 16:42:12 CEST 2020
+Intel(R) Xeon(R) CPU E3-1275 v5 @ 3.60GHz
+numpy version: 1.18.5
+blas_mkl_info:
+    libraries = ['mkl_rt', 'pthread']
+    library_dirs = ['/home/rzlin/bu49mebu/IntelDistributionPython/intelpython3/lib']
+    define_macros = [('SCIPY_MKL_H', None), ('HAVE_CBLAS', None)]
+    include_dirs = ['/home/rzlin/bu49mebu/IntelDistributionPython/intelpython3/include']
+blas_opt_info:
+    libraries = ['mkl_rt', 'pthread']
+    library_dirs = ['/home/rzlin/bu49mebu/IntelDistributionPython/intelpython3/lib']
+    define_macros = [('SCIPY_MKL_H', None), ('HAVE_CBLAS', None)]
+    include_dirs = ['/home/rzlin/bu49mebu/IntelDistributionPython/intelpython3/include']
+lapack_mkl_info:
+    libraries = ['mkl_rt', 'pthread']
+    library_dirs = ['/home/rzlin/bu49mebu/IntelDistributionPython/intelpython3/lib']
+    define_macros = [('SCIPY_MKL_H', None), ('HAVE_CBLAS', None)]
+    include_dirs = ['/home/rzlin/bu49mebu/IntelDistributionPython/intelpython3/include']
+lapack_opt_info:
+    libraries = ['mkl_rt', 'pthread']
+    library_dirs = ['/home/rzlin/bu49mebu/IntelDistributionPython/intelpython3/lib']
+    define_macros = [('SCIPY_MKL_H', None), ('HAVE_CBLAS', None)]
+    include_dirs = ['/home/rzlin/bu49mebu/IntelDistributionPython/intelpython3/include']
+############ END INFOS
