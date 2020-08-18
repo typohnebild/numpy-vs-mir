@@ -100,7 +100,7 @@ void sweep(T, size_t Dim : 3)(in Color color, const Slice!(T*, 3) F, Slice!(T*, 
                 if ((i + j) % 2 == color)
                 {
                     U[i, j, k] = (U[i - 1, j, k] + U[i + 1, j, k] + U[i, j - 1,
-                            k] + U[i, j + 1, k] + U[i, j, k - 1] + U[i, j, k + 1] - h2 * F[i, j, k]) / 4.0;
+                            k] + U[i, j + 1, k] + U[i, j, k - 1] + U[i, j, k + 1] - h2 * F[i, j, k]) / 6.0;
 
                 }
             }
@@ -137,13 +137,28 @@ T residual_norm(T, size_t Dim)(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T h)
 
 unittest
 {
-    auto U = slice!double([3, 3], 1.0);
-    auto F = slice!double([3, 3], 0.0);
-    F[1, 1] = 1;
+    const size_t N = 3;
+    auto U1 = slice!double([N], 1.0);
+    auto F1 = slice!double([N], 0.0);
+    F1[1] = 1;
+    GS_RB!(double, 1, 1)(F1, U1, 1.0);
+    assert(U1 == [1.0, 1.0 / 2.0, 1.0].sliced);
+
+    auto U2 = slice!double([N, N], 1.0);
+    auto F2 = slice!double([N, N], 0.0);
+    F2[1, 1] = 1;
 
     auto expected = slice!double([3, 3], 1.0);
-    expected[1, 1] = 0.75;
-    GS_RB!(double, 2, 1)(F, U, 1.0);
-    assert(expected == U);
+    expected[1, 1] = 3.0 / 4.0;
+    GS_RB!(double, 2, 1)(F2, U2, 1.0);
+    assert(expected == U2);
+
+    auto U3 = slice!double([N, N, N], 1.0);
+    auto F3 = slice!double([N, N, N], 0.0);
+    F3[1, 1, 1] = 1;
+    GS_RB!(double, 3, 1)(F3, U3, 1.0);
+    auto expected3 = slice!double([N, N, N], 1.0);
+    expected3[1, 1, 1] = 5.0 / 6.0;
+    assert(expected3 == U3);
 
 }
