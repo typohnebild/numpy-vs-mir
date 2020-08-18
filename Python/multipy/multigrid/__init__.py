@@ -14,7 +14,7 @@ logger = logging.getLogger('MG')
 logger.setLevel(logging.DEBUG)
 
 
-def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle):
+def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle, numba=True):
     """Implementation of MultiGrid iterations
        should solve AU = F
        A is poisson equation
@@ -25,7 +25,7 @@ def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle):
        @param mu iterations for recursive call
        @return x n vector
     """
-    cycle = PoissonCycle(F, v1, v2, mu, l)
+    cycle = PoissonCycle(F, v1, v2, mu, l, numba)
     eps = 1e-3
     return multigrid(cycle, U, eps, iter_cycle)
 

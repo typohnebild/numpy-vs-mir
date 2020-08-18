@@ -1,8 +1,15 @@
 module multid.gaussseidel.redblack;
 
+import multid.tools.apply_poisson;
+
 import std.stdio;
 import mir.ndslice;
 import std.traits : isFloatingPoint;
+import std.range;
+import mir.math.sum;
+import std.math : sqrt;
+import std.stdio : writeln;
+import pretty_array;
 
 /++
     red is for even indicies
@@ -28,9 +35,14 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000,
     {
         if (it % norm_iter == 0)
         {
-            //TODO: implemenent apply_poisson
-            // r = F - apply_poisson(U, h)
-            // ...
+            auto r = (F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1, 1 .. $ - 1];
+            auto norm = r.map!(x => x * x).sum;
+            if (sqrt(norm) <= eps)
+            {
+                it.writeln;
+                break;
+            }
+
         }
         // rote Halbiteration
         sweep!(T, Dim)(Color.red, F, U, h2);
@@ -90,10 +102,24 @@ void sweep(T, size_t Dim : 3)(Color color, Slice!(T*, 3) F, Slice!(T*, 3) U, T h
             {
                 if ((i + j) % 2 == color)
                 {
-                    //TODO
+                    U[i, j, k] = (U[i - 1, j, k] + U[i + 1, j, k] + U[i, j - 1,
+                            k] + U[i, j + 1, k] + U[i, j, k - 1] + U[i, j, k + 1] - h2 * F[i, j, k]) / 4.0;
 
                 }
             }
         }
     }
+}
+
+unittest
+{
+    auto U = slice!double([3, 3], 1.0);
+    auto F = slice!double([3, 3], 0.0);
+    F[1, 1] = 1;
+
+    auto expected = slice!double([3, 3], 1.0);
+    expected[1, 1] = 0.75;
+    GS_RB!(double, 2, 1)(F, U, 1.0);
+    assert(expected == U);
+
 }
