@@ -97,7 +97,7 @@ void sweep(T, size_t Dim : 3)(in Color color, const Slice!(T*, 3) F, Slice!(T*, 
         {
             for (size_t k = 1u; k < l - 1u; k++)
             {
-                if ((i + j) % 2 == color)
+                if ((i + j + k) % 2 == color)
                 {
                     U[i, j, k] = (U[i - 1, j, k] + U[i + 1, j, k] + U[i, j - 1,
                             k] + U[i, j + 1, k] + U[i, j, k - 1] + U[i, j, k + 1] - h2 * F[i, j, k]) / 6.0;
@@ -148,7 +148,7 @@ unittest
     auto F2 = slice!double([N, N], 0.0);
     F2[1, 1] = 1;
 
-    auto expected = slice!double([3, 3], 1.0);
+    auto expected = slice!double([N, N], 1.0);
     expected[1, 1] = 3.0 / 4.0;
     GS_RB!(double, 2, 1)(F2, U2, 1.0);
     assert(expected == U2);
