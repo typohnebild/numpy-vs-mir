@@ -5,7 +5,6 @@ import multid.tools.norm : nrmL2;
 
 import mir.ndslice;
 import std.traits : isFloatingPoint;
-import std.range;
 
 import std.stdio : writeln;
 import pretty_array;
@@ -56,13 +55,9 @@ This is a sweep implementation for 1D
 +/
 void sweep(T, size_t Dim : 1)(in Color color, const Slice!(T*, 1) F, Slice!(T*, 1) U, T h2)
 {
-    const auto n = F.shape[0];
-    for (size_t i = 1u + color; i < n - 1u; i += 2u)
-    {
-        U[i] = (U[i - 1u] + U[i + 1u] - F[i] * h2) / 2.0;
-
-    }
-
+    U[1 + color .. $ - 1].strided!0(2)[] = (
+            U[0 + color .. $ - 2].strided!0(2) + U[2 + color .. $].strided!0(
+            2) - h2 * F[1 + color .. $ - 1].strided!0(2)) / 2.0;
 }
 
 /++
@@ -72,6 +67,7 @@ void sweep(T, size_t Dim : 2)(in Color color, const Slice!(T*, 2) F, Slice!(T*, 
 {
     const auto n = F.shape[0];
     const auto m = F.shape[1];
+    /* U[1 .. $ - 1, 2 .. $ - 1].strided!0(2).strided!1(2); */
     for (size_t i = 1u; i < n - 1u; i++)
     {
         for (size_t j = 1u; j < m - 1u; j++)
@@ -116,7 +112,6 @@ T residual_norm(T, size_t Dim)(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T h)
 {
     import mir.math.sum : sum;
 
-    T norm;
     static if (Dim == 1)
     {
         return nrmL2((F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1]);
@@ -161,5 +156,34 @@ unittest
     auto expected3 = slice!double([N, N, N], 1.0);
     expected3[1, 1, 1] = 5.0 / 6.0;
     assert(expected3 == U3);
+
+}
+
+unittest
+{
+    import std.range : generate;
+    import std.random : uniform;
+    import std.algorithm : fill;
+
+    const size_t N = 10;
+    immutable double eps = 1e-5;
+    auto U = slice!double([N], 1.0);
+    U.field.fill(generate!(() => uniform(0.0, 1.0)));
+    auto U1 = U.dup;
+    const auto F = slice!double([N], 0.0);
+    const double h2 = 1.0;
+    for (size_t i = 1u + Color.red; i < N - 1u; i += 2u)
+    {
+        U[i] = (U[i - 1u] + U[i + 1u] - F[i] * h2) / 2.0;
+    }
+    sweep!(double, 1)(Color.red, F, U1, h2);
+    assert(U == U1);
+
+    for (size_t i = 1u + Color.black; i < N - 1u; i += 2u)
+    {
+        U[i] = (U[i - 1u] + U[i + 1u] - F[i] * h2) / 2.0;
+    }
+    sweep!(double, 1)(Color.black, F, U1, h2);
+    assert(U == U1);
 
 }
