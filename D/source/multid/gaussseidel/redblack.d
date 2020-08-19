@@ -1,11 +1,12 @@
 module multid.gaussseidel.redblack;
 
 import multid.tools.apply_poisson;
+import multid.tools.norm : nrmL2;
 
-import std.stdio;
 import mir.ndslice;
 import std.traits : isFloatingPoint;
 import std.range;
+
 import std.stdio : writeln;
 import pretty_array;
 
@@ -118,20 +119,20 @@ T residual_norm(T, size_t Dim)(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T h)
     T norm;
     static if (Dim == 1)
     {
-        norm = (F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1].map!(x => x * x).sum;
+        return nrmL2((F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1]);
     }
     else static if (Dim == 2)
     {
-        norm = (F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1, 1 .. $ - 1].map!(x => x * x).sum;
+        return nrmL2((F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1, 1 .. $ - 1]);
     }
     else static if (Dim == 3)
     {
-        norm = (F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1, 1 .. $ - 1, 1 .. $ - 1].map!(x => x * x)
-            .sum;
+        return nrmL2((F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1, 1 .. $ - 1, 1 .. $ - 1]);
     }
-    import std.math : sqrt;
-
-    return norm.sqrt;
+    else
+    {
+        static assert(false, Dim.stringof ~ " is not a supported dimension!");
+    }
 
 }
 
