@@ -1,4 +1,5 @@
 import numpy as np
+from multipy.tools.util import counter
 
 
 def restriction(A):
@@ -50,7 +51,7 @@ def restriction(A):
 
     return ret
 
-
+@counter
 def weighted_restriction(A):
     # indicator for Dimension
     alpha = len(A.shape)

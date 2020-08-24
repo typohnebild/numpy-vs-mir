@@ -67,6 +67,6 @@ def test_MultiGrid_VS_GS_RB():
     F = hm.heat_sources_2D(40)
 
     A = GS_RB(np.copy(F), np.copy(U), eps=eps)
-    B = mg.poisson_multigrid(F, U, 2, 2, 2, 2, 10)
+    B = mg.poisson_multigrid(F, U, 2, 2, 2, 2, 100)
 
     assert np.allclose(A, B, atol=eps)

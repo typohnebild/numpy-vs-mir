@@ -3,7 +3,7 @@
 # import logging
 from multipy.tools.heatmap import create_problem_2D
 from multipy.multigrid import poisson_multigrid
-from multipy.tools.util import str2bool
+from multipy.tools.util import str2bool, FLOPS
 import sys
 
 # logging.basicConfig(level=logging.INFO)
@@ -11,7 +11,8 @@ import sys
 
 def measure(N, numba=True):
     U, F = create_problem_2D(N)
-    poisson_multigrid(F, U, 3, 2, 2, 2, 100, numba=numba)
+    poisson_multigrid(F, U, 0, 1, 1, 1, 10, numba=numba)
+    print(FLOPS)
 
 
 if __name__ == "__main__":

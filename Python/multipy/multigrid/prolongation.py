@@ -1,6 +1,8 @@
 import numpy as np
+from multipy.tools.util import counter
 
 
+@counter
 def prolongation(e, fine_shape):
     """
         This interpolates/ prolongates to a grid of fine_shape

@@ -7,6 +7,7 @@ import time as time
 import numpy as np
 
 TIME_STATS = {}
+FLOPS = {}
 
 logger = logging.getLogger('time')
 logger.setLevel(logging.INFO)
@@ -43,6 +44,44 @@ def timer(func):
 
         return value
     return wrapper
+
+
+def counter(func):
+    def counter_wrapper(*args, **kwargs):
+        value = func(*args, **kwargs)
+        if func.__name__ not in FLOPS:
+            FLOPS[func.__name__] = 0
+        # TODO: sweep1D and sweep_3D
+        if (func.__name__ == "GS_RB"):
+            alpha = len(kwargs["U"].shape)
+            N = kwargs["U"].shape[0]
+            if (alpha == 1):
+                pass
+            elif (alpha == 2):
+                FLOPS[func.__name__] += 12 * (N-2)**2
+            elif (alpha == 3):
+                pass
+        elif (func.__name__ == "weighted_restriction"):
+            alpha = len(args[0].shape)
+            N = args[0].shape[0] // 2 + 1
+            if (alpha == 1):
+                pass
+            elif (alpha == 2):
+                FLOPS[func.__name__] += 11 * ((N-2)//2)**2
+            elif (alpha == 3):
+                pass
+        elif (func.__name__ == "prolongation"):
+            alpha = len(args[1])
+            N = args[1][0]
+            if (alpha == 1):
+                pass
+            elif (alpha == 2):
+                FLOPS[func.__name__] += 6 * ((N-2)//2)**2
+            elif (alpha == 3):
+                pass
+
+        return value
+    return counter_wrapper
 
 
 def MatrixGenerator(dim, max_value=500):

@@ -4,13 +4,14 @@ import numpy as np
 from numba import jit
 
 from ..tools.apply_poisson import apply_poisson
-from ..tools.util import timer
+from ..tools.util import timer, counter
 
 logger = logging.getLogger('GS')
 logger.setLevel(logging.WARNING)
 
 
-# @timer
+#@timer
+@counter
 def GS_RB(
         F,
         U=None,
