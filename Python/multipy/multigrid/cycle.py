@@ -18,6 +18,8 @@ class AbstractCycle:
         self.l = l
         self.eps = 1e-30
         self.h = 1 / F.shape[0]
+        if (self.l == 0):
+            self.l = int(np.log2(self.F.shape[0]))-1
         # ceck if l is plausible
         if np.log2(self.F.shape[0]) < self.l:
             raise ValueError('false value of levels')
@@ -65,7 +67,7 @@ class AbstractCycle:
 
         r = self._compute_residual(F=F, U=U, h=2 * h)
 
-        r = restriction(r)
+        r = weighted_restriction(r)
 
         e = self._compute_correction(r, l - 1, 2 * h)
 
