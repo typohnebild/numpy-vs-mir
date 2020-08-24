@@ -34,7 +34,7 @@ def test_red_black_one_iter():
     F[1, 1] = 1
     expected = np.ones((3, 3))
     expected[1, 1] = 0.75
-    actual = GS_RB(F, U, h=1, max_iter=1)
+    actual = GS_RB(F, U, h=1, max_iter=1, numba=False)
     assert np.allclose(expected, actual, atol=1e-8)
 
 
@@ -98,7 +98,7 @@ def test_red_black_vs_linalg():
         grid.copy(),
         h=h,
         eps=eps,
-        max_iter=max_iter)[
+        max_iter=max_iter,numba=False)[
         1:-1,
         1:-1].flatten()
 
@@ -122,7 +122,7 @@ def test_red_black_vs_F():
         grid.copy(),
         h=h,
         eps=eps,
-        max_iter=max_iter)[
+        max_iter=max_iter, numba=False)[
         1:-1,
         1:-1].flatten()
     X = A @ U1
@@ -146,7 +146,7 @@ def test_red_black_against_gauss_seidel():
                       U,
                       eps=eps,
                       max_iter=max_iter).reshape((N - 2, N - 2))
-    U2 = GS_RB(-rhs, grid.copy(), h=h, eps=eps, max_iter=max_iter)
+    U2 = GS_RB(-rhs, grid.copy(), h=h, eps=eps, max_iter=max_iter, numba=False)
 
     assert np.allclose(U1, U2[1:-1, 1:-1], atol=1e-8)
 
@@ -165,7 +165,7 @@ def test_sweep_1D_red():
                      U1[i + 1] -
                      F[i] * h * h) / (2.0)
 
-    sweep_1D(color, F, U2, h * h)
+    sweep_1D.py_func(color, F, U2, h * h)
 
     assert np.allclose(U1, U2)
 
@@ -184,7 +184,7 @@ def test_sweep_1D_black():
                      U1[i + 1] -
                      F[i] * h * h) / (2.0)
 
-    sweep_1D(color, F, U2, h * h)
+    sweep_1D.py_func(color, F, U2, h * h)
 
     assert np.allclose(U1, U2)
 
@@ -205,7 +205,7 @@ def test_sweep_2D_red():
                             U1[i, j - 1] +
                             U1[i, j + 1] -
                             F[i, j] * h * h) / (4.0)
-    sweep_2D(color, F, U2, h * h)
+    sweep_2D.py_func(color, F, U2, h * h)
 
     assert np.allclose(U1, U2)
 
@@ -226,6 +226,6 @@ def test_sweep_2D_black():
                             U1[i, j - 1] +
                             U1[i, j + 1] -
                             F[i, j] * h * h) / (4.0)
-    sweep_2D(color, F, U2, h * h)
+    sweep_2D.py_func(color, F, U2, h * h)
 
     assert np.allclose(U1, U2)

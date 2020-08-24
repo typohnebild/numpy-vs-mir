@@ -51,16 +51,20 @@ def counter(func):
         value = func(*args, **kwargs)
         if func.__name__ not in FLOPS:
             FLOPS[func.__name__] = 0
+
+        # if (func.__name__ == "GS_RB"):
+        #     alpha = len(kwargs["U"].shape)
+        #     N = kwargs["U"].shape[0]
+        #     if (alpha == 1):
+        #         pass
+        #     elif (alpha == 2):
+        #         FLOPS[func.__name__] += 12 * (N-2)**2
+        #     elif (alpha == 3):
+        #         pass
         # TODO: sweep1D and sweep_3D
-        if (func.__name__ == "GS_RB"):
-            alpha = len(kwargs["U"].shape)
-            N = kwargs["U"].shape[0]
-            if (alpha == 1):
-                pass
-            elif (alpha == 2):
-                FLOPS[func.__name__] += 12 * (N-2)**2
-            elif (alpha == 3):
-                pass
+        if (func.__name__ == "sweep_2D"):
+            N = args[1].shape[0]
+            FLOPS[func.__name__] += 12 * ((N-2)//2)**2
         elif (func.__name__ == "weighted_restriction"):
             alpha = len(args[0].shape)
             N = args[0].shape[0] // 2 + 1

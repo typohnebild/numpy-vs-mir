@@ -11,7 +11,6 @@ logger.setLevel(logging.WARNING)
 
 
 #@timer
-@counter
 def GS_RB(
         F,
         U=None,
@@ -68,6 +67,7 @@ def GS_RB(
 
 # --- 1D Fall ---
 @jit(nopython=True, fastmath=True)
+@counter
 def sweep_1D(color, F, U, h2):
     """
     Does the sweeps
@@ -84,6 +84,7 @@ def sweep_1D(color, F, U, h2):
 
 
 @jit(nopython=True, fastmath=True)
+@counter
 def sweep_2D(color, F, U, h2):
     """
     Does the sweeps
@@ -122,6 +123,7 @@ def sweep_2D(color, F, U, h2):
 
 # --- 3D Fall ---
 @jit(nopython=True, fastmath=True)
+@counter
 def sweep_3D(color, F, U, h):
     """
     Does the sweeps
