@@ -11,7 +11,14 @@ logger.setLevel(logging.WARNING)
 
 
 # @timer
-def GS_RB(F, U=None, h=None, max_iter=10_000_000, eps=1e-8, norm_iter=10000, numba=True):
+def GS_RB(
+        F,
+        U=None,
+        h=None,
+        max_iter=10_000_000,
+        eps=1e-8,
+        norm_iter=10000,
+        numba=True):
     """Implementation of Gauss Seidl Red Black iterations
        should solve AU = F
        A poisson equation

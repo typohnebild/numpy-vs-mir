@@ -10,7 +10,7 @@ import multid.gaussseidel.redblack;
 
 void main()
 {
-    const size_t N = 10;
+    immutable size_t N = 50;
     auto U = slice!double(N, N);
     auto fun = generate!(() => uniform(0.0, 1.0));
     U.field.fill(fun);

@@ -42,9 +42,9 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000,
 
         }
         // rote Halbiteration
-        sweep!(T, Dim)(Color.red, F, U, h2);
+        sweep!(T, Dim, Color.red)(F, U, h2);
         // schwarze Halbiteration
-        sweep!(T, Dim)(Color.black, F, U, h2);
+        sweep!(T, Dim, Color.black)(F, U, h2);
     }
 
     return U;
@@ -53,7 +53,7 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000,
 /++
 This is a sweep implementation for 1D
 +/
-void sweep(T, size_t Dim : 1)(in Color color, const Slice!(T*, 1) F, Slice!(T*, 1) U, T h2)
+void sweep(T, size_t Dim : 1, Color color)(const Slice!(T*, 1) F, Slice!(T*, 1) U, T h2)
 {
     U[1 + color .. $ - 1].strided!0(2)[] = (
             U[0 + color .. $ - 2].strided!0(2) + U[2 + color .. $].strided!0(
@@ -63,27 +63,59 @@ void sweep(T, size_t Dim : 1)(in Color color, const Slice!(T*, 1) F, Slice!(T*, 
 /++
 This is a sweep implementation for 2D
 +/
-void sweep(T, size_t Dim : 2)(in Color color, const Slice!(T*, 2) F, Slice!(T*, 2) U, T h2)
+void sweep(T, size_t Dim : 2, Color color)(const Slice!(T*, 2) F, Slice!(T*, 2) U, T h2)
 {
-    const auto n = F.shape[0];
-    const auto m = F.shape[1];
-    /* U[1 .. $ - 1, 2 .. $ - 1].strided!0(2).strided!1(2); */
-    for (size_t i = 1u; i < n - 1u; i++)
+    const auto m = F.shape[0];
+    const auto n = F.shape[1];
+    static if (color == Color.red)
     {
-        for (size_t j = 1u; j < m - 1u; j++)
-        {
-            if ((i + j) % 2 == color)
-            {
-                U[i, j] = (U[i - 1, j] + U[i + 1, j] + U[i, j - 1] + U[i, j + 1] - h2 * F[i, j]) / 4.0;
-            }
-        }
+        U[1 .. m - 1, 2 .. n - 1].strided!(0, 1)(2, 2).flattened[] = (U[0 .. m - 2,
+                2 .. n - 1].strided!(0, 1)(2, 2).flattened + U[2 .. m,
+                2 .. n - 1].strided!(0, 1)(2, 2).flattened + U[1 .. m - 1,
+                1 .. n - 2].strided!(0, 1)(2, 2).flattened + U[1 .. m - 1,
+                3 .. n].strided!(0, 1)(2, 2).flattened - F[1 .. m - 1,
+                2 .. n - 1].strided!(0, 1)(2, 2).flattened * h2) / 4.0;
+
+        U[2 .. m - 1, 1 .. n - 1].strided!(0, 1)(2, 2).flattened[] = (U[1 .. m - 2,
+                1 .. n - 1].strided!(0, 1)(2, 2).flattened + U[3 .. m,
+                1 .. n - 1].strided!(0, 1)(2, 2).flattened + U[2 .. m - 1,
+                0 .. n - 2].strided!(0, 1)(2, 2).flattened + U[2 .. m - 1,
+                2 .. n].strided!(0, 1)(2, 2).flattened - F[2 .. m - 1,
+                1 .. n - 1].strided!(0, 1)(2, 2).flattened * h2) / 4.0;
     }
+    else static if (color == Color.black)
+    {
+        U[1 .. m - 1, 1 .. n - 1].strided!(0, 1)(2, 2).flattened[] = (U[0 .. m - 2,
+                1 .. n - 1].strided!(0, 1)(2, 2).flattened + U[2 .. m,
+                1 .. n - 1].strided!(0, 1)(2, 2).flattened + U[1 .. m - 1,
+                0 .. n - 2].strided!(0, 1)(2, 2).flattened + U[1 .. m - 1,
+                2 .. n].strided!(0, 1)(2, 2).flattened - F[1 .. m - 1,
+                1 .. n - 1].strided!(0, 1)(2, 2).flattened * h2) / 4.0;
+
+        U[2 .. m - 1, 2 .. n - 1].strided!(0, 1)(2, 2).flattened[] = (U[1 .. m - 2,
+                2 .. n - 1].strided!(0, 1)(2, 2).flattened + U[3 .. m,
+                2 .. n - 1].strided!(0, 1)(2, 2).flattened + U[2 .. m - 1,
+                1 .. n - 2].strided!(0, 1)(2, 2).flattened + U[2 .. m - 1,
+                3 .. n].strided!(0, 1)(2, 2).flattened - F[2 .. m - 1,
+                2 .. n - 1].strided!(0, 1)(2, 2).flattened * h2) / 4.0;
+    }
+
+    // foreach (i; 1 .. m - 1)
+    // {
+    //     foreach (j; 1 .. n - 1)
+    //     {
+    //         if ((i + j) % 2 == color)
+    //         {
+    //             U[i, j] = (U[i - 1, j] + U[i + 1, j] + U[i, j - 1] + U[i, j + 1] - h2 * F[i, j]) / 4.0;
+    //         }
+    //     }
+    // }
 }
 
 /++
 This is a sweep implementation for 3D
 +/
-void sweep(T, size_t Dim : 3)(in Color color, const Slice!(T*, 3) F, Slice!(T*, 3) U, T h2)
+void sweep(T, size_t Dim : 3, Color color)(const Slice!(T*, 3) F, Slice!(T*, 3) U, T h2)
 {
     const auto n = F.shape[0];
     const auto m = F.shape[1];
@@ -166,7 +198,6 @@ unittest
     import std.algorithm : fill;
 
     const size_t N = 10;
-    immutable double eps = 1e-5;
     auto U = slice!double([N], 1.0);
     U.field.fill(generate!(() => uniform(0.0, 1.0)));
     auto U1 = U.dup;
@@ -176,14 +207,14 @@ unittest
     {
         U[i] = (U[i - 1u] + U[i + 1u] - F[i] * h2) / 2.0;
     }
-    sweep!(double, 1)(Color.red, F, U1, h2);
+    sweep!(double, 1, Color.red)(F, U1, h2);
     assert(U == U1);
 
     for (size_t i = 1u + Color.black; i < N - 1u; i += 2u)
     {
         U[i] = (U[i - 1u] + U[i + 1u] - F[i] * h2) / 2.0;
     }
-    sweep!(double, 1)(Color.black, F, U1, h2);
+    sweep!(double, 1, Color.black)(F, U1, h2);
     assert(U == U1);
 
 }
