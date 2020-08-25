@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
-# import logging
-from multipy.tools.heatmap import create_problem_2D
-from multipy.multigrid import poisson_multigrid
-from multipy.tools.util import str2bool, FLOPS
 import sys
 
-# logging.basicConfig(level=logging.INFO)
+from multipy.multigrid import poisson_multigrid
+from multipy.tools.heatmap import create_problem_2D
+from multipy.tools.util import FLOPS, str2bool
 
 
 def measure(N, numba=True):
