@@ -10,7 +10,7 @@ from multipy.tools.util import FLOPS, str2bool
 def measure(N, numba=True):
     U, F = create_problem_2D(N)
     poisson_multigrid(F, U, 0, 1, 1, 1, 10, numba=numba)
-    print(FLOPS)
+    #print(FLOPS)
 
 
 if __name__ == "__main__":

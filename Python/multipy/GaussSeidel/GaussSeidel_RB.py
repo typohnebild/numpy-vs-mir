@@ -4,7 +4,7 @@ import numpy as np
 from numba import jit
 
 from ..tools.apply_poisson import apply_poisson
-from ..tools.util import timer, counter
+from ..tools.util import timer
 
 logger = logging.getLogger('GS')
 logger.setLevel(logging.WARNING)
@@ -66,7 +66,6 @@ def GS_RB(
 
 
 # --- 1D Fall ---
-@counter
 @jit(nopython=True, fastmath=True)
 def sweep_1D(color, F, U, h2):
     """
@@ -83,7 +82,6 @@ def sweep_1D(color, F, U, h2):
         U[2:n - 1:2] = (U[1:n - 2:2] + U[3::2] - F[2:n - 1:2] * h2) / (2.0)
 
 
-@counter
 @jit(nopython=True, fastmath=True)
 def sweep_2D(color, F, U, h2):
     """
@@ -122,7 +120,6 @@ def sweep_2D(color, F, U, h2):
 
 
 # --- 3D Fall ---
-@counter
 @jit(nopython=True, fastmath=True)
 def sweep_3D(color, F, U, h):
     """
