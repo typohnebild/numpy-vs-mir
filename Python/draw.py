@@ -1,5 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+
+
+def plot_multiple(str_startswith):
+    for file in os.listdir("results"):
+        if file.startswith(str_startswith):
+            draw_flops(*read_file(f"results/{file}"))
+    plt.legend()
+    
 
 
 def read_file(filepath):
@@ -26,17 +35,34 @@ def read_file(filepath):
                 ret[1].append(sum([float(x.replace(',', '')) for x in flop]))
                 ret[2].append(float(time))
     # this assures that we have that sorted by N
-    return list(zip(*sorted(zip(*ret), key=lambda x: x[0]))), infos
+    return list(zip(*sorted(zip(*ret), key=lambda x: x[0]))), os.path.basename(filepath)
 
 
-def draw_flops(input_data):
-    flops = np.array(input_data[1]) / np.array(input_data[2])
-    plt.plot(input_data[0], flops)
+def draw_flops(input_data, str_legend):
+    print(str_legend)
+    sizes, flops_sec = avg_reduce(input_data)
+    #flops = np.array(input_data[1]) / np.array(input_data[2])
+    #plt.plot(input_data[0], flops)
+    plt.plot(sizes, flops_sec, label=str_legend)
     plt.ylabel("Flops")
     plt.xlabel("Problem size")
 
 
 def draw_time(input_data):
-    plt.plot(input_data[0], input_data[1])
+    #plt.plot(input_data[0], input_data[1])
+    plt.scatter(input_data[0], input_data[1])
     plt.ylabel("Time in s")
     plt.xlabel("Problem size")
+
+
+def avg_reduce(input_data):
+    dict = {}
+    for n, flops, time  in zip(*input_data):
+        if not n in dict:
+            dict[n]=[]
+        dict[n].append(flops/time)
+    sizes, flops_sec = [],[]
+    for key, value in dict.items():
+        sizes.append(key)
+        flops_sec.append(sum(value)/len(value))
+    return sizes, flops_sec

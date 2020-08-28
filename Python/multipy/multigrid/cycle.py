@@ -68,6 +68,7 @@ class AbstractCycle:
         r = self._compute_residual(F=F, U=U, h=2 * h)
 
         r = weighted_restriction(r)
+        #r = restriction(r)
 
         e = self._compute_correction(r, l - 1, 2 * h)
 
