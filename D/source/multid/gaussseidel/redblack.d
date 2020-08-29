@@ -69,47 +69,36 @@ void sweep(T, size_t Dim : 2, Color color)(const Slice!(T*, 2) F, Slice!(T*, 2) 
     const auto n = F.shape[1];
     static if (color == Color.red)
     {
-        U[1 .. m - 1, 2 .. n - 1].strided!(0, 1)(2, 2).flattened[] = (U[0 .. m - 2,
-                2 .. n - 1].strided!(0, 1)(2, 2).flattened + U[2 .. m,
-                2 .. n - 1].strided!(0, 1)(2, 2).flattened + U[1 .. m - 1,
-                1 .. n - 2].strided!(0, 1)(2, 2).flattened + U[1 .. m - 1,
-                3 .. n].strided!(0, 1)(2, 2).flattened - F[1 .. m - 1,
-                2 .. n - 1].strided!(0, 1)(2, 2).flattened * h2) / 4.0;
+        U[1 .. m - 1, 1 .. n - 1].strided!(0, 1)(2, 2)[] = U[0 .. m - 2, 1 .. n - 1].strided!(0, 1)(2, 2) / 4.0;
+        U[1 .. m - 1, 1 .. n - 1].strided!(0, 1)(2, 2)[] += U[2 .. m, 1 .. n - 1].strided!(0, 1)(2, 2) / 4.0;
+        U[1 .. m - 1, 1 .. n - 1].strided!(0, 1)(2, 2)[] += U[1 .. m - 1, 0 .. n - 2].strided!(0, 1)(2, 2) / 4.0;
+        U[1 .. m - 1, 1 .. n - 1].strided!(0, 1)(2, 2)[] += U[1 .. m - 1, 2 .. n].strided!(0, 1)(2, 2) / 4.0;
+        U[1 .. m - 1, 1 .. n - 1].strided!(0, 1)(2, 2)[] -= F[1 .. m - 1, 1 .. n - 1].strided!(0, 1)(2, 2) * h2 / 4.0;
 
-        U[2 .. m - 1, 1 .. n - 1].strided!(0, 1)(2, 2).flattened[] = (U[1 .. m - 2,
-                1 .. n - 1].strided!(0, 1)(2, 2).flattened + U[3 .. m,
-                1 .. n - 1].strided!(0, 1)(2, 2).flattened + U[2 .. m - 1,
-                0 .. n - 2].strided!(0, 1)(2, 2).flattened + U[2 .. m - 1,
-                2 .. n].strided!(0, 1)(2, 2).flattened - F[2 .. m - 1,
-                1 .. n - 1].strided!(0, 1)(2, 2).flattened * h2) / 4.0;
+        U[2 .. m - 1, 2 .. n - 1].strided!(0, 1)(2, 2)[] = U[1 .. m - 2, 2 .. n - 1].strided!(0, 1)(2, 2) / 4.0;
+        U[2 .. m - 1, 2 .. n - 1].strided!(0, 1)(2, 2)[] += U[3 .. m, 2 .. n - 1].strided!(0, 1)(2, 2) / 4.0;
+        U[2 .. m - 1, 2 .. n - 1].strided!(0, 1)(2, 2)[] += U[2 .. m - 1, 1 .. n - 2].strided!(0, 1)(2, 2) / 4.0;
+        U[2 .. m - 1, 2 .. n - 1].strided!(0, 1)(2, 2)[] += U[2 .. m - 1, 3 .. n].strided!(0, 1)(2, 2) / 4.0;
+        U[2 .. m - 1, 2 .. n - 1].strided!(0, 1)(2, 2)[] -= F[2 .. m - 1, 2 .. n - 1].strided!(0, 1)(2, 2) * h2 / 4.0;
     }
     else static if (color == Color.black)
     {
-        U[1 .. m - 1, 1 .. n - 1].strided!(0, 1)(2, 2).flattened[] = (U[0 .. m - 2,
-                1 .. n - 1].strided!(0, 1)(2, 2).flattened + U[2 .. m,
-                1 .. n - 1].strided!(0, 1)(2, 2).flattened + U[1 .. m - 1,
-                0 .. n - 2].strided!(0, 1)(2, 2).flattened + U[1 .. m - 1,
-                2 .. n].strided!(0, 1)(2, 2).flattened - F[1 .. m - 1,
-                1 .. n - 1].strided!(0, 1)(2, 2).flattened * h2) / 4.0;
+        U[1 .. m - 1, 2 .. n - 1].strided!(0, 1)(2, 2)[] = U[0 .. m - 2, 2 .. n - 1].strided!(0, 1)(2, 2) / 4.0;
+        U[1 .. m - 1, 2 .. n - 1].strided!(0, 1)(2, 2)[] += U[2 .. m, 2 .. n - 1].strided!(0, 1)(2, 2) / 4.0;
+        U[1 .. m - 1, 2 .. n - 1].strided!(0, 1)(2, 2)[] += U[1 .. m - 1, 1 .. n - 2].strided!(0, 1)(2, 2) / 4.0;
+        U[1 .. m - 1, 2 .. n - 1].strided!(0, 1)(2, 2)[] += U[1 .. m - 1, 3 .. n].strided!(0, 1)(2, 2) / 4.0;
+        U[1 .. m - 1, 2 .. n - 1].strided!(0, 1)(2, 2)[] -= F[1 .. m - 1, 2 .. n - 1].strided!(0, 1)(2, 2) * h2 / 4.0;
 
-        U[2 .. m - 1, 2 .. n - 1].strided!(0, 1)(2, 2).flattened[] = (U[1 .. m - 2,
-                2 .. n - 1].strided!(0, 1)(2, 2).flattened + U[3 .. m,
-                2 .. n - 1].strided!(0, 1)(2, 2).flattened + U[2 .. m - 1,
-                1 .. n - 2].strided!(0, 1)(2, 2).flattened + U[2 .. m - 1,
-                3 .. n].strided!(0, 1)(2, 2).flattened - F[2 .. m - 1,
-                2 .. n - 1].strided!(0, 1)(2, 2).flattened * h2) / 4.0;
+        U[2 .. m - 1, 1 .. n - 1].strided!(0, 1)(2, 2)[] = U[1 .. m - 2, 1 .. n - 1].strided!(0, 1)(2, 2) / 4.0;
+        U[2 .. m - 1, 1 .. n - 1].strided!(0, 1)(2, 2)[] += U[3 .. m, 1 .. n - 1].strided!(0, 1)(2, 2) / 4.0;
+        U[2 .. m - 1, 1 .. n - 1].strided!(0, 1)(2, 2)[] += U[2 .. m - 1, 0 .. n - 2].strided!(0, 1)(2, 2) / 4.0;
+        U[2 .. m - 1, 1 .. n - 1].strided!(0, 1)(2, 2)[] += U[2 .. m - 1, 2 .. n].strided!(0, 1)(2, 2) / 4.0;
+        U[2 .. m - 1, 1 .. n - 1].strided!(0, 1)(2, 2)[] -= F[2 .. m - 1, 1 .. n - 1].strided!(0, 1)(2, 2) * h2 / 4.0;
     }
-
-    // foreach (i; 1 .. m - 1)
-    // {
-    //     foreach (j; 1 .. n - 1)
-    //     {
-    //         if ((i + j) % 2 == color)
-    //         {
-    //             U[i, j] = (U[i - 1, j] + U[i + 1, j] + U[i, j - 1] + U[i, j + 1] - h2 * F[i, j]) / 4.0;
-    //         }
-    //     }
-    // }
+    else
+    {
+        static assert(false, color.stringof ~ "invalid color");
+    }
 }
 
 /++
@@ -215,6 +204,49 @@ unittest
         U[i] = (U[i - 1u] + U[i + 1u] - F[i] * h2) / 2.0;
     }
     sweep!(double, 1, Color.black)(F, U1, h2);
+    assert(U == U1);
+
+}
+
+unittest
+{
+    import std.range : generate;
+    import std.random : uniform;
+    import std.algorithm : fill;
+
+    const size_t N = 10;
+    auto U = slice!double([N, N], 1.0);
+    U.field.fill(generate!(() => uniform(0.0, 1.0)));
+    auto U1 = U.dup;
+    const auto F = slice!double([N, N], 1.0);
+    const double h2 = 1.0;
+
+    foreach (i; 1 .. N - 1)
+    {
+        foreach (j; 1 .. N - 1)
+        {
+            if ((i + j) % 2 == Color.red)
+            {
+                U[i, j] = (U[i - 1, j] + U[i + 1, j] + U[i, j - 1] + U[i, j + 1] - h2 * F[i, j]) / 4.0;
+            }
+        }
+    }
+
+    sweep!(double, 2, Color.red)(F, U1, h2);
+    assert(U == U1);
+
+    foreach (i; 1 .. N - 1)
+    {
+        foreach (j; 1 .. N - 1)
+        {
+            if ((i + j) % 2 == Color.black)
+            {
+                U[i, j] = (U[i - 1, j] + U[i + 1, j] + U[i, j - 1] + U[i, j + 1] - h2 * F[i, j]) / 4.0;
+            }
+        }
+    }
+
+    sweep!(double, 2, Color.black)(F, U1, h2);
     assert(U == U1);
 
 }
