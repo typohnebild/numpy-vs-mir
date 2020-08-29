@@ -1,0 +1,31 @@
+############ INFOS
+Sat 29 Aug 2020 07:13:28 AM CEST
+Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz
+numpy version: 1.19.1
+blas_mkl_info:
+  NOT AVAILABLE
+blis_info:
+  NOT AVAILABLE
+openblas_info:
+    libraries = ['openblas', 'openblas']
+    library_dirs = ['/usr/local/lib']
+    language = c
+    define_macros = [('HAVE_CBLAS', None)]
+blas_opt_info:
+    libraries = ['openblas', 'openblas']
+    library_dirs = ['/usr/local/lib']
+    language = c
+    define_macros = [('HAVE_CBLAS', None)]
+lapack_mkl_info:
+  NOT AVAILABLE
+openblas_lapack_info:
+    libraries = ['openblas', 'openblas']
+    library_dirs = ['/usr/local/lib']
+    language = c
+    define_macros = [('HAVE_CBLAS', None)]
+lapack_opt_info:
+    libraries = ['openblas', 'openblas']
+    library_dirs = ['/usr/local/lib']
+    language = c
+    define_macros = [('HAVE_CBLAS', None)]
+############ END INFOS
