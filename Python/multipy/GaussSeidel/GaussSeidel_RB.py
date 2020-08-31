@@ -58,9 +58,9 @@ def GS_RB(
                 break
 
         # rote Halbiteration
-        sweep(0, F, U, h2)
-        # schwarze Halbiteration
         sweep(1, F, U, h2)
+        # schwarze Halbiteration
+        sweep(0, F, U, h2)
 
     return U
 
