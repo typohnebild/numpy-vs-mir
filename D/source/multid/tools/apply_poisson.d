@@ -99,7 +99,7 @@ unittest
         x[i] = (-2.0 * U[i] + U[i - 1] + U[i + 1]) / (h * h);
     }
 
-    auto x1 = apply_poisson!(double, 1)(U, h);
+    const auto x1 = apply_poisson!(double, 1)(U, h);
     assert(x == x1);
 }
 
@@ -129,7 +129,7 @@ unittest
 
         }
     }
-    auto x1 = apply_poisson!(double, 2)(U, h);
+    const auto x1 = apply_poisson!(double, 2)(U, h);
     assert(x == x1);
 }
 
@@ -162,6 +162,6 @@ unittest
         }
     }
 
-    auto x1 = apply_poisson!(double, 3)(U, h);
+    const auto x1 = apply_poisson!(double, 3)(U, h);
     assert(x == x1);
 }
