@@ -40,7 +40,7 @@ def test_red_black_one_iter():
 
 def test_gauss_seidel_vs_linalg():
     eps = 1e-12
-    N = 30
+    N = 20
     max_iter = 1000
 
     # h = 1 / N
@@ -61,7 +61,7 @@ def test_gauss_seidel_vs_linalg():
 
 def test_gauss_seidel_vs_F():
     eps = 1e-12
-    N = 30
+    N = 20
     max_iter = 10000
 
     # h = 1 / N
@@ -81,7 +81,7 @@ def test_gauss_seidel_vs_F():
 
 def test_red_black_vs_linalg():
     eps = 1e-12
-    N = 30
+    N = 20
     max_iter = 1000
 
     h = 1 / N
@@ -98,7 +98,7 @@ def test_red_black_vs_linalg():
         grid.copy(),
         h=h,
         eps=eps,
-        max_iter=max_iter,numba=False)[
+        max_iter=max_iter, numba=False)[
         1:-1,
         1:-1].flatten()
 
@@ -107,7 +107,7 @@ def test_red_black_vs_linalg():
 
 def test_red_black_vs_F():
     eps = 1e-12
-    N = 30
+    N = 20
     max_iter = 1000
 
     h = 1 / N
@@ -132,7 +132,7 @@ def test_red_black_vs_F():
 
 def test_red_black_against_gauss_seidel():
     eps = 1e-12
-    N = 30
+    N = 20
     max_iter = 1000
 
     h = 1. / N
