@@ -77,10 +77,12 @@ void sweep(T, size_t Dim : 2, Color color)(in Slice!(T*, 2) F, Slice!(T*, 2) U, 
     {
         for (size_t j = 1 + (i + 1 + color) % 2; j < n - 1; j += 2)
         {
-            auto flattindex = i * m + j;
-            UF[flattindex] = (
-                    UF[flattindex - m] + UF[flattindex + m] + UF[flattindex -
-                    1] + UF[flattindex + 1] - h2 * FF[flattindex]) / 4.0;
+            auto flatindex = i * m + j;
+            UF[flatindex] = (
+                    UF[flatindex - m] +
+                    UF[flatindex + m] +
+                    UF[flatindex - 1] +
+                    UF[flatindex + 1] - h2 * FF[flatindex]) / 4.0;
         }
     }
 }
@@ -99,14 +101,17 @@ void sweep(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 3) U, 
     {
         foreach (j; 1 .. n - 1)
         {
-            immutable auto flattindex2d = i * (n * l) + j * l;
+            const auto flatindex2d = i * (n * l) + j * l;
             for (size_t k = 1u + (i + j + 1 + color) % 2; k < l - 1u; k += 2)
             {
-                immutable auto flattindex = flattindex2d + k;
-                UF[flattindex] = (
-                        UF[flattindex - n * l] + UF[flattindex + n * l] +
-                        UF[flattindex - l] + UF[flattindex + l] + UF[flattindex - 1] +
-                        UF[flattindex + 1] - h2 * FF[flattindex]) / 6.0;
+                const flatindex = flatindex2d + k;
+                UF[flatindex] = (
+                        UF[flatindex - n * l] +
+                        UF[flatindex + n * l] +
+                        UF[flatindex - l] +
+                        UF[flatindex + l] +
+                        UF[flatindex - 1] +
+                        UF[flatindex + 1] - h2 * FF[flatindex]) / 6.0;
 
             }
         }
