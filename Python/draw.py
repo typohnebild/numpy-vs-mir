@@ -3,12 +3,22 @@ import numpy as np
 import os
 
 
-def plot_multiple(str_startswith):
+def plot_multiple_flops(str_startswith):
     for file in os.listdir("results"):
         if file.startswith(str_startswith):
             draw_flops(*read_file(f"results/{file}"))
     plt.legend()
-    
+    plt.minorticks_on()
+    plt.grid(color='b', linestyle='-', linewidth=0.2, alpha=0.5)
+
+
+def plot_multiple_times(str_startswith):
+    for file in os.listdir("results"):
+        if file.startswith(str_startswith):
+            draw_time(*read_file(f"results/{file}"))
+    plt.legend()
+    plt.minorticks_on()
+    plt.grid(color='b', linestyle='-', linewidth=0.2, alpha=0.5)
 
 
 def read_file(filepath):
@@ -40,17 +50,16 @@ def read_file(filepath):
 
 def draw_flops(input_data, str_legend):
     print(str_legend)
-    sizes, flops_sec = avg_reduce(input_data)
-    #flops = np.array(input_data[1]) / np.array(input_data[2])
-    #plt.plot(input_data[0], flops)
+    sizes, flops_sec, _ = avg_reduce(input_data)
     plt.plot(sizes, flops_sec, label=str_legend)
     plt.ylabel("Flops")
     plt.xlabel("Problem size")
 
 
-def draw_time(input_data):
-    #plt.plot(input_data[0], input_data[1])
-    plt.scatter(input_data[0], input_data[1])
+def draw_time(input_data, str_legend):
+    print(str_legend)
+    sizes, _, sec = avg_reduce(input_data)
+    plt.plot(sizes, sec, label=str_legend)
     plt.ylabel("Time in s")
     plt.xlabel("Problem size")
 
@@ -60,9 +69,10 @@ def avg_reduce(input_data):
     for n, flops, time  in zip(*input_data):
         if not n in dict:
             dict[n]=[]
-        dict[n].append(flops/time)
-    sizes, flops_sec = [],[]
+        dict[n].append((flops, time))
+    sizes, flops_sec, sec = [],[],[]
     for key, value in dict.items():
         sizes.append(key)
-        flops_sec.append(sum(value)/len(value))
-    return sizes, flops_sec
+        flops_sec.append(sum([flop/time for flop, time in value])/len(value))
+        sec.append(sum([time for _, time in value])/len(value))
+    return sizes, flops_sec, sec
