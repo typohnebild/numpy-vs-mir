@@ -3,6 +3,15 @@ import numpy as np
 import os
 
 
+def plot_multiple_flops_sec(str_startswith):
+    for file in os.listdir("results"):
+        if file.startswith(str_startswith):
+            draw_flops_sec(*read_file(f"results/{file}"))
+    plt.legend()
+    plt.minorticks_on()
+    plt.grid(color='b', linestyle='-', linewidth=0.2, alpha=0.5)
+
+
 def plot_multiple_flops(str_startswith):
     for file in os.listdir("results"):
         if file.startswith(str_startswith):
@@ -48,17 +57,25 @@ def read_file(filepath):
     return list(zip(*sorted(zip(*ret), key=lambda x: x[0]))), os.path.basename(filepath)
 
 
+def draw_flops_sec(input_data, str_legend):
+    print(str_legend)
+    sizes, flops_sec, _, _ = avg_reduce(input_data)
+    plt.plot(sizes, flops_sec, label=str_legend)
+    plt.ylabel("Flops/sec")
+    plt.xlabel("Problem size")
+
+
 def draw_flops(input_data, str_legend):
     print(str_legend)
-    sizes, flops_sec, _ = avg_reduce(input_data)
-    plt.plot(sizes, flops_sec, label=str_legend)
+    sizes, _, _, flops = avg_reduce(input_data)
+    plt.plot(sizes, flops, label=str_legend)
     plt.ylabel("Flops")
     plt.xlabel("Problem size")
 
 
 def draw_time(input_data, str_legend):
     print(str_legend)
-    sizes, _, sec = avg_reduce(input_data)
+    sizes, _, sec, _ = avg_reduce(input_data)
     plt.plot(sizes, sec, label=str_legend)
     plt.ylabel("Time in s")
     plt.xlabel("Problem size")
@@ -70,9 +87,10 @@ def avg_reduce(input_data):
         if not n in dict:
             dict[n]=[]
         dict[n].append((flops, time))
-    sizes, flops_sec, sec = [],[],[]
+    sizes, flops_sec, sec, flops = [],[],[], []
     for key, value in dict.items():
         sizes.append(key)
         flops_sec.append(sum([flop/time for flop, time in value])/len(value))
         sec.append(sum([time for _, time in value])/len(value))
-    return sizes, flops_sec, sec
+        flops.append(sum([flops for flops, _ in value])/len(value))
+    return sizes, flops_sec, sec, flops
