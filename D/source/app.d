@@ -9,6 +9,7 @@ import std.datetime.stopwatch : StopWatch;
 import std.conv : to;
 
 import multid.gaussseidel.redblack;
+import multid.multigrid.restriction;
 
 /++
 This performs a GS_RB run for 3D
