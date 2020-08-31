@@ -7,7 +7,6 @@ import mir.ndslice : slice, sliced, Slice, strided;
 import std.traits : isFloatingPoint;
 
 import std.stdio : writeln;
-import pretty_array;
 
 /++
     red is for even indicies
@@ -53,25 +52,39 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000,
 /++
 This is a sweep implementation for 1D
 +/
-void sweep(T, size_t Dim : 1, Color color)(const Slice!(T*, 1) F, Slice!(T*, 1) U, T h2)
+void sweep(T, size_t Dim : 1, Color color)(in Slice!(T*, 1) F, Slice!(T*, 1) U, T h2)
 {
-    U[1 + color .. $ - 1].strided!0(2)[] = (
-            U[0 + color .. $ - 2].strided!0(2) + U[2 + color .. $].strided!0(
-            2) - h2 * F[1 + color .. $ - 1].strided!0(2)) / 2.0;
+    const auto N = F.shape[0];
+    auto UF = U.field;
+    auto FF = F.field;
+    for (size_t i = 1u + color; i < N - 1u; i += 2u)
+    {
+        UF[i] = (UF[i - 1u] + UF[i + 1u] - FF[i] * h2) / 2.0;
+    }
+    // U[1 + color .. $ - 1].strided!0(2)[] = (
+    //         U[0 + color .. $ - 2].strided!0(2) + U[2 + color .. $].strided!0(
+    //         2) - h2 * F[1 + color .. $ - 1].strided!0(2)) / 2.0;
 }
 
 /++
 This is a sweep implementation for 2D
 +/
-void sweep(T, size_t Dim : 2, Color color)(const Slice!(T*, 2) F, Slice!(T*, 2) U, T h2)
+void sweep(T, size_t Dim : 2, Color color)(in Slice!(T*, 2) F, Slice!(T*, 2) U, T h2)
 {
     const auto m = F.shape[0];
     const auto n = F.shape[1];
+    auto UF = U.field;
+    auto FF = F.field;
+
     foreach (i; 1 .. m - 1)
     {
         for (size_t j = 1 + (i + 1 + color) % 2; j < n - 1; j += 2)
         {
-            U[i, j] = (U[i - 1, j] + U[i + 1, j] + U[i, j - 1] + U[i, j + 1] - h2 * F[i, j]) / 4.0;
+            // U[i, j] = (U[i - 1, j] + U[i + 1, j] + U[i, j - 1] + U[i, j + 1] - h2 * F[i, j]) / 4.0;
+            auto flattindex = i * m + j;
+            UF[flattindex] = (
+                    UF[flattindex - m] + UF[flattindex + m] + UF[flattindex -
+                    1] + UF[flattindex + 1] - h2 * FF[flattindex]) / 4.0;
         }
     }
 
@@ -112,23 +125,26 @@ void sweep(T, size_t Dim : 2, Color color)(const Slice!(T*, 2) F, Slice!(T*, 2) 
 /++
 This is a sweep implementation for 3D
 +/
-void sweep(T, size_t Dim : 3, Color color)(const Slice!(T*, 3) F, Slice!(T*, 3) U, T h2)
+void sweep(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 3) U, T h2)
 {
-    const auto n = F.shape[0];
-    const auto m = F.shape[1];
-    const auto l = F.shape[1];
-    for (size_t i = 1u; i < n - 1u; i++)
+    const auto m = F.shape[0];
+    const auto n = F.shape[1];
+    const auto l = F.shape[2];
+    auto UF = U.field;
+    auto FF = F.field;
+    foreach (i; 1 .. m - 1)
     {
-        for (size_t j = 1u; j < m - 1u; j++)
+        foreach (j; 1 .. n - 1)
         {
-            for (size_t k = 1u; k < l - 1u; k++)
+            immutable auto flattindex2d = i * (n * l) + j * l;
+            for (size_t k = 1u + (i + j + 1 + color) % 2; k < l - 1u; k += 2)
             {
-                if ((i + j + k) % 2 == color)
-                {
-                    U[i, j, k] = (U[i - 1, j, k] + U[i + 1, j, k] + U[i, j - 1,
-                            k] + U[i, j + 1, k] + U[i, j, k - 1] + U[i, j, k + 1] - h2 * F[i, j, k]) / 6.0;
+                immutable auto flattindex = flattindex2d + k;
+                UF[flattindex] = (
+                        UF[flattindex - n * l] + UF[flattindex + n * l] +
+                        UF[flattindex - l] + UF[flattindex + l] + UF[flattindex - 1] +
+                        UF[flattindex + 1] - h2 * FF[flattindex]) / 6.0;
 
-                }
             }
         }
     }
@@ -255,6 +271,51 @@ unittest
     }
 
     sweep!(double, 2, Color.black)(F, U1, h2);
+    assert(U == U1);
+
+}
+
+unittest
+{
+    import std.range : generate;
+    import std.random : uniform;
+    import std.algorithm : fill;
+
+    const size_t N = 10;
+    auto U = slice!double([N, N, N], 1.0);
+    U.field.fill(generate!(() => uniform(0.0, 1.0)));
+    auto U1 = U.dup;
+    const auto F = slice!double([N, N, N], 1.0);
+    const double h2 = 1.0;
+
+    void sweep_naive(T, size_t Dim : 3, Color color)(const Slice!(T*, 3) F, Slice!(T*, 3) U, T h2)
+    {
+        const auto n = F.shape[0];
+        const auto m = F.shape[1];
+        const auto l = F.shape[2];
+        for (size_t i = 1u; i < n - 1u; i++)
+        {
+            for (size_t j = 1u; j < m - 1u; j++)
+            {
+                for (size_t k = 1u; k < l - 1u; k++)
+                {
+                    if ((i + j + k) % 2 == color)
+                    {
+                        U[i, j, k] = (U[i - 1, j, k] + U[i + 1, j, k] + U[i, j - 1,
+                                k] + U[i, j + 1, k] + U[i, j, k - 1] + U[i, j, k + 1] - h2 * F[i, j, k]) / 6.0;
+
+                    }
+                }
+            }
+        }
+    }
+
+    sweep_naive!(double, 3, Color.red)(F, U, h2);
+    sweep!(double, 3, Color.red)(F, U1, h2);
+    assert(U == U1);
+
+    sweep_naive!(double, 3, Color.black)(F, U, h2);
+    sweep!(double, 3, Color.black)(F, U1, h2);
     assert(U == U1);
 
 }
