@@ -129,6 +129,47 @@ def test_MG_weighted_restriction_1D():
     assert np.array_equal(mg.weighted_restriction(d), mg.restriction(d))
 
 
+def test_MG_weighted_restriction_2D():
+    def f(N): return np.arange(N * N).reshape(N, N)
+
+    c = f(5)
+    assert np.array_equal(mg.weighted_restriction(c), mg.restriction(c))
+    d = f(6)
+    assert np.array_equal(mg.weighted_restriction(d), mg.restriction(d))
+
+
+def test_MG_weighted_restriction_3D():
+    def f(N): return np.arange(N * N * N).reshape(N, N, N)
+    a = np.array([1.0, 2.0, 3.0, 2.0, 1.0,
+                  2.0, 3.0, 4.0, 3.0, 2.0,
+                  3.0, 4.0, 5.0, 4.0, 3.0,
+                  4.0, 5.0, 6.0, 5.0, 4.0,
+                  5.0, 6.0, 7.0, 6.0, 5.0]).reshape(5, 5)
+    ret1 = mg.weighted_restriction(a)
+    correct1 = np.array([[1.0, 3.0, 1.0],
+                         [3.0, 4.5, 3.0],
+                         [5.0, 7.0, 5.0]])
+    assert np.array_equal(ret1, correct1)
+
+    a2 = np.array([1.0, 2.0, 3.0, 3.0, 2.0, 1.0,
+                   2.0, 3.0, 4.0, 4.0, 3.0, 2.0,
+                   3.0, 4.0, 5.0, 5.0, 4.0, 3.0,
+                   4.0, 5.0, 6.0, 6.0, 5.0, 4.0,
+                   5.0, 6.0, 7.0, 7.0, 6.0, 5.0,
+                   6.0, 7.0, 8.0, 8.0, 7.0, 6.0]).reshape(6, 6)
+    ret2 = mg.weighted_restriction(a2)
+    correct2 = np.array([[1.0, 3.0, 2.0, 1.0],
+                         [3.0, 4.75, 4.0, 3.0],
+                         [5.0, 6.75, 6.0, 5.0],
+                         [6.0, 8.0, 7.0, 6.0]])
+    assert np.array_equal(ret2, correct2)
+
+    c = f(5)
+    assert np.array_equal(mg.weighted_restriction(c), mg.restriction(c))
+    d = f(6)
+    assert np.array_equal(mg.weighted_restriction(d), mg.restriction(d))
+
+
 def test_MultiGrid_VS_GS_RB():
     eps = 1e-3
     N = 20
