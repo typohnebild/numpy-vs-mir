@@ -2,13 +2,9 @@ import logging
 
 import numpy as np
 
-from ..GaussSeidel.GaussSeidel import gauss_seidel
-from ..GaussSeidel.GaussSeidel_RB import GS_RB
-from ..tools.apply_poisson import apply_poisson
-from ..tools.operators import poisson_operator_like
-from .cycle import PoissonCycle, GeneralCycle
+from .cycle import GeneralCycle, PoissonCycle
 from .prolongation import prolongation
-from .restriction import restriction
+from .restriction import restriction, weighted_restriction
 
 logger = logging.getLogger('MG')
 logger.setLevel(logging.DEBUG)
@@ -57,4 +53,3 @@ def general_multigrid(A, F, U, l, v1, v2, mu, iter_cycle):
     cycle = GeneralCycle(A, F, v1, v2, mu, l)
     eps = 1e-3
     return multigrid(cycle, U, eps, iter_cycle)
-
