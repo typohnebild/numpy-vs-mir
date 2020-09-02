@@ -19,7 +19,7 @@ class AbstractCycle:
         self.eps = 1e-30
         self.h = 1 / F.shape[0]
         if (self.l == 0):
-            self.l = int(np.log2(self.F.shape[0]))-1
+            self.l = int(np.log2(self.F.shape[0])) - 1
         # ceck if l is plausible
         if np.log2(self.F.shape[0]) < self.l:
             raise ValueError('false value of levels')
@@ -86,10 +86,22 @@ class PoissonCycle(AbstractCycle):
         super().__init__(F, v1, v2, mu, l)
 
     def _presmooth(self, F, U, h=None):
-        return GS_RB(F, U=U, h=h, max_iter=self.v1, eps=self.eps, numba=self.numba)
+        return GS_RB(
+            F,
+            U=U,
+            h=h,
+            max_iter=self.v1,
+            eps=self.eps,
+            numba=self.numba)
 
     def _postsmooth(self, F, U, h=None):
-        return GS_RB(F, U=U, h=h, max_iter=self.v2, eps=self.eps, numba=self.numba)
+        return GS_RB(
+            F,
+            U=U,
+            h=h,
+            max_iter=self.v2,
+            eps=self.eps,
+            numba=self.numba)
 
     def _compute_residual(self, F, U, h):
         return F - apply_poisson(U, h)
@@ -108,10 +120,11 @@ class GeneralCycle(AbstractCycle):
         self.curl = self.l
         # self.A is Array of As for each level
         self.A = [None] * self.l
-        # save As with respect to the corresponding level at index of that level
+        # save As with respect to the corresponding level at index of that
+        # level
         self.A[self.l - 1] = A
         for level in range(self.l - 1, 0, -1):
-            self.A[level-1] = weighted_restriction(self.A[level])
+            self.A[level - 1] = weighted_restriction(self.A[level])
 
     def _presmooth(self, F, U, h=None):
         return gauss_seidel(self.A[self.curl - 1], F, U, max_iter=self.v1)
@@ -133,3 +146,4 @@ class GeneralCycle(AbstractCycle):
     def do_cycle(self, F, U, l, h=None):
         self.curl = l
         return super().do_cycle(F, U, l, h)
+

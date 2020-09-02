@@ -1,15 +1,16 @@
 module multid.multigrid.prolongation;
 
 import mir.ndslice;
-import std.stdio : writeln;
-import pretty_array;
 
 /++
 This is the implementation of a prolongation
+    Params:
+        e = the grid that needs to be prolongated
+        fine_shape = the shape of the returned grid
+        returns the finer grid with interpolated values in between
 +/
-Slice!(T*, Dim) prolongation(T, size_t Dim)(Slice!(T*, Dim) e, size_t[Dim] fine_shape)
+Slice!(T*, Dim) prolongation(T, size_t Dim)(in Slice!(T*, Dim) e, in size_t[Dim] fine_shape)
 {
-    //TODO
     auto w = slice!T(fine_shape, 0);
     auto end = e.shape[0] - (fine_shape[0] + 1) % 2;
     auto wend = w.shape[0] - (fine_shape[0] + 1) % 2;
@@ -27,9 +28,6 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(Slice!(T*, Dim) e, size_t[Dim] fine_
     }
     else static if (Dim == 2)
     {
-        //TODO
-        // w[0 .. $, 0 .. $].strided!(0, 1)(2, 2)[] = e[0 .. $, 0 .. $];
-
         foreach (i; 0 .. end - 1)
         {
             auto flatindexw = 2 * i * w.shape[0];
@@ -38,14 +36,18 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(Slice!(T*, Dim) e, size_t[Dim] fine_
             auto flatindexe2 = (i + 1) * e.shape[0];
             foreach (j; 0 .. end - 1)
             {
+                // the value that is copied
                 WF[flatindexw + 2 * j] = EF[flatindexe + j];
+                // the value next a copied one
                 WF[flatindexw + 2 * (j + 1) - 1] = (EF[flatindexe + j] + EF[flatindexe + j + 1]) / 2;
+                // the value below a copied one
                 WF[flatindexw2 + 2 * j] = (EF[flatindexe2 + j] + EF[flatindexe + j]) / 2;
             }
             WF[flatindexw + 2 * (end - 1)] = EF[flatindexe + end - 1];
             WF[flatindexw2 + 2 * (end - 1)] = (EF[flatindexe2 + end - 1] +
                     EF[flatindexe + end - 1]) / 2;
         }
+        // this is for the last row and the last colomn
         auto flatindexw = 2 * (end - 1) * w.shape[0];
         auto flatindexe = (end - 1) * e.shape[0];
         foreach (j; 0 .. end - 1)
@@ -64,6 +66,9 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(Slice!(T*, Dim) e, size_t[Dim] fine_
                         w.shape[0]] + WF[flatindex - 1] + WF[flatindex + 1]) / 4;
             }
         }
+        // Since we restrict always to N//2 + 1 we need to handle the case if
+        // the finer grid is even sized, because that means between the last
+        // and the forelast is no new colomn that needs to be calculated
         if (fine_shape[0] % 2 != e.shape[0] % 2)
         {
             flatindexw = (w.shape[0] - 1) * w.shape[0];
@@ -88,6 +93,7 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(Slice!(T*, Dim) e, size_t[Dim] fine_
     else static if (Dim == 3)
     {
         //TODO
+        static assert(false, Dim.stringof ~ "not implementet yet");
     }
     else
     {
@@ -96,6 +102,7 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(Slice!(T*, Dim) e, size_t[Dim] fine_
     return w;
 }
 
+// Tests 1D
 unittest
 {
 
@@ -116,6 +123,7 @@ unittest
 
 }
 
+// Tests 2D
 unittest
 {
     auto arr = [0., 2., 4., 6., 8.,
@@ -133,4 +141,3 @@ unittest
     auto ret2 = prolongation!(double, 2)(arr2, correct2.shape);
     assert(ret2 == correct2);
 }
-
