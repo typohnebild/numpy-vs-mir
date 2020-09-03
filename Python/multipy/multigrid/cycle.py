@@ -47,6 +47,10 @@ class AbstractCycle:
     def norm(self, U):
         pass
 
+    @abstractmethod
+    def restriction(self, r):
+        pass
+
     def _residual(self, U):
         return self._compute_residual(self.F, U, self.h)
 
@@ -67,8 +71,7 @@ class AbstractCycle:
 
         r = self._compute_residual(F=F, U=U, h=2 * h)
 
-        r = weighted_restriction(r)
-        #r = restriction(r)
+        r = self.restriction(r)
 
         e = self._compute_correction(r, l - 1, 2 * h)
 
@@ -113,6 +116,9 @@ class PoissonCycle(AbstractCycle):
         residual = self._residual(U)
         return np.linalg.norm(residual[1:-1, 1:-1])
 
+    def restriction(self, r):
+        return weighted_restriction(r)
+
 
 class GeneralCycle(AbstractCycle):
     def __init__(self, A, F, v1, v2, mu, l):
@@ -143,7 +149,9 @@ class GeneralCycle(AbstractCycle):
         residual = self._residual(U)
         return np.linalg.norm(residual)
 
+    def restriction(self, r):
+        return weighted_restriction(r)
+
     def do_cycle(self, F, U, l, h=None):
         self.curl = l
         return super().do_cycle(F, U, l, h)
-
