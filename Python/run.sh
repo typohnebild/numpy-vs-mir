@@ -38,24 +38,24 @@ do
         then
             for _ in $(seq "$iter")
             do
-    	    for _ in $(seq 5)
-    	    do
-                x=$(perf stat -M GFLOPS ./measure.py $N "$numba" 2>&1 | grep -i 'fp\|elapsed' | awk '{ print $1}' | tr '\n' ':')
-    		    EXTENSION=$([ $numba = "True" ] && echo "numba" || echo "nonumba")
-                printf "%b:%b\\n" "$N" "$x" >> "${OUTFILE}_${threads}_${EXTENSION}"
-    	    done
-    	    N=$((N + step))
+                for _ in $(seq 5)
+                do
+                    x=$(perf stat -M GFLOPS ./measure.py $N "$numba" 2>&1 | grep -i 'fp\|elapsed' | awk '{ print $1}' | tr '\n' ':')
+                    EXTENSION=$([ $numba = "True" ] && echo "numba" || echo "nonumba")
+                    printf "%b:%b\\n" "$N" "$x" >> "${OUTFILE}_${threads}_${EXTENSION}"
+                done
+                N=$((N + step))
             done
         else
             for _ in $(seq "$iter")
             do
-    	    for _ in $(seq 5)
-     	    do
-                x=$(/usr/bin/time -f %e ./measure.py $N "$numba" 2>&1)
-    		    EXTENSION=$([ $numba = "True" ] && echo "numba" || echo "nonumba")
-		printf "%b:%b\\n" "$N" "$x" >> "${OUTFILE}_${threads}_${EXTENSION}"
-    	    done
-    	    N=$((N + step))
+                for _ in $(seq 5)
+                do
+                    x=$(/usr/bin/time -f %e ./measure.py $N "$numba" 2>&1)
+                    EXTENSION=$([ $numba = "True" ] && echo "numba" || echo "nonumba")
+                    printf "%b:%b\\n" "$N" "$x" >> "${OUTFILE}_${threads}_${EXTENSION}"
+                done
+                N=$((N + step))
             done
         fi
     done

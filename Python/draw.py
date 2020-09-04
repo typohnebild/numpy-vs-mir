@@ -54,7 +54,8 @@ def read_file(filepath):
                 ret[1].append(sum([float(x.replace(',', '')) for x in flop]))
                 ret[2].append(float(time))
     # this assures that we have that sorted by N
-    return list(zip(*sorted(zip(*ret), key=lambda x: x[0]))), os.path.basename(filepath)
+    str_legend = " ".join(os.path.basename(filepath).split('_')[-3:])
+    return list(zip(*sorted(zip(*ret), key=lambda x: x[0]))), str_legend
 
 
 def draw_flops_sec(input_data, str_legend):
@@ -83,14 +84,15 @@ def draw_time(input_data, str_legend):
 
 def avg_reduce(input_data):
     dict = {}
-    for n, flops, time  in zip(*input_data):
-        if not n in dict:
-            dict[n]=[]
+    for n, flops, time in zip(*input_data):
+        if n not in dict:
+            dict[n] = []
         dict[n].append((flops, time))
-    sizes, flops_sec, sec, flops = [],[],[], []
+    sizes, flops_sec, sec, flops = [], [], [], []
     for key, value in dict.items():
         sizes.append(key)
-        flops_sec.append(sum([flop/time for flop, time in value])/len(value))
-        sec.append(sum([time for _, time in value])/len(value))
-        flops.append(sum([flops for flops, _ in value])/len(value))
+        flops_sec.append(
+            sum([flop / time for flop, time in value]) / len(value))
+        sec.append(sum([time for _, time in value]) / len(value))
+        flops.append(sum([flops for flops, _ in value]) / len(value))
     return sizes, flops_sec, sec, flops
