@@ -110,7 +110,13 @@ class PoissonCycle(AbstractCycle):
         return F - apply_poisson(U, h)
 
     def _solve(self, F, U, h):
-        return GS_RB(F=F, U=U, h=h, max_iter=5_000, eps=1e-3, numba=self.numba)
+        return GS_RB(
+            F=F,
+            U=U,
+            h=h,
+            max_iter=100_000,
+            eps=1e-3,
+            numba=self.numba)
 
     def norm(self, U):
         residual = self._residual(U)

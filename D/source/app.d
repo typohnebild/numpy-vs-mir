@@ -10,6 +10,7 @@ import std.conv : to;
 
 import multid.gaussseidel.redblack;
 import multid.multigrid.restriction;
+import multid.multigrid.cycle;
 
 /++
 This performs a GS_RB run for 3D
@@ -42,7 +43,7 @@ This performs a GS_RB run for 2D
 void test2D()
 {
 
-    immutable size_t N = 100;
+    immutable size_t N = 200;
     auto U = slice!double(N, N);
     auto fun = generate!(() => uniform(0.0, 1.0));
     U.field.fill(fun);
@@ -85,7 +86,7 @@ void main()
     StopWatch sw;
     sw.reset;
     sw.start;
-    test3D();
+    test2D();
 
     sw.stop;
     writeln((sw.peek
