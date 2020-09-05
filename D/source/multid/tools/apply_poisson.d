@@ -12,12 +12,14 @@ import mir.ndslice;
 +/
 Slice!(T*, Dim) apply_poisson(T, size_t Dim)(Slice!(T*, Dim) U, T h)
 {
-    auto x = U.dup;
+    auto x = slice!(T)(U.shape, 0);
     const T h2 = h * h;
     auto UF = U.field;
 
     static if (Dim == 1)
     {
+        x.field[0] = UF[0];
+        x.field[$-1] = UF[$-1];
         foreach (i; 1 .. U.shape[0] - 1)
         {
             x.field[i] = (-2.0 * UF[i] + UF[i - 1] + UF[i + 1]) / h2;
@@ -28,6 +30,11 @@ Slice!(T*, Dim) apply_poisson(T, size_t Dim)(Slice!(T*, Dim) U, T h)
     {
         immutable m = U.shape[0];
         immutable n = U.shape[1];
+        x.field[0..m] = UF[0..m];
+        x.field[$-m..$] = UF[$-m..$];
+        x[1 .. $-1, 0] = U[1 .. $-1, 0];
+        x[1 .. $-1, $-1] = U[1 .. $-1, $-1];
+
         foreach (i; 1 .. m - 1)
         {
             foreach (j; 1 .. n - 1)
@@ -41,7 +48,6 @@ Slice!(T*, Dim) apply_poisson(T, size_t Dim)(Slice!(T*, Dim) U, T h)
                         UF[flatindex + 1]) / h2;
             }
         }
-
     }
     else static if (Dim == 3)
     {
@@ -49,6 +55,11 @@ Slice!(T*, Dim) apply_poisson(T, size_t Dim)(Slice!(T*, Dim) U, T h)
         const auto m = U.shape[0];
         const auto n = U.shape[1];
         const auto l = U.shape[2];
+
+        // x.field[0..m] = UF[0..m];
+        // x.field[$-m..$] = UF[$-m..$];
+        // x[1 .. $-1, 0] = U[1 .. $-1, 0];
+        // x[1 .. $-1, $-1] = U[1 .. $-1, $-1];
 
         for (size_t i = 1; i < m - 1; i++)
         {

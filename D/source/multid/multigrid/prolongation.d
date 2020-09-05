@@ -14,7 +14,7 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(in Slice!(T*, Dim) e, in size_t[Dim]
 {
     auto w = slice!T(fine_shape, 0);
     auto end = e.shape[0] - (fine_shape[0] + 1) % 2;
-    auto wend = w.shape[0] - (fine_shape[0] + 1) % 2;
+    const auto wend = w.shape[0] - (fine_shape[0] + 1) % 2;
     auto WF = w.field;
     auto EF = e.field;
 
@@ -109,17 +109,17 @@ unittest
 
     auto a = [0, 2, 4, 6, 8].sliced!long;
     auto correct = 9.iota.slice;
-    auto ret = prolongation!(long, 1)(a, correct.shape);
+    const auto ret = prolongation!(long, 1)(a, correct.shape);
     assert(ret == correct);
 
     auto a2 = [0, 2, 4, 6, 8, 9].sliced!long;
     auto correct2 = 10.iota.slice;
-    auto ret2 = prolongation!(long, 1)(a2, correct2.shape);
+    const auto ret2 = prolongation!(long, 1)(a2, correct2.shape);
     assert(ret2 == correct2);
 
     auto a3 = [0, 2, 4, 6, 7].sliced!long;
     auto correct3 = 8.iota.slice;
-    auto ret3 = prolongation!(long, 1)(a3, correct3.shape);
+    const auto ret3 = prolongation!(long, 1)(a3, correct3.shape);
     assert(ret3 == correct3);
 
 }
@@ -134,12 +134,12 @@ unittest
         72., 74., 76., 78., 80.].sliced(5, 5);
 
     auto correct = iota([9, 9]).slice;
-    auto ret = prolongation!(double, 2)(arr, correct.shape);
+    const auto ret = prolongation!(double, 2)(arr, correct.shape);
     assert(ret == correct);
     auto arr2 = [0., 2., 4., 6., 7., 16., 18., 20., 22., 23., 32., 34., 36.,
         38., 39., 48., 50., 52., 54., 55., 56., 58., 60., 62., 63.].sliced(5, 5);
     auto correct2 = iota([8, 8]).slice;
-    auto ret2 = prolongation!(double, 2)(arr2, correct2.shape);
+    const auto ret2 = prolongation!(double, 2)(arr2, correct2.shape);
     assert(ret2 == correct2);
 }
 

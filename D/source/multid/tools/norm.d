@@ -8,7 +8,18 @@ import mir.ndslice;
 +/
 auto nrmL2(V)(V v)
 {
-    return v.map!(x => x * x).sum.sqrt;
+    //return v.map!(x => x * x).sum.sqrt;
+    double s = 0.0;
+    // foreach(x; v.slice.field)
+    // {
+    //     s += x*x;
+    // }
+
+    foreach(x; v.flattened.field)
+    {
+        s+=x*x;
+    }
+    return s.sqrt;
 }
 
 unittest
