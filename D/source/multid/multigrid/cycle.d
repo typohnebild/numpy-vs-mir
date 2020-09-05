@@ -14,45 +14,44 @@ protected:
     Slice!(T*, Dim) F;
     T eps = 1e-30;
     T h;
-    /++ T*his changes with current level so we do not to pass this h argument everywhere +/
-    T current_h;
-    abstract Slice!(T*, Dim) presmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U);
-    abstract Slice!(T*, Dim) postsmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U);
-    abstract Slice!(T*, Dim) compute_residual(Slice!(T*, Dim) F, Slice!(T*, Dim) U);
-    abstract Slice!(T*, Dim) solve(Slice!(T*, Dim) F, Slice!(T*, Dim) U);
+
+    abstract Slice!(T*, Dim) presmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h);
+    abstract Slice!(T*, Dim) postsmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h);
+    abstract Slice!(T*, Dim) compute_residual(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h);
+    abstract Slice!(T*, Dim) solve(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h);
     abstract Slice!(T*, Dim) restriction(Slice!(T*, Dim) U);
 
-    Slice!(T*, Dim) compute_correction(Slice!(T*, Dim) r, uint l)
+    Slice!(T*, Dim) compute_correction(Slice!(T*, Dim) r, uint l, T current_h)
     {
         auto e = slice!T(r.shape, 0);
         foreach (_; 0 .. mu)
         {
-            e = do_cycle(r, e, l);
+            e = do_cycle(r, e, l, current_h);
+
         }
         return e;
     }
 
-    Slice!(T*, Dim) do_cycle(Slice!(T*, Dim) F, Slice!(T*, Dim) U, uint l)
+    Slice!(T*, Dim) do_cycle(Slice!(T*, Dim) F, Slice!(T*, Dim) U, uint l, T current_h)
     {
         if (l <= 0 || U.shape[0] <= 1)
         {
-            return solve(F, U);
+            return solve(F, U, current_h);
         }
 
-        U = presmooth(F, U);
+        U = presmooth(F, U, current_h);
 
-        auto r = compute_residual(F, U);
+        auto r = compute_residual(F, U, current_h * 2);
 
-        this.current_h *= 2.0;
-        r = restriction(U);
+        r = restriction(r);
 
-        auto e = compute_correction(r, l - 1);
+        auto e = compute_correction(r, l - 1, current_h * 2);
+
         e = prolongation!(T, Dim)(e, U.shape);
-        U[] = U + e;
 
-        this.current_h /= 2.0;
-        return postsmooth(F, U);
+        U[] = U[] + e[]; //ggf fields?
 
+        return postsmooth(F, U, current_h);
     }
 
 public:
@@ -61,11 +60,11 @@ public:
     +/
     this(Slice!(T*, Dim) F, uint mu, uint l, T h)
     {
-        enforce(l == 0 || log2(F.shape[0]) < l, "l is to big for F");
+        enforce(l == 0 || log2(F.shape[0]) > l, "l is to big for F");
         this.F = F;
         this.l = l;
         this.h = h ? h : 1.0 / F.shape[0];
-        this.current_h = this.h;
+        this.mu = mu;
         if (this.l == 0)
         {
             this.l = F.shape[0].log2.to!uint - 1;
@@ -77,7 +76,7 @@ public:
     +/
     Slice!(T*, Dim) residual(Slice!(T*, Dim) F, Slice!(T*, Dim) U)
     {
-        return compute_residual(F, U);
+        return compute_residual(F, U, this.h);
     }
 
     /++
@@ -85,7 +84,7 @@ public:
     +/
     Slice!(T*, Dim) cycle(Slice!(T*, Dim) U)
     {
-        return do_cycle(this.F, U, this.l);
+        return do_cycle(this.F, U, this.l, this.h);
     }
 
     /++ Computes the l2 norm of U and the inital F+/
@@ -97,30 +96,29 @@ class PoissonCycle(T, size_t Dim, uint v1, uint v2) : Cycle!(T, Dim)
     import multid.gaussseidel.redblack : GS_RB;
 
 protected:
-    override Slice!(T*, Dim) presmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U)
+    override Slice!(T*, Dim) presmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
 
-        return GS_RB!(T, Dim, v1)(F, U, this.current_h);
+        return GS_RB!(T, Dim, v1)(F, U, current_h);
     }
 
-    override Slice!(T*, Dim) postsmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U)
+    override Slice!(T*, Dim) postsmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
 
-        return GS_RB!(T, Dim, v2)(F, U, this.current_h);
+        return GS_RB!(T, Dim, v2)(F, U, current_h);
     }
 
-    override Slice!(T*, Dim) compute_residual(Slice!(T*, Dim) F, Slice!(T*, Dim) U)
+    override Slice!(T*, Dim) compute_residual(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
         import multid.tools.apply_poisson;
 
-        auto AU = apply_poisson!(T, Dim)(U, this.current_h);
+        auto AU = apply_poisson!(T, Dim)(U, current_h);
         return (F - AU).slice;
     }
 
-    override Slice!(T*, Dim) solve(Slice!(T*, Dim) F, Slice!(T*, Dim) U)
+    override Slice!(T*, Dim) solve(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
-        return GS_RB!(T, Dim)(F, U, this.current_h);
-
+        return GS_RB!(T, Dim)(F, U, current_h);
     }
 
     override Slice!(T*, Dim) restriction(Slice!(T*, Dim) U)

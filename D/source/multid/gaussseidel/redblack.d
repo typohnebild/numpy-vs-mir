@@ -22,20 +22,19 @@ enum Color
 This is a Gauss Seidel Red Black implementation for 1D
 +/
 Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000,
-        size_t norm_iter = 10_000, double eps = 1e-8)(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T h)
+        size_t norm_iter = 1_000, double eps = 1e-8)(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T h)
         if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 {
 
     const T h2 = h * h;
 
-    foreach (it; 0 .. max_iter)
+    foreach (it; 1 .. max_iter + 1)
     {
         if (it % norm_iter == 0)
         {
             const auto norm = residual_norm!(T, Dim)(F, U, h);
             if (norm <= eps)
             {
-                it.writeln;
                 break;
             }
 

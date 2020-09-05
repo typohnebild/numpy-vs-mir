@@ -1,6 +1,7 @@
 module multid.multigrid.prolongation;
 
 import mir.ndslice;
+import numir:approxEqual;
 
 /++
 This is the implementation of a prolongation
@@ -69,7 +70,7 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(in Slice!(T*, Dim) e, in size_t[Dim]
         // Since we restrict always to N//2 + 1 we need to handle the case if
         // the finer grid is even sized, because that means between the last
         // and the forelast is no new colomn that needs to be calculated
-        if (fine_shape[0] % 2 != e.shape[0] % 2)
+        if (fine_shape[0] % 2 == 0)// != e.shape[0] % 2)
         {
             flatindexw = (w.shape[0] - 1) * w.shape[0];
             flatindexe = (e.shape[0] - 1) * e.shape[0];
@@ -140,4 +141,72 @@ unittest
     auto correct2 = iota([8, 8]).slice;
     auto ret2 = prolongation!(double, 2)(arr2, correct2.shape);
     assert(ret2 == correct2);
+}
+
+
+unittest
+{
+    auto arr = [[0.70986027, 0.05107005, 0.36803441, 0.91042483],
+       [0.18354898, 0.5568611 , 0.94596048, 0.99127882],
+       [0.63025087, 0.33234683, 0.65401546, 0.98237209],
+       [0.66271802, 0.48028311, 0.79653074, 0.18756112]].fuse;
+    auto correct6 = [[0.70986027, 0.38046516, 0.05107005, 0.20955223, 0.36803441,
+        0.91042483],
+       [0.44670463, 0.3753351 , 0.30396557, 0.48048151, 0.65699745,
+        0.95085182],
+       [0.18354898, 0.37020504, 0.5568611 , 0.75141079, 0.94596048,
+        0.99127882],
+       [0.40689993, 0.42575195, 0.44460397, 0.62229597, 0.79998797,
+        0.98682545],
+       [0.63025087, 0.48129885, 0.33234683, 0.49318115, 0.65401546,
+        0.98237209],
+       [0.66271802, 0.57150057, 0.48028311, 0.63840692, 0.79653074,
+        0.18756112]].fuse;
+    auto correct7 = [[0.70986027, 0.38046516, 0.05107005, 0.20955223, 0.36803441,
+        0.63922962, 0.91042483],
+       [0.44670463, 0.3753351 , 0.30396557, 0.48048151, 0.65699745,
+        0.80392463, 0.95085182],
+       [0.18354898, 0.37020504, 0.5568611 , 0.75141079, 0.94596048,
+        0.96861965, 0.99127882],
+       [0.40689993, 0.42575195, 0.44460397, 0.62229597, 0.79998797,
+        0.89340671, 0.98682545],
+       [0.63025087, 0.48129885, 0.33234683, 0.49318115, 0.65401546,
+        0.81819377, 0.98237209],
+       [0.64648445, 0.52639971, 0.40631497, 0.56579404, 0.7252731 ,
+        0.65511985, 0.5849666 ],
+       [0.66271802, 0.57150057, 0.48028311, 0.63840692, 0.79653074,
+        0.49204593, 0.18756112]].fuse;
+    auto ret6 = prolongation!(double, 2)(arr, [6,6]);
+    auto ret7 = prolongation!(double, 2)(arr, [7,7]);
+
+    assert (approxEqual(ret6, correct6, 1e-2, 1e-8));
+    assert (approxEqual(ret7, correct7, 1e-2, 1e-8));
+}
+
+unittest
+{
+    import std.range : generate;
+    import std.random : uniform;
+    import std.algorithm: fill;
+
+    immutable size_t N = 4;
+    auto A = slice!double(N, N);
+    auto fun = generate!(() => uniform(0.0, 1.0));
+    A.field.fill(fun);
+
+    auto ret6 = prolongation!(double, 2)(A, [6,6]);
+    auto ret7 = prolongation!(double, 2)(A, [7,7]);
+
+
+    assert (ret6[0, 0..$].strided!(0)(2) == A[0, 0..$-1]);
+    assert (ret6[0..$, 0].strided!(0)(2) == A[0..$-1, 0]);
+    assert (ret6[$-2 .. $, 0..$].strided!(0,1)(1,2) == A[$-2..$, 0..$-1]);
+    assert (ret6[0..$, $-2..$].strided!(0)(2) == A[0..$-1, $-2..$]);
+    assert (ret6[$-2..$, $-2..$] == A[$-2..$, $-2..$]);
+
+
+    assert (ret7[0, 0..$].strided!(0)(2) == A[0, 0..$]);
+    assert (ret7[0..$, 0].strided!(0)(2) == A[0..$, 0]);
+    assert (ret7[$-1 .. $, 0..$].strided!(1)(2) == A[$-1..$, 0..$]);
+    assert (ret7[0..$, $-1..$].strided!(0)(2) == A[0..$, $-1..$]);
 }
