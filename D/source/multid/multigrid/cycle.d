@@ -6,7 +6,6 @@ import std.math : log2;
 import std.conv : to;
 import multid.multigrid.prolongation : prolongation;
 
-
 class Cycle(T, size_t Dim)
 {
 protected:
@@ -32,6 +31,14 @@ protected:
         return e;
     }
 
+    /++ adds the correction vector to the U +/
+    Slice!(T*, Dim) add_correction(Slice!(T*, Dim) U, Slice!(T*, Dim) e)
+    {
+
+        U.field[] += e.field[];
+        return U;
+    }
+
     Slice!(T*, Dim) do_cycle(Slice!(T*, Dim) F, Slice!(T*, Dim) U, uint l, T current_h)
     {
         if (l <= 0 || U.shape[0] <= 1)
@@ -48,8 +55,7 @@ protected:
         auto e = compute_correction(r, l - 1, current_h * 2);
 
         e = prolongation!(T, Dim)(e, U.shape);
-
-        U[] = U[] + e[]; //ggf fields?
+        U = add_correction(U, e);
 
         return postsmooth(F, U, current_h);
     }
@@ -145,7 +151,7 @@ public:
 
 unittest
 {
-    import std.range : generate ;
+    import std.range : generate;
     import std.random : uniform;
     import std.algorithm : fill, all;
 
