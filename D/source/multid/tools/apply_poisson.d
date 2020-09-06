@@ -10,9 +10,9 @@ import mir.ndslice;
         h = distance between grid points
     Returns: x = A*U
 +/
-Slice!(T*, Dim) apply_poisson(T, size_t Dim)(Slice!(T*, Dim) U, T h)
+Slice!(T*, Dim) apply_poisson(T, size_t Dim)(in Slice!(T*, Dim) U, in T h)
 {
-    auto x = slice!(T)(U.shape, 0);
+    auto x = slice!(T)(U.shape);
     const T h2 = h * h;
     auto UF = U.field;
 
@@ -30,6 +30,7 @@ Slice!(T*, Dim) apply_poisson(T, size_t Dim)(Slice!(T*, Dim) U, T h)
     {
         immutable m = U.shape[0];
         immutable n = U.shape[1];
+
         x.field[0 .. m] = UF[0 .. m];
         x.field[$ - m .. $] = UF[$ - m .. $];
 
@@ -96,6 +97,16 @@ Slice!(T*, Dim) apply_poisson(T, size_t Dim)(Slice!(T*, Dim) U, T h)
     return x;
 }
 
+/++
+    Computes F - AU were A is the poisson matrix
++/
+Slice!(T*, Dim) compute_residual(T, size_t Dim)(in Slice!(T*, Dim) F, in Slice!(T*, Dim) U, in T current_h)
+{
+    auto AU = apply_poisson!(T, Dim)(U, current_h);
+    AU.field[] = F.field[] - AU.field[];
+    return AU;
+}
+
 unittest
 {
     import std.range : generate;
@@ -124,8 +135,8 @@ unittest
     import std.random : uniform;
     import std.algorithm : fill;
 
-    const size_t N = 100;
-    immutable auto h = 1.0 / double(100);
+    const size_t N = 1000;
+    immutable auto h = 1.0 / double(N);
 
     auto U = slice!double([N, N], 1.0);
     U.field.fill(generate!(() => uniform(0.0, 1.0)));
@@ -178,5 +189,35 @@ unittest
 
     const auto x1 = apply_poisson!(double, 3)(U, h);
 
+    assert(x == x1);
+}
+
+unittest
+{
+
+    import std.range : generate;
+    import std.random : uniform;
+    import std.algorithm : fill;
+
+    const size_t N = 100;
+    immutable auto h = 1.0 / double(100);
+
+    auto U = slice!double([N, N], 1.0);
+    U.field.fill(generate!(() => uniform(0.0, 1.0)));
+
+    immutable m = U.shape[0];
+    immutable n = U.shape[1];
+    auto x = U.dup;
+
+    for (size_t i = 1; i < m - 1; i++)
+    {
+        for (size_t j = 1; j < n - 1; j++)
+        {
+            x[i, j] = (-4.0 * U[i, j] + U[i - 1, j] + U[i + 1, j] + U[i, j - 1]
+                    + U[i, j + 1]) / (h * h);
+
+        }
+    }
+    auto x1 = apply_poisson!(double, 2)(U, h);
     assert(x == x1);
 }
