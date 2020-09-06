@@ -19,7 +19,7 @@ Slice!(T*, Dim) apply_poisson(T, size_t Dim)(Slice!(T*, Dim) U, T h)
     static if (Dim == 1)
     {
         x.field[0] = UF[0];
-        x.field[$-1] = UF[$-1];
+        x.field[$ - 1] = UF[$ - 1];
         foreach (i; 1 .. U.shape[0] - 1)
         {
             x.field[i] = (-2.0 * UF[i] + UF[i - 1] + UF[i + 1]) / h2;
@@ -30,10 +30,11 @@ Slice!(T*, Dim) apply_poisson(T, size_t Dim)(Slice!(T*, Dim) U, T h)
     {
         immutable m = U.shape[0];
         immutable n = U.shape[1];
-        x.field[0..m] = UF[0..m];
-        x.field[$-m..$] = UF[$-m..$];
-        x[1 .. $-1, 0] = U[1 .. $-1, 0];
-        x[1 .. $-1, $-1] = U[1 .. $-1, $-1];
+        x.field[0 .. m] = UF[0 .. m];
+        x.field[$ - m .. $] = UF[$ - m .. $];
+
+        x[1 .. $ - 1, 0] = U[1 .. $ - 1, 0];
+        x[1 .. $ - 1, $ - 1] = U[1 .. $ - 1, $ - 1];
 
         foreach (i; 1 .. m - 1)
         {
@@ -56,16 +57,18 @@ Slice!(T*, Dim) apply_poisson(T, size_t Dim)(Slice!(T*, Dim) U, T h)
         const auto n = U.shape[1];
         const auto l = U.shape[2];
 
-        // x.field[0..m] = UF[0..m];
-        // x.field[$-m..$] = UF[$-m..$];
-        // x[1 .. $-1, 0] = U[1 .. $-1, 0];
-        // x[1 .. $-1, $-1] = U[1 .. $-1, $-1];
+        x[0 .. $, 0 .. $, 0] = U[0 .. $, 0 .. $, 0];
+        x[0 .. $, 0, 0 .. $] = U[0 .. $, 0, 0 .. $];
+        x[0, 0 .. $, 0 .. $] = U[0, 0 .. $, 0 .. $];
+
+        x[0 .. $, 0 .. $, $ - 1] = U[0 .. $, 0 .. $, $ - 1];
+        x[0 .. $, $ - 1, 0 .. $] = U[0 .. $, $ - 1, 0 .. $];
+        x[$ - 1, 0 .. $, 0 .. $] = U[$ - 1, 0 .. $, 0 .. $];
 
         for (size_t i = 1; i < m - 1; i++)
         {
             for (size_t j = 1; j < n - 1; j++)
             {
-
                 const auto flatindex2d = i * (n * l) + j * l;
                 for (size_t k = 1; k < l - 1; k++)
                 {
@@ -174,5 +177,6 @@ unittest
     }
 
     const auto x1 = apply_poisson!(double, 3)(U, h);
+
     assert(x == x1);
 }
