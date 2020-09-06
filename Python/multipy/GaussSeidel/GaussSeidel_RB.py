@@ -17,7 +17,7 @@ def GS_RB(
         h=None,
         max_iter=10_000_000,
         eps=1e-8,
-        norm_iter=10000,
+        norm_iter=1000,
         numba=True):
     """Implementation of Gauss Seidl Red Black iterations
        should solve AU = F
@@ -47,7 +47,7 @@ def GS_RB(
         raise ValueError("Wrong Shape!!!")
 
     # Anzahl an Gauss-Seidel-Iterationen ausfuehren
-    for it in range(max_iter):
+    for it in range(1, max_iter + 1):
         # check sometimes if solutions converges
         if it % norm_iter == 0:
             r = F - apply_poisson(U, h)
