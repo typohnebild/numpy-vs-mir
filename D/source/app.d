@@ -82,7 +82,6 @@ void test1D()
 
 }
 
-
 /++
 This performs multigrid for 2D
 +/
@@ -103,7 +102,7 @@ void testMG2D()
     F[$ - 1][1 .. $] = 0.0;
     F[1 .. $, $ - 1] = 0.0;
 
-    U = poisson_multigrid!(double, 2, 2, 2)(F, U, 0, 1, 100);
+    U = poisson_multigrid!(double, 2, 2, 2)(F, U, 0, 2, 100);
 
     //U.prettyArr.writeln;
 }

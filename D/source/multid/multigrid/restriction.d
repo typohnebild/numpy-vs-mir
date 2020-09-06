@@ -2,15 +2,15 @@ module multid.multigrid.restriction;
 
 import mir.ndslice : Slice, slice, sliced, strided, iota, as, fuse;
 import std.exception : enforce;
-import numir: approxEqual;
+import numir : approxEqual;
 
 /++
 This is the implementation of a restriction for 1D
 +/
-Slice!(T*, Dim) restriction(T, size_t Dim : 1)(Slice!(T*, Dim) A)
+Slice!(T*, Dim) restriction(T, size_t Dim : 1)(in Slice!(T*, Dim) A)
 {
     auto N = A.shape[0] / 2 + 1;
-    auto ret = slice!T([N], 0);
+    auto ret = slice!T([N]);
     const auto end = N - (A.shape[0] + 1) % 2;
     auto AF = A.field;
 
@@ -29,12 +29,12 @@ Slice!(T*, Dim) restriction(T, size_t Dim : 1)(Slice!(T*, Dim) A)
 This is the implementation of a restriction for 2D
 works only for square grids
 +/
-Slice!(T*, Dim) restriction(T, size_t Dim : 2)(Slice!(T*, Dim) A)
+Slice!(T*, Dim) restriction(T, size_t Dim : 2)(in Slice!(T*, Dim) A)
 {
     enforce(A.shape[0] == A.shape[1], "not all dimensions have the same length");
     const auto M = A.shape[0];
     const auto N = M / 2 + 1;
-    auto ret = slice!T([N, N], 0);
+    auto ret = slice!T([N, N]);
     const auto end = N - (A.shape[0] + 1) % 2;
     auto AF = A.field;
 
@@ -51,10 +51,10 @@ Slice!(T*, Dim) restriction(T, size_t Dim : 2)(Slice!(T*, Dim) A)
     // special case: borders
     // ret[0 .. end, $ - 1] = A[0 .. $, $ - 1].strided!(0)(2);
     // ret[$ - 1, 0 .. end] = A[$ - 1, 0 .. $].strided!(0)(2);
-    foreach (i; 0..end)
+    foreach (i; 0 .. end)
     {
-        auto indexrowR = (N-1)*N + i;
-        auto indexrowA = (M-1)*M + 2 * i;
+        auto indexrowR = (N - 1) * N + i;
+        auto indexrowA = (M - 1) * M + 2 * i;
         auto indexcolR = N * i + N - 1;
         auto indexcolA = M * 2 * i + M - 1;
         ret.field[indexrowR] = AF[indexrowA];
@@ -70,12 +70,12 @@ Slice!(T*, Dim) restriction(T, size_t Dim : 2)(Slice!(T*, Dim) A)
 This is the implementation of a restriction for 3D
 works only if all dimensions have the same length
 +/
-Slice!(T*, Dim) restriction(T, size_t Dim : 3)(Slice!(T*, Dim) A)
+Slice!(T*, Dim) restriction(T, size_t Dim : 3)(in Slice!(T*, Dim) A)
 {
     enforce(A.shape[0] == A.shape[1] && A.shape[1] == A.shape[2], "not all dimensions have the same length");
     const auto M = A.shape[0];
     const auto N = M / 2 + 1;
-    auto ret = slice!T([N, N, N], 0);
+    auto ret = slice!T([N, N, N]);
     const auto end = N - (A.shape[0] + 1) % 2;
     auto AF = A.field;
 
@@ -109,7 +109,7 @@ Slice!(T*, Dim) restriction(T, size_t Dim : 3)(Slice!(T*, Dim) A)
 /++
 This is the implementation of a weighted_restriction 1D
 +/
-Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 1)(Slice!(T*, Dim) A)
+Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 1)(in Slice!(T*, Dim) A)
 {
     const auto M = A.shape[0];
     const auto N = M / 2 + 1;
@@ -125,7 +125,7 @@ Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 1)(Slice!(T*, Dim) A)
 /++
 This is the implementation of a weighted_restriction 2D
 +/
-Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 2)(Slice!(T*, Dim) A)
+Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 2)(in Slice!(T*, Dim) A)
 {
     enforce(A.shape[0] == A.shape[1], "not all dimensions have the same length");
     const auto M = A.shape[0];
@@ -154,7 +154,7 @@ Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 2)(Slice!(T*, Dim) A)
 /++
 This is the implementation of a weighted_restriction 3D
 +/
-Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 3)(Slice!(T*, Dim) A)
+Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 3)(in Slice!(T*, Dim) A)
 {
     enforce(A.shape[0] == A.shape[1] && A.shape[1] == A.shape[2], "not all dimensions have the same length");
     const auto M = A.shape[0];
@@ -374,56 +374,56 @@ unittest
     assert(ret == correct);
 }
 
-
 unittest
 {
     auto arr = [0.40088473, 0.89582552, 0.16398608, 0.45921818, 0.50720246,
         0.05841615, 0.71127485,
-       0.29420544, 0.55262016, 0.45112843, 0.63388048, 0.27870701,
+        0.29420544, 0.55262016, 0.45112843, 0.63388048, 0.27870701,
         0.43475406, 0.66402547,
-       0.9038084 , 0.16260612, 0.61827658, 0.17583573, 0.26752605,
+        0.9038084, 0.16260612, 0.61827658, 0.17583573, 0.26752605,
         0.54132342, 0.95954425,
-       0.21255126, 0.63423338, 0.48119557, 0.42348304, 0.66583851,
+        0.21255126, 0.63423338, 0.48119557, 0.42348304, 0.66583851,
         0.80677271, 0.76529026,
-       0.30096364, 0.36264674, 0.23783031, 0.21284939, 0.12336692,
+        0.30096364, 0.36264674, 0.23783031, 0.21284939, 0.12336692,
         0.74549574, 0.47731472,
-       0.47082754, 0.36148885, 0.24760767, 0.968772  , 0.41319792,
+        0.47082754, 0.36148885, 0.24760767, 0.968772, 0.41319792,
         0.44027865, 0.65545125,
-       0.98000574, 0.78919914, 0.49313159, 0.85537712, 0.44181032,
-        0.4994793 , 0.97419118].sliced(7, 7);
+        0.98000574, 0.78919914, 0.49313159, 0.85537712, 0.44181032,
+        0.4994793, 0.97419118].sliced(7, 7);
     auto correct = [0.40088473, 0.16398608, 0.50720246, 0.71127485,
-       0.9038084 , 0.45367844, 0.41827524, 0.95954425,
-       0.30096364, 0.37174358, 0.45047108, 0.47731472,
-       0.98000574, 0.49313159, 0.44181032, 0.97419118].sliced(4,4);
+        0.9038084, 0.45367844, 0.41827524, 0.95954425,
+        0.30096364, 0.37174358, 0.45047108, 0.47731472,
+        0.98000574, 0.49313159, 0.44181032, 0.97419118].sliced(4, 4);
     auto ret = weighted_restriction!(double, 2)(arr);
 
-    assert (approxEqual(ret, correct, 1e-2, 1e-8));
+    assert(approxEqual(ret, correct, 1e-2, 1e-8));
 }
 
 unittest
 {
     auto arr = [[0.81221201, 0.78276113, 0.48331298, 0.37342158, 0.69540543,
-        0.76324145, 0.82182523, 0.72875685],
-       [0.57634476, 0.31967787, 0.82186108, 0.52491243, 0.15475378,
-        0.13005756, 0.54944053, 0.2843028 ],
-       [0.60829286, 0.66684961, 0.03881298, 0.36623578, 0.43896866,
-        0.09926548, 0.21621183, 0.14579873],
-       [0.53163999, 0.30784403, 0.79728148, 0.5986419 , 0.45822312,
-        0.61653698, 0.12602686, 0.84576779],
-       [0.99019009, 0.15173809, 0.97024363, 0.21683838, 0.32338431,
-        0.92911924, 0.76354069, 0.14346233],
-       [0.90767941, 0.2732503 , 0.23990377, 0.82870636, 0.66895977,
-        0.55954603, 0.91480887, 0.56811022],
-       [0.24181791, 0.11676617, 0.65585234, 0.74380539, 0.16570513,
-        0.31648328, 0.26040337, 0.51607495],
-       [0.68527047, 0.42570696, 0.13484427, 0.48563044, 0.23751941,
-        0.60301295, 0.20323849, 0.59139025]];
-    auto  correct = [[0.81221201, 0.48331298, 0.69540543, 0.82182523, 0.72875685],
-       [0.60829286, 0.450674  , 0.36143624, 0.28641098, 0.14579873],
-       [0.99019009, 0.54380879, 0.5277031 , 0.6169349 , 0.14346233],
-       [0.24181791, 0.44420891, 0.44207825, 0.45405526, 0.51607495],
-       [0.68527047, 0.13484427, 0.23751941, 0.20323849, 0.59139025]];
+            0.76324145, 0.82182523, 0.72875685],
+        [0.57634476, 0.31967787, 0.82186108, 0.52491243, 0.15475378,
+            0.13005756, 0.54944053, 0.2843028],
+        [0.60829286, 0.66684961, 0.03881298, 0.36623578, 0.43896866,
+            0.09926548, 0.21621183, 0.14579873],
+        [0.53163999, 0.30784403, 0.79728148, 0.5986419, 0.45822312,
+            0.61653698, 0.12602686, 0.84576779],
+        [0.99019009, 0.15173809, 0.97024363, 0.21683838, 0.32338431,
+            0.92911924, 0.76354069, 0.14346233],
+        [0.90767941, 0.2732503, 0.23990377, 0.82870636, 0.66895977,
+            0.55954603, 0.91480887, 0.56811022],
+        [0.24181791, 0.11676617, 0.65585234, 0.74380539, 0.16570513,
+            0.31648328, 0.26040337, 0.51607495],
+        [0.68527047, 0.42570696, 0.13484427, 0.48563044, 0.23751941,
+            0.60301295, 0.20323849, 0.59139025]];
+    auto correct = [[0.81221201, 0.48331298, 0.69540543, 0.82182523, 0.72875685],
+        [0.60829286, 0.450674, 0.36143624, 0.28641098, 0.14579873],
+        [0.99019009, 0.54380879, 0.5277031, 0.6169349, 0.14346233],
+        [0.24181791, 0.44420891, 0.44207825, 0.45405526, 0.51607495],
+        [0.68527047, 0.13484427, 0.23751941, 0.20323849, 0.59139025]];
     auto ret = weighted_restriction!(double, 2)(arr.fuse);
 
-    assert (approxEqual(ret, correct.fuse, 1e-8, 1e-8));
+    assert(approxEqual(ret, correct.fuse, 1e-8, 1e-8));
 }
+
