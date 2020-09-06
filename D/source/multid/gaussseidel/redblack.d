@@ -1,6 +1,6 @@
 module multid.gaussseidel.redblack;
 
-import multid.tools.apply_poisson;
+import multid.tools.apply_poisson : compute_residual;
 import multid.tools.norm : nrmL2;
 
 import mir.ndslice : slice, sliced, Slice, strided;
@@ -19,7 +19,7 @@ enum Color
 }
 
 /++
-This is a Gauss Seidel Red Black implementation for 1D
+This is a Gauss Seidel Red Black implementation 
 +/
 Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000,
         size_t norm_iter = 1_000, double eps = 1e-8)(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T h)
@@ -32,7 +32,7 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000,
     {
         if (it % norm_iter == 0)
         {
-            const auto norm = residual_norm!(T, Dim)(F, U, h);
+            const auto norm = compute_residual!(T, Dim)(F, U, h).nrmL2;
             if (norm <= eps)
             {
                 break;
@@ -115,32 +115,6 @@ void sweep(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 3) U, 
             }
         }
     }
-}
-
-/++
-    Computes the L2 norm of the residual
-+/
-T residual_norm(T, size_t Dim)(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T h)
-{
-    import mir.math.sum : sum;
-
-    static if (Dim == 1)
-    {
-        return nrmL2((F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1]);
-    }
-    else static if (Dim == 2)
-    {
-        return nrmL2((F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1, 1 .. $ - 1]);
-    }
-    else static if (Dim == 3)
-    {
-        return nrmL2((F - apply_poisson!(T, Dim)(U, h))[1 .. $ - 1, 1 .. $ - 1, 1 .. $ - 1]);
-    }
-    else
-    {
-        static assert(false, Dim.stringof ~ " is not a supported dimension!");
-    }
-
 }
 
 unittest

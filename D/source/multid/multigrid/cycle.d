@@ -116,15 +116,14 @@ protected:
 
     override Slice!(T*, Dim) compute_residual(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
-        import multid.tools.apply_poisson;
+        import ap = multid.tools.apply_poisson;
 
-        auto AU = apply_poisson!(T, Dim)(U, current_h);
-        return (F - AU).slice;
+        return ap.compute_residual!(T, Dim)(F, U, current_h);
     }
 
     override Slice!(T*, Dim) solve(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
-        return GS_RB!(T, Dim)(F, U, current_h);
+        return GS_RB!(T, Dim, 100_000, 1_000, 1e-8)(F, U, current_h);
     }
 
     override Slice!(T*, Dim) restriction(Slice!(T*, Dim) U)

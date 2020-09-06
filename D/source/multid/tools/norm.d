@@ -1,23 +1,17 @@
 module multid.tools.norm;
-import mir.math.sum : sum;
+
 import std.math : sqrt;
-import mir.ndslice;
+import mir.ndslice : Slice, sliced;
 
 /++
     Computes the L2 norm
 +/
-auto nrmL2(V)(V v)
+T nrmL2(T, size_t Dim)(Slice!(T*, Dim) v)
 {
-    //return v.map!(x => x * x).sum.sqrt;
-    double s = 0.0;
-    // foreach(x; v.slice.field)
-    // {
-    //     s += x*x;
-    // }
-
-    foreach(x; v.flattened.field)
+    T s = 0.0;
+    foreach (x; v.field)
     {
-        s+=x*x;
+        s += x * x;
     }
     return s.sqrt;
 }
