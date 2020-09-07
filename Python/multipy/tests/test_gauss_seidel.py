@@ -3,7 +3,7 @@ import pytest
 
 from ..GaussSeidel.GaussSeidel import gauss_seidel
 from ..GaussSeidel.GaussSeidel_RB import GS_RB, sweep_1D, sweep_2D, sweep_3D
-from ..tools import heatmap as hm
+from ..tools import heatmap as op
 from ..tools import operators as op
 from ..tools import util
 
@@ -44,7 +44,7 @@ def test_gauss_seidel_vs_linalg():
     N = 20
     max_iter = 1000
 
-    A, U, F = hm.reshape_grid(grid, rhs)
+    A, U, F = op.reshape_grid(grid, rhs)
 
     U1 = gauss_seidel(A,
                       F,
@@ -64,7 +64,7 @@ def test_gauss_seidel_vs_F():
     eps = 1e-12
     max_iter = 10000
 
-    A, U, F = hm.reshape_grid(grid, rhs)
+    A, U, F = op.reshape_grid(grid, rhs)
 
     U1 = gauss_seidel(A,
                       F,
@@ -84,7 +84,7 @@ def test_red_black_vs_linalg():
     N = 20
     max_iter = 1000
 
-    A, _, F = hm.reshape_grid(grid, rhs, h)
+    A, _, F = op.reshape_grid(grid, rhs, h)
 
     # Linalg
     U1 = np.linalg.solve(A, F)
@@ -109,7 +109,7 @@ def test_red_black_vs_F():
     eps = 1e-12
     max_iter = 1000
 
-    A, _, F = hm.reshape_grid(grid, rhs, h)
+    A, _, F = op.reshape_grid(grid, rhs, h)
 
     # Red Black
     U1 = GS_RB(
@@ -133,7 +133,7 @@ def test_red_black_against_gauss_seidel():
     eps = 1e-12
     max_iter = 1000
 
-    A, U, F = hm.reshape_grid(grid, rhs, h)
+    A, U, F = op.reshape_grid(grid, rhs, h)
 
     U1 = gauss_seidel(A,
                       F,

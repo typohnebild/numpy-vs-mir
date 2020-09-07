@@ -1,5 +1,4 @@
 import numpy as np
-from ..tools import heatmap as hm
 from ..tools import operators as op
 from ..tools.apply_poisson import apply_poisson
 from ..tools import util
@@ -11,7 +10,7 @@ def test_apply_poisson():
     U, _ = util.load_test_2D_problem()
 
     A = op.poisson_operator_2D(U.shape[0] - 2)
-    B = (A @ U[1:-1, 1:-1].flatten() - hm.boundary_condition(U)
+    B = (A @ U[1:-1, 1:-1].flatten() - op.boundary_condition(U)
          ).reshape(np.array(U.shape) - 2)
     C = apply_poisson(-U, 1)
 

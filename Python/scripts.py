@@ -3,7 +3,8 @@ import logging
 
 import numpy as np
 
-import multipy.tools.heatmap as hm
+import problemgenerator.heatmap as hm
+import multipy.tools.operators as op
 import multipy.tools.util as util
 from multipy.multigrid import poisson_multigrid, general_multigrid
 from multipy.GaussSeidel import GaussSeidel as gs
@@ -18,7 +19,7 @@ np.set_printoptions(precision=4, linewidth=180)
 @util.timer
 def run(N, iter=500):
     grid = hm.initMap_2D(N)
-    A, U, F = hm.reshape_grid(grid, hm.heat_sources_2D(N))
+    A, U, F = op.reshape_grid(grid, hm.heat_sources_2D(N))
     U = gs.gauss_seidel(A, F, U, max_iter=iter)
     grid[1:-1, 1:-1] = U.reshape((N - 2, N - 2))
     return grid
@@ -27,7 +28,7 @@ def run(N, iter=500):
 @util.timer
 def solve(N):
     grid = hm.initMap_2D(N)
-    A, U, F = hm.reshape_grid(grid, hm.heat_sources_2D(N))
+    A, U, F = op.reshape_grid(grid, hm.heat_sources_2D(N))
     U = np.linalg.solve(A, F)
     grid[1:-1, 1:-1] = U.reshape((N - 2, N - 2))
     return grid
@@ -65,7 +66,7 @@ def simulate_2D_multigrid(N, iter_cycle=5, numba=True):
 def simulate_2D_general_multigrid(N, iter_cycle=5):
     grid = hm.initMap_2D(N)
     rhs = hm.heat_sources_2D(N)
-    A, U, F = hm.reshape_grid(grid, rhs)
+    A, U, F = op.reshape_grid(grid, rhs)
     U = general_multigrid(A, F, U, 0, 4, 4, 1, iter_cycle)
     grid[1:-1, 1:-1] = U.reshape((N - 2, N - 2))
     return grid

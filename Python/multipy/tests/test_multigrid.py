@@ -3,7 +3,6 @@ import pytest
 
 from .. import multigrid as mg
 from ..GaussSeidel.GaussSeidel_RB import GS_RB
-from ..tools import heatmap as hm
 from ..tools import operators as op
 from ..tools import util
 
