@@ -12,6 +12,7 @@ import multid.gaussseidel.redblack;
 import multid.multigrid.restriction;
 import multid.multigrid.cycle;
 import multid.multigrid.multigrid;
+import loadproblem;
 
 /++
 This performs a GS_RB run for 3D
@@ -107,12 +108,39 @@ void testMG2D()
     //U.prettyArr.writeln;
 }
 
-void main()
+void main(string[] argv)
 {
     StopWatch sw;
     sw.reset;
     sw.start;
-    testMG2D();
+    //testMG2D();
+
+
+    //string pfad = argv[1]; //"../problems/problem_2D_100.npy";
+    string pfad = "../problems/problem_1D_100.npy";
+    const uint dim = getDim(pfad);
+
+    switch (dim)
+    {
+        case 1:
+            auto UF = npyload!(double, 1)(pfad);
+            const auto U = poisson_multigrid!(double, 1, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
+            U.prettyArr.writeln;
+            break;
+        case 2:
+            auto UF = npyload!(double, 2)(pfad);
+            const auto U = poisson_multigrid!(double, 2, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
+            U.prettyArr.writeln;
+            break;
+        case 3:
+            //auto UF = npyload!(double, 3)(pfad);
+            //const auto U = poisson_multigrid!(double, 3, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
+            //U.prettyArr.writeln;
+            break;
+        default:
+            throw new Exception("wrong dimension!");
+    }
+
 
     sw.stop;
     writeln((sw.peek

@@ -6,6 +6,7 @@ import std.math : log2;
 import std.conv : to;
 import multid.multigrid.prolongation : prolongation;
 
+
 class Cycle(T, size_t Dim)
 {
 protected:

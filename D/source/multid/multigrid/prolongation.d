@@ -26,6 +26,7 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(in Slice!(T*, Dim) e, in size_t[Dim]
             w.field[2 * i] = e.field[i];
         }
         w.field[$ - 1] = e.field[$ - 1];
+        w.field[0] = e.field[0];
     }
     else static if (Dim == 2)
     {
@@ -107,9 +108,9 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(in Slice!(T*, Dim) e, in size_t[Dim]
 unittest
 {
 
-    auto a = [0, 2, 4, 6, 8].sliced!long;
+    auto a = [0, 2, 4, 6, 8].sliced!double;
     auto correct = 9.iota.slice;
-    const auto ret = prolongation!(long, 1)(a, correct.shape);
+    const auto ret = prolongation!(double, 1)(a, correct.shape);
     assert(ret == correct);
 
     auto a2 = [0, 2, 4, 6, 8, 9].sliced!long;
