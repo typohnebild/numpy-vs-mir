@@ -90,6 +90,22 @@ def MatrixGenerator(dim, max_value=500):
     return np.random.rand(*dim) * np.random.randint(max_value)
 
 
+def load_problem(path):
+    U, F = np.load(path)
+    return U, F
+
+
+def load_test_1D_problem():
+    return load_problem("./multipy/tests/problem_1D_20.npy")
+
+
+def load_test_2D_problem():
+    return load_problem("./multipy/tests/problem_2D_20.npy")
+
+
+def load_test_3D_problem():
+    return load_problem("./multipy/tests/problem_3D_20.npy")
+
+
 def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1")
-

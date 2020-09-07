@@ -8,9 +8,6 @@ from ..tools import operators as op
 from ..tools import util
 
 
-def MatrixGenerator(dim, max_value=500):
-    return np.random.rand(*dim) * np.random.randint(max_value)
-
 # --- GausSeidel TestCases ---
 
 
@@ -39,14 +36,14 @@ def test_red_black_one_iter():
 
 
 def test_gauss_seidel_vs_linalg():
+    grid, rhs = util.load_test_2D_problem()
+    N = grid.shape[0]
+    h = 1 / N
+
     eps = 1e-12
     N = 20
     max_iter = 1000
 
-    # h = 1 / N
-
-    grid = hm.initMap_2D(N)
-    rhs = hm.heat_sources_2D(N)
     A, U, F = hm.reshape_grid(grid, rhs)
 
     U1 = gauss_seidel(A,
@@ -60,14 +57,13 @@ def test_gauss_seidel_vs_linalg():
 
 
 def test_gauss_seidel_vs_F():
+    grid, rhs = util.load_test_2D_problem()
+    N = grid.shape[0]
+    h = 1 / N
+
     eps = 1e-12
-    N = 20
     max_iter = 10000
 
-    # h = 1 / N
-
-    grid = hm.initMap_2D(N)
-    rhs = hm.heat_sources_2D(N)
     A, U, F = hm.reshape_grid(grid, rhs)
 
     U1 = gauss_seidel(A,
@@ -80,14 +76,14 @@ def test_gauss_seidel_vs_F():
 
 
 def test_red_black_vs_linalg():
+    grid, rhs = util.load_test_2D_problem()
+    N = grid.shape[0]
+    h = 1 / N
+
     eps = 1e-12
     N = 20
     max_iter = 1000
 
-    h = 1 / N
-
-    grid = hm.initMap_2D(N)
-    rhs = hm.heat_sources_2D(N)
     A, _, F = hm.reshape_grid(grid, rhs, h)
 
     # Linalg
@@ -106,14 +102,13 @@ def test_red_black_vs_linalg():
 
 
 def test_red_black_vs_F():
-    eps = 1e-12
-    N = 20
-    max_iter = 1000
-
+    grid, rhs = util.load_test_2D_problem()
+    N = grid.shape[0]
     h = 1 / N
 
-    grid = hm.initMap_2D(N)
-    rhs = hm.heat_sources_2D(N)
+    eps = 1e-12
+    max_iter = 1000
+
     A, _, F = hm.reshape_grid(grid, rhs, h)
 
     # Red Black
@@ -131,14 +126,13 @@ def test_red_black_vs_F():
 
 
 def test_red_black_against_gauss_seidel():
-    eps = 1e-12
-    N = 20
-    max_iter = 1000
-
+    grid, rhs = util.load_test_2D_problem()
+    N = grid.shape[0]
     h = 1. / N
 
-    grid = hm.initMap_2D(N)
-    rhs = hm.heat_sources_2D(N)
+    eps = 1e-12
+    max_iter = 1000
+
     A, U, F = hm.reshape_grid(grid, rhs, h)
 
     U1 = gauss_seidel(A,

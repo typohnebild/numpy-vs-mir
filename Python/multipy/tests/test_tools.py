@@ -2,12 +2,13 @@ import numpy as np
 from ..tools import heatmap as hm
 from ..tools import operators as op
 from ..tools.apply_poisson import apply_poisson
+from ..tools import util
 
 
 def test_apply_poisson():
     eps = 1e-12
     # Variables
-    U = hm.initMap_2D(40)
+    U, _ = util.load_test_2D_problem()
 
     A = op.poisson_operator_2D(U.shape[0] - 2)
     B = (A @ U[1:-1, 1:-1].flatten() - hm.boundary_condition(U)
@@ -18,8 +19,8 @@ def test_apply_poisson():
 
 
 def test_apply_poisson_1D():
-    N = 50
-    U = hm.initMap_1D(N)
+    U, _ = util.load_test_1D_problem()
+    N = U.shape[0]
     h = 1
     expected = np.zeros_like(U)
     expected[0] = U[0]
@@ -31,8 +32,8 @@ def test_apply_poisson_1D():
 
 
 def test_apply_poisson_2D():
-    N = 50
-    U = hm.initMap_2D(N)
+    U, _ = util.load_test_2D_problem()
+    N = U.shape[0]
     h = 1
     expected = np.zeros_like(U)
     expected[:, 0] = U[:, 0]
@@ -51,8 +52,8 @@ def test_apply_poisson_2D():
 
 
 def test_apply_poisson_3D():
-    N = 50
-    U = hm.initMap_3D(N)
+    U, _ = util.load_test_3D_problem()
+    N = U.shape[0]
     h = 1
     expected = np.zeros_like(U)
     expected[:, :, 0] = U[:, :, 0]

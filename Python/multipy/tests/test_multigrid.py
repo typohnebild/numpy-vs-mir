@@ -172,10 +172,9 @@ def test_MG_weighted_restriction_3D():
 
 def test_MultiGrid_VS_GS_RB():
     eps = 1e-3
-    N = 20
     # Variables
-    U = hm.initMap_2D(N)
-    F = hm.heat_sources_2D(N)
+    U, F = util.load_test_2D_problem()
+    N = U.shape[0]
 
     A = GS_RB(np.copy(F), np.copy(U), eps=eps, numba=False)
     B = mg.poisson_multigrid(F, U, 2, 2, 2, 2, 100, numba=False)
