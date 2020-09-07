@@ -12,7 +12,7 @@ def prolongation(e, fine_shape):
     # indicator for Dimension
     alpha = len(e.shape)
     # initialize result with respect to the wanted shape
-    w = np.zeros(fine_shape)
+    w = np.empty(fine_shape)
     # Index of the second to the last element to mention in e (depends on the
     # shape of w)
     end = e.shape[0] - (w.shape[0] + 1) % 2

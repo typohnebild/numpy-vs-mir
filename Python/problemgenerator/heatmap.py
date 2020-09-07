@@ -7,8 +7,8 @@ import numpy as np
 
 def initMap_1D(N):
     U = np.random.uniform(0, 1, (N))
-    U[0] = 0
-    U[-1] = 1
+    U[0] = 1
+    U[-1] = 0
     return U
 
 
@@ -35,7 +35,7 @@ def initMap_3D(N):
 def heat_sources_1D(N):
     F = np.zeros((N))
     F[0] = 1
-    F[1] = 0
+    F[-1] = 0
     return F
 
 

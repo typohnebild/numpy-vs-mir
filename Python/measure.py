@@ -3,7 +3,7 @@
 import sys
 
 from multipy.multigrid import poisson_multigrid
-from multipy.tools.util import str2bool, load_problem
+from multipy.tools.util import str2bool, load_problem, timer
 
 
 def measure(path, numba=True):

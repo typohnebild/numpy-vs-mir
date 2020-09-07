@@ -121,7 +121,7 @@ class PoissonCycle(AbstractCycle):
 
     def norm(self, U):
         residual = self._residual(U)
-        return np.linalg.norm(residual[1:-1, 1:-1])
+        return np.linalg.norm(residual)
 
     def restriction(self, r):
         return weighted_restriction(r)
