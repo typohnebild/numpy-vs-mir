@@ -4,9 +4,6 @@
 """
 import numpy as np
 
-from ..GaussSeidel.GaussSeidel import gauss_seidel
-from ..GaussSeidel.GaussSeidel_RB import GS_RB
-from ..multigrid import poisson_multigrid, general_multigrid
 from .operators import poisson_operator_2D
 
 
@@ -48,6 +45,10 @@ def heat_sources_1D(dimension):
 def heat_sources_2D(dimension):
     F = np.zeros((dimension, dimension))
     # F[dimension // 2, dimension // 2] = 1
+    F[:, -1] = 0
+    F[-1, :] = 0
+    F[:, 0] = 1
+    F[0, :] = 1
     return F
 
 
