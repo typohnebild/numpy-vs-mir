@@ -1,10 +1,24 @@
 {
-	"name": "multid",
-	"dependencies": {
-		"mir-algorithm": "~>3.9.6",
-		"mir-random": "~>2.2.14",
-        "numir": "~>2.0.5",
-        "pretty_array" :"~>1.0.2"
-	},
-	"dflags-ldc": ["-mcpu=native"]
+  "name": "multid",
+  "dependencies": {
+    "mir-algorithm": "~>3.9.6",
+    "mir-random": "~>2.2.14",
+    "numir": "~>2.0.5",
+    "pretty_array": "~>1.0.2"
+  },
+  "configurations": [
+    {
+	  "name": "multid",
+      "targetType": "executable",
+      "dflags-ldc": ["-mcpu=native"]
+    },
+    {
+      "name": "multid-static",
+      "targetType": "executable",
+      "targetName": "multid-static",
+      "compiler": "ldc",
+      "dflags-ldc": ["--static"],
+      "buildOptiones": ["releaseMode", "optimize", "inline", "noBoundsCheck"]
+    }
+  ]
 }

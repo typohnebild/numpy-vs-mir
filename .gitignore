@@ -14,5 +14,6 @@ __pycache__
 venv
 */multid
 multid-test-library
+multid-static
 trace.*
 *.log
