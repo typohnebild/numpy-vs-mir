@@ -1,7 +1,8 @@
 import mir.ndslice : slice;
 import std.stdio : writeln;
-import std.datetime.stopwatch : StopWatch;
+import std.datetime.stopwatch : StopWatch, msecs;
 import std.getopt : getopt;
+import core.thread : Thread;
 
 import loadproblem;
 import multid.multigrid.multigrid;
@@ -17,8 +18,12 @@ void main(string[] argv)
     StopWatch sw;
     void wait_till()
     {
-        while (sw.peek.total!"msecs" <= delay)
+        auto rest = delay - sw.peek.total!"msecs";
+        if (0 < rest)
         {
+            rest.writeln;
+            Thread.sleep(msecs(rest));
+            sw.peek.total!"msecs".writeln;
         }
         sw.reset;
         sw.stop;
