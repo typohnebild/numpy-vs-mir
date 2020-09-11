@@ -21,9 +21,7 @@ void main(string[] argv)
         auto rest = delay - sw.peek.total!"msecs";
         if (0 < rest)
         {
-            rest.writeln;
             Thread.sleep(msecs(rest));
-            sw.peek.total!"msecs".writeln;
         }
         sw.reset;
         sw.stop;
