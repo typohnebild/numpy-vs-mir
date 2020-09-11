@@ -218,6 +218,6 @@ unittest
 
         }
     }
-    auto x1 = apply_poisson!(double, 2)(U, h);
+    const auto x1 = apply_poisson!(double, 2)(U, h);
     assert(x == x1);
 }

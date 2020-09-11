@@ -34,4 +34,3 @@ Slice!(T*, Dim) poisson_multigrid(T, size_t Dim, uint v1, uint v2)(Slice!(T*, Di
     auto cycle = new PoissonCycle!(T, Dim, v1, v2)(F, mu, level, cast(T)(0));
     return multigrid!(T, Dim)(cycle, U, iter_cycles, eps);
 }
-
