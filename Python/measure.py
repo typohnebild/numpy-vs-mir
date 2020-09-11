@@ -1,23 +1,40 @@
 #!/usr/bin/env python3
 
 import sys
+import optparse
+import time
 
 from multipy.multigrid import poisson_multigrid
-from multipy.tools.util import str2bool, load_problem, timer
+from multipy.tools.util import load_problem, timer
 
 
-def measure(path, numba=True):
-    U, F = load_problem(path)
+def measure(F, U, numba=True):
     poisson_multigrid(F, U, 0, 2, 2, 2, 100, numba=numba)
 
 
+def main():
+    start = time.time()
+    parser = optparse.OptionParser()
+    parser.add_option("-n", action="store_true", dest='numba', default=False)
+    parser.add_option(
+        "-d",
+        action="store",
+        dest='delay',
+        type=int,
+        default=500)
+    parser.add_option("-p", action="store", dest="path",
+                      default="../problems/problem_1D_100.npy")
+    options, _ = parser.parse_args()
+
+    U, F = load_problem(options.path)
+
+    # while time.time() - start <= options.delay / 1000:
+    rest = options.delay / 1000 - (time.time() - start)
+    if 0 < rest:
+        time.sleep(rest)
+
+    measure(F, U, options.numba)
+
+
 if __name__ == "__main__":
-    path = "../problems/problem_2D_100.npy"
-    numba = True
-    if len(sys.argv) >= 2:
-        path = sys.argv[1]
-        if len(sys.argv) == 3:
-            numba = str2bool(str(sys.argv[2]))
-        elif len(sys.argv) > 3:
-            raise ValueError("to much input parameters")
-    measure(path, numba)
+    main()
