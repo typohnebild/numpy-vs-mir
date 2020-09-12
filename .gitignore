@@ -13,7 +13,7 @@ __pycache__
 *.pytest_cache
 venv
 */multid
-multid-test-library
+multid-test-multid
 multid-static
 trace.*
 *.log

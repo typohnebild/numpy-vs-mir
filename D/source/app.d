@@ -1,150 +1,66 @@
-import std.stdio;
-import std.range : generate;
-import std.random : uniform;
-import std.array;
-import std.algorithm;
-import mir.ndslice;
-import pretty_array;
-import std.datetime.stopwatch : StopWatch;
+import mir.ndslice : slice;
+import std.stdio : writeln;
+import std.datetime.stopwatch : StopWatch, msecs;
+import std.getopt : getopt;
+import core.thread : Thread;
 import std.conv : to;
 
-import multid.gaussseidel.redblack;
-import multid.multigrid.restriction;
-import multid.multigrid.cycle;
-import multid.multigrid.multigrid;
 import loadproblem;
+import multid.multigrid.multigrid;
 
 /++
-This performs a GS_RB run for 3D
+    This loads and runs a problem that is provided on Commandline and delays the execution of
+    the multigrid till delay is over.
+
 +/
-void test3D()
+void main(string[] argv)
 {
+    uint delay = 500;
+    StopWatch sw;
+    void wait_till()
+    {
+        auto rest = delay - sw.peek.total!"msecs";
+        if (0 < rest)
+        {
+            Thread.sleep(msecs(rest));
+        }
+        sw.stop;
+        sw.reset;
+    }
 
-    immutable size_t N = 50;
-    auto U = slice!double(N, N, N);
-    auto fun = generate!(() => uniform(0.0, 1.0));
-    U.field.fill(fun);
-    U[0, 0 .. $, 0 .. $] = 1.0;
-    U[0 .. $, 0, 0 .. $] = 1.0;
-    U[0 .. $, 0 .. $, 0] = 1.0;
-    U[$ - 1, 0 .. $, 0 .. $] = 0.0;
-    U[1 .. $, $ - 1, 1 .. $] = 0.0;
-    U[1 .. $, 1 .. $, $ - 1] = 0.0;
+    sw.reset;
+    sw.start;
 
-    auto F = slice!double([N, N, N], 0.0);
-    const double h = 1.0 / double(N);
+    string path = "../problems/problem_1D_100.npy";
+    getopt(argv, "p|P", &path, "d|D", &delay);
 
-    GS_RB!(double, 3)(F, U, h);
-    U.prettyArr.writeln;
+    const uint dim = getDim(path);
 
+    switch (dim)
+    {
+    case 1:
+        auto UF = npyload!(double, 1)(path);
+        poisson_multigrid!(double, 1, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 1);
+        wait_till();
+        sw.start;
+        poisson_multigrid!(double, 1, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
+        break;
+    case 2:
+        auto UF = npyload!(double, 2)(path);
+        poisson_multigrid!(double, 2, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 1);
+        wait_till();
+        sw.start;
+        poisson_multigrid!(double, 2, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
+        break;
+    case 3:
+        //auto UF = npyload!(double, 3)(path);
+        //const auto U = poisson_multigrid!(double, 3, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
+        break;
+    default:
+        throw new Exception("wrong dimension!");
+    }
+    sw.stop;
+    writeln(sw.peek
+            .total!"msecs"
+            .to!double / 1_000.0);
 }
-
-/++
-This performs a GS_RB run for 2D
-+/
-void test2D()
-{
-
-    immutable size_t N = 200;
-    auto U = slice!double(N, N);
-    auto fun = generate!(() => uniform(0.0, 1.0));
-    U.field.fill(fun);
-    U[0][0 .. $] = 1.0;
-    U[1 .. $, 0] = 1.0;
-    U[$ - 1][1 .. $] = 0.0;
-    U[1 .. $, $ - 1] = 0.0;
-
-    auto F = slice!double([N, N], 0.0);
-    const double h = 1.0 / double(N);
-
-    GS_RB!(double, 2)(F, U, h);
-    U.prettyArr.writeln;
-
-}
-
-/++
-This performs a GS_RB run for 1D
-+/
-void test1D()
-{
-
-    immutable size_t N = 1000;
-    auto U = slice!double(N);
-    auto fun = generate!(() => uniform(0.0, 1.0));
-    U.field.fill(fun);
-    U[0] = 1.0;
-    U[$ - 1] = 0.0;
-
-    auto F = slice!double([N], 0.0);
-    const double h = 1.0 / double(N);
-
-    GS_RB!(double, 1, 30_000)(F, U, h);
-    U.prettyArr.writeln;
-
-}
-
-/++
-This performs multigrid for 2D
-+/
-void testMG2D()
-{
-    immutable size_t N = 1000;
-    auto U = slice!double(N, N);
-    auto fun = generate!(() => uniform(0.0, 1.0));
-    U.field.fill(fun);
-    U[0][0 .. $] = 1.0;
-    U[1 .. $, 0] = 1.0;
-    U[$ - 1][1 .. $] = 0.0;
-    U[1 .. $, $ - 1] = 0.0;
-
-    auto F = slice!double([N, N], 0.0);
-    F[0][0 .. $] = 1.0;
-    F[1 .. $, 0] = 1.0;
-    F[$ - 1][1 .. $] = 0.0;
-    F[1 .. $, $ - 1] = 0.0;
-
-    U = poisson_multigrid!(double, 2, 2, 2)(F, U, 0, 2, 100);
-
-    //U.prettyArr.writeln;
-}
-
-//void main(string[] argv)
-//{
-//    StopWatch sw;
-//    sw.reset;
-//    sw.start;
-//    //testMG2D();
-
-//    string pfad = "../problems/problem_1D_100.npy";
-//    if (argv.length == 2)
-//    {
-//        pfad = argv[1];
-//    }
-//    const uint dim = getDim(pfad);
-
-//    switch (dim)
-//    {
-//    case 1:
-//        auto UF = npyload!(double, 1)(pfad);
-//        const auto U = poisson_multigrid!(double, 1, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
-//        U.prettyArr.writeln;
-//        break;
-//    case 2:
-//        auto UF = npyload!(double, 2)(pfad);
-//        const auto U = poisson_multigrid!(double, 2, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
-//        U.prettyArr.writeln;
-//        break;
-//    case 3:
-//        //auto UF = npyload!(double, 3)(pfad);
-//        //const auto U = poisson_multigrid!(double, 3, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
-//        //U.prettyArr.writeln;
-//        break;
-//    default:
-//        throw new Exception("wrong dimension!");
-//    }
-
-//    sw.stop;
-//    writeln((sw.peek
-//            .total!"msecs"
-//            .to!float / 1000.0), "s");
-//}

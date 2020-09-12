@@ -1,5 +1,7 @@
 {
   "name": "multid",
+  "dflags-ldc": ["-mcpu=native"],
+  "mainSourceFile" : "source/app.d",
   "dependencies": {
     "mir-algorithm": "~>3.9.6",
     "mir-random": "~>2.2.14",
@@ -8,7 +10,7 @@
   },
   "configurations": [
     {
-	  "name": "multid",
+      "name": "multid",
       "targetType": "executable",
       "dflags-ldc": ["-mcpu=native"]
     },
