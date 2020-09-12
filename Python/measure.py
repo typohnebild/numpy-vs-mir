@@ -13,7 +13,7 @@ def measure(F, U, numba=True):
 
 
 def main():
-    start = time.time()
+    start = time.perf_counter()
     parser = optparse.OptionParser()
     parser.add_option('-n', action='store_true', dest='numba', default=False)
     parser.add_option(
@@ -30,11 +30,13 @@ def main():
     # warm up
     poisson_multigrid(F, U.copy(), 0, 2, 2, 2, 1, numba=options.numba)
 
-    rest = options.delay / 1000 - (time.time() - start)
+    rest = options.delay / 1000 - (time.perf_counter() - start)
     if 0 < rest:
         time.sleep(rest)
 
+    print(time.perf_counter() - start)
     measure(F, U, options.numba)
+    print(time.perf_counter() - start)
 
 
 if __name__ == '__main__':
