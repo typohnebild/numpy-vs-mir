@@ -23,8 +23,8 @@ void main(string[] argv)
         {
             Thread.sleep(msecs(rest));
         }
-        sw.reset;
         sw.stop;
+        sw.reset;
     }
 
     sw.reset;

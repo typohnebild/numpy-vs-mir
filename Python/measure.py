@@ -15,20 +15,21 @@ def measure(F, U, numba=True):
 def main():
     start = time.time()
     parser = optparse.OptionParser()
-    parser.add_option("-n", action="store_true", dest='numba', default=False)
+    parser.add_option('-n', action='store_true', dest='numba', default=False)
     parser.add_option(
-        "-d",
-        action="store",
+        '-d',
+        action='store',
         dest='delay',
         type=int,
         default=500)
-    parser.add_option("-p", action="store", dest="path",
-                      default="../problems/problem_1D_100.npy")
+    parser.add_option('-p', action='store', dest='path',
+                      default='../problems/problem_1D_100.npy')
     options, _ = parser.parse_args()
 
     U, F = load_problem(options.path)
+    # warm up
+    poisson_multigrid(F, U, 0, 2, 2, 2, 1, numba=options.numba)
 
-    # while time.time() - start <= options.delay / 1000:
     rest = options.delay / 1000 - (time.time() - start)
     if 0 < rest:
         time.sleep(rest)
@@ -36,5 +37,5 @@ def main():
     measure(F, U, options.numba)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
