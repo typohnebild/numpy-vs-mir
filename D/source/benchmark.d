@@ -40,12 +40,14 @@ void main(string[] argv)
     {
     case 1:
         auto UF = npyload!(double, 1)(path);
+        poisson_multigrid!(double, 1, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 1);
         wait_till();
         sw.start;
         poisson_multigrid!(double, 1, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
         break;
     case 2:
         auto UF = npyload!(double, 2)(path);
+        poisson_multigrid!(double, 2, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 1);
         wait_till();
         sw.start;
         poisson_multigrid!(double, 2, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
