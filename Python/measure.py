@@ -28,7 +28,7 @@ def main():
 
     U, F = load_problem(options.path)
     # warm up
-    poisson_multigrid(F, U, 0, 2, 2, 2, 1, numba=options.numba)
+    poisson_multigrid(F, U.copy(), 0, 2, 2, 2, 1, numba=options.numba)
 
     rest = options.delay / 1000 - (time.time() - start)
     if 0 < rest:
