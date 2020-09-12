@@ -3,6 +3,7 @@ import std.stdio : writeln;
 import std.datetime.stopwatch : StopWatch, msecs;
 import std.getopt : getopt;
 import core.thread : Thread;
+import std.conv : to;
 
 import loadproblem;
 import multid.multigrid.multigrid;
@@ -57,5 +58,7 @@ void main(string[] argv)
         throw new Exception("wrong dimension!");
     }
     sw.stop;
-    writeln(sw.peek.total!"msecs");
+    writeln(sw.peek
+            .total!"msecs"
+            .to!double / 1_000.0);
 }

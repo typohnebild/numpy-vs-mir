@@ -34,7 +34,7 @@ def main():
     if 0 < rest:
         time.sleep(rest)
 
-    print(time.perf_counter() - start)
+    start = time.perf_counter()
     measure(F, U, options.numba)
     print(time.perf_counter() - start)
 
