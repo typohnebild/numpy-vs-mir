@@ -19,7 +19,7 @@ enum Color
 }
 
 /++
-This is a Gauss Seidel Red Black implementation 
+This is a Gauss Seidel Red Black implementation
 +/
 Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000,
         size_t norm_iter = 1_000, double eps = 1e-8)(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T h)

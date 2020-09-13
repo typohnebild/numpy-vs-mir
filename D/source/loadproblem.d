@@ -4,8 +4,7 @@ import mir.ndslice;
 import numir.io;
 import std.regex;
 import std.stdio;
-import std.conv: to;
-
+import std.conv : to;
 
 // /++
 // Implementation of npy loader
@@ -33,21 +32,22 @@ uint getDim(string path)
 /++
 Implementation of an npy loader 1D
 +/
-auto npyload(T, uint Dim)(string path)
+auto npyload(T, uint Dim : 1)(string path)
 {
     return loadNpy!(T, 2)(path);
 }
 /++
 Implementation of an npy loader 2D
 +/
-auto npyload(T, uint Dim:2)(string path)
+auto npyload(T, uint Dim : 2)(string path)
 {
     return loadNpy!(T, 3)(path);
 }
 /++
 Implementation of an npy loader 3D
 +/
-auto npyload(T, uint Dim:3)(string path)
+auto npyload(T, uint Dim : 3)(string path)
 {
     return loadNpy!(T, 4)(path);
 }
+

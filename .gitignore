@@ -1,6 +1,7 @@
 *.dub
 *.vscode
 *.json
+!dub.json
 __dummy.html
 *.o
 *.obj
@@ -14,6 +15,7 @@ __pycache__
 venv
 */multid
 multid-test-multid
+multid-test-library
 multid-static
 trace.*
 *.log
