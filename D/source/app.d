@@ -5,8 +5,9 @@ import std.getopt : getopt;
 import core.thread : Thread;
 import std.conv : to;
 
-import loadproblem;
-import multid.multigrid.multigrid;
+import loadproblem : npyload, getDim;
+import multid.multigrid.multigrid : poisson_multigrid;
+import multid.gaussseidel.redblack : GS_RB;
 
 /++
     This loads and runs a problem that is provided on Commandline and delays the execution of
@@ -51,6 +52,7 @@ void main(string[] argv)
         wait_till();
         sw.start;
         poisson_multigrid!(double, 2, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
+        // GS_RB!(double, 2)(UF[1].slice, UF[0].slice, 1.0 / UF[0].shape[0]);
         break;
     case 3:
         //auto UF = npyload!(double, 3)(path);

@@ -1,6 +1,5 @@
 {
   "name": "multid",
-  "dflags-ldc": ["-mcpu=native"],
   "mainSourceFile" : "source/app.d",
   "dependencies": {
     "mir-algorithm": "~>3.9.6",

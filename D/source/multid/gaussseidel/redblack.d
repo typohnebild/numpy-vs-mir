@@ -7,6 +7,7 @@ import mir.ndslice : slice, sliced, Slice, strided;
 import std.traits : isFloatingPoint;
 
 import std.stdio : writeln;
+import multid.gaussseidel.slow_sweep;
 
 /++
     red is for even indicies
@@ -20,9 +21,22 @@ enum Color
 
 /++
 This is a Gauss Seidel Red Black implementation
+it solves AU = F, with A being a poisson matrix like this
+        1 1 1 1 .. 1
+        1 4 1 0 .. 1
+        1 1 4 1 .. 1
+        .          .
+        . 0..1 4 1 .
+        1 .. 1 1 1 1
+so the borders of U remain unchanged
+Params:
+    U = slice of dimension Dim
+    F = slice of dimension Dim
+    h = the distance between the grid points
+Returns: U
 +/
-Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000,
-        size_t norm_iter = 1_000, double eps = 1e-8)(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T h)
+Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000, size_t norm_iter = 1_000, double eps = 1e-8)(
+        in Slice!(T*, Dim) F, Slice!(T*, Dim) U, in T h)
         if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 {
 
@@ -44,14 +58,19 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000,
         // schwarze Halbiteration
         sweep!(T, Dim, Color.black)(F, U, h2);
     }
-
     return U;
 }
 
 /++
 This is a sweep implementation for 1D
+    it calculates U[i] = (U[i-1] + U[i+1])/2
+    for every cell except the borders
+Params:
+    F  = slice of dimension Dim
+    U  = slice of dimension Dim
+    h2 = the squared distance between the grid points
 +/
-void sweep(T, size_t Dim : 1, Color color)(in Slice!(T*, 1) F, Slice!(T*, 1) U, T h2)
+void sweep(T, size_t Dim : 1, Color color)(in Slice!(T*, 1) F, Slice!(T*, 1) U, in T h2)
 {
     const auto N = F.shape[0];
     auto UF = U.field;
@@ -64,8 +83,14 @@ void sweep(T, size_t Dim : 1, Color color)(in Slice!(T*, 1) F, Slice!(T*, 1) U, 
 
 /++
 This is a sweep implementation for 2D
+    it calculates U[i,j] = (U[i-1, j] + U[i+1, j] + U[i, j-1] +U[i, j+1] - h2 * F[i,j])/4
+    for every cell except the borders
+Params:
+    F  = slice of dimension Dim
+    U  = slice of dimension Dim
+    h2 = the squared distance between the grid points
 +/
-void sweep(T, size_t Dim : 2, Color color)(in Slice!(T*, 2) F, Slice!(T*, 2) U, T h2)
+void sweep(T, size_t Dim : 2, Color color)(in Slice!(T*, 2) F, Slice!(T*, 2) U, in T h2)
 {
     const auto m = F.shape[0];
     const auto n = F.shape[1];
@@ -81,15 +106,21 @@ void sweep(T, size_t Dim : 2, Color color)(in Slice!(T*, 2) F, Slice!(T*, 2) U, 
                     UF[flatindex - m] +
                     UF[flatindex + m] +
                     UF[flatindex - 1] +
-                    UF[flatindex + 1] - h2 * FF[flatindex]) / 4.0;
+                    UF[flatindex + 1] - h2 * FF[flatindex]) / cast(T) 4;
         }
     }
 }
 
 /++
 This is a sweep implementation for 3D
+    it calculates U[i,j,k] = (U[i-1,j,k] + U[i+1,j,k] + U[i,j-1,k] +U[i,j+1,k] ... - h2 * F[i,j,k])/4
+    for every cell except the borders
+Params:
+    F  = slice of dimension Dim
+    U  = slice of dimension Dim
+    h2 = the squared distance between the grid points
 +/
-void sweep(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 3) U, T h2)
+void sweep(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 3) U, in T h2)
 {
     const auto m = F.shape[0];
     const auto n = F.shape[1];
