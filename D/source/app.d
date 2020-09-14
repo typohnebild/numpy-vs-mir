@@ -32,7 +32,14 @@ void main(string[] argv)
     sw.reset;
     sw.start;
 
-    string path = "../problems/problem_1D_100.npy";
+    immutable string default_path = "../problems/problem_1D_100.npy";
+    void warmup()
+    {
+        auto UF1 = npyload!(double, 1)(default_path);
+        poisson_multigrid!(double, 1, 2, 2)(UF1[1].slice, UF1[0].slice, 0, 2, 1);
+    }
+
+    string path = default_path;
     getopt(argv, "p|P", &path, "d|D", &delay);
 
     const uint dim = getDim(path);
@@ -41,14 +48,14 @@ void main(string[] argv)
     {
     case 1:
         auto UF = npyload!(double, 1)(path);
-        poisson_multigrid!(double, 1, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 1);
+        warmup();
         wait_till();
         sw.start;
         poisson_multigrid!(double, 1, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
         break;
     case 2:
         auto UF = npyload!(double, 2)(path);
-        poisson_multigrid!(double, 2, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 1);
+        warmup();
         wait_till();
         sw.start;
         poisson_multigrid!(double, 2, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
