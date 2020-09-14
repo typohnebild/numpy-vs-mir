@@ -6,7 +6,9 @@ import std.math : log2;
 import std.conv : to;
 import multid.multigrid.prolongation : prolongation;
 
-
+/++
+    Abstract base class for the Cycles
++/
 class Cycle(T, size_t Dim)
 {
 protected:
@@ -64,6 +66,11 @@ protected:
 public:
     /++
        Constructor for Cycle
+       Params:
+        F = Dim-slice as righthandsite
+        mu = indicator for type of cycle
+        l = the depth of the multigrid cycle if it is set to 0, the maxmium depth is choosen
+        h = is the distance between the grid points if set to 0 1 / F.shape[0] is used
     +/
     this(Slice!(T*, Dim) F, uint mu, uint l, T h)
     {
