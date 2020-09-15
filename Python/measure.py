@@ -17,6 +17,7 @@ def main():
     start = time.perf_counter()
     parser = optparse.OptionParser()
     parser.add_option('-n', action='store_true', dest='numba', default=False)
+    parser.add_option('-v', action='store_true', dest='verbose', default=False)
     parser.add_option(
         '-d',
         action='store',
@@ -32,6 +33,9 @@ def main():
     # problems
     U1, F1 = load_problem(default_problem)
     poisson_multigrid(F1, U1, 0, 1, 1, 1, 1, numba=options.numba)
+    if options.verbose:
+        import logging
+        logging.basicConfig(level=logging.INFO)
 
     rest = options.delay / 1000 - (time.perf_counter() - start)
     if 0 < rest:

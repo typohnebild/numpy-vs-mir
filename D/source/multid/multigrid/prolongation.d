@@ -8,7 +8,7 @@ This is the implementation of a prolongation
     Params:
         e = the grid that needs to be prolongated
         fine_shape = the shape of the returned grid
-        returns the finer grid with interpolated values in between
+    Returns: the finer grid with interpolated values in between
 +/
 Slice!(T*, Dim) prolongation(T, size_t Dim)(in Slice!(T*, Dim) e, in size_t[Dim] fine_shape)
 {
