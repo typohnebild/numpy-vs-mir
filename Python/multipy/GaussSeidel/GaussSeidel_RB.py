@@ -6,25 +6,26 @@ from numba import jit
 from ..tools.apply_poisson import apply_poisson
 from ..tools.util import timer
 
-logger = logging.getLogger('GS')
+logger = logging.getLogger("GS")
 logger.setLevel(logging.WARNING)
 
 
 # @timer
 def GS_RB(
-        F,
-        U=None,
-        h=None,
-        max_iter=10_000_000,
-        eps=1e-8,
-        norm_iter=1000,
-        numba=True):
+    F,
+    U=None,
+    h=None,
+    max_iter=10_000_000,
+    eps=1e-8,
+    norm_iter=1000,
+    numba=True,
+):
     """Implementation of Gauss Seidl Red Black iterations
-       should solve AU = F
-       A poisson equation
-       @param F n vector
-       @param h is distance between grid points | default is 1/N
-       @return U n vector
+    should solve AU = F
+    A poisson equation
+    @param F n vector
+    @param h is distance between grid points | default is 1/N
+    @return U n vector
     """
 
     if U is None:
@@ -53,8 +54,7 @@ def GS_RB(
             r = F - apply_poisson(U, h)
             norm = np.linalg.norm(r)
             if norm <= eps:
-                logger.info(
-                    f"converged after {it} iterations with {norm:.4}")
+                logger.info(f"converged after {it} iterations with {norm:.4}")
                 break
 
         # rote Halbiteration
@@ -74,8 +74,12 @@ def sweep_1D(color, F, U, h2):
     @param h2 is distance between grid points squared
     """
     n = F.shape[0]
-    U[2-color:n - 1:2] = (U[1-color:n - 2:2] + U[3-color::2] - F[2-color:n - 1:2] * h2) / (2.0)
+    U[2 - color:n - 1:2] = (U[1 - color:n - 2:2] + U[3 - color::2] -
+                            F[2 - color:n - 1:2] * h2) / (2.0)
+
+
 # ----------------
+
 
 # --- 2D Fall ---
 @jit(nopython=True, fastmath=True)
@@ -88,16 +92,15 @@ def sweep_2D(color, F, U, h2):
 
     m, n = F.shape
 
-    U[1:m - 1:2, 1+color:n - 1:2] = (U[0:m - 2:2, 1+color:n - 1:2] +
-                                U[2::2, 1+color:n - 1:2] +
-                                U[1:m - 1:2, color:n - 2:2] +
-                                U[1:m - 1:2, 2+color::2] -
-                                F[1:m - 1:2, 1+color:n - 1:2] * h2) / (4.0)
-    U[2:m - 1:2, 2-color:n - 1:2] = (U[1:m - 2:2, 2-color:n - 1:2] +
-                                U[3::2, 2-color:n - 1:2] +
-                                U[2:m - 1:2, 1-color:n - 2:2] +
-                                U[2:m - 1:2, 3-color::2] -
-                                F[2:m - 1:2, 2-color:n - 1:2] * h2) / (4.0)
+    U[1:m - 1:2, 1 + color:n - 1:2] = (
+        U[0:m - 2:2, 1 + color:n - 1:2] + U[2::2, 1 + color:n - 1:2] +
+        U[1:m - 1:2, color:n - 2:2] + U[1:m - 1:2, 2 + color::2] -
+        F[1:m - 1:2, 1 + color:n - 1:2] * h2) / (4.0)
+    U[2:m - 1:2, 2 - color:n - 1:2] = (
+        U[1:m - 2:2, 2 - color:n - 1:2] + U[3::2, 2 - color:n - 1:2] +
+        U[2:m - 1:2, 1 - color:n - 2:2] + U[2:m - 1:2, 3 - color::2] -
+        F[2:m - 1:2, 2 - color:n - 1:2] * h2) / (4.0)
+
 # ----------------
 
 
@@ -110,34 +113,43 @@ def sweep_3D(color, F, U, h2):
     @param h is distance between grid points
     """
 
-    m, n, o= F.shape
+    m, n, o = F.shape
 
-    U[2:m-1:2, 1:n-1:2, 1+color:o-1:2] = (U[1:m-2:2, 1:n-1:2, 1+color:o-1:2] +
-                                    U[3:m:2, 1:n-1:2, 1+color:o-1:2] +
-                                    U[2:m-1:2, 0:n-2:2, 1+color:o-1:2] +
-                                    U[2:m-1:2, 2:n:2, 1+color:o-1:2] +
-                                    U[2:m-1:2, 1:n-1:2, color:o-2:2] +
-                                    U[2:m-1:2, 1:n-1:2, 2+color:o:2] -
-                                    F[2:m-1:2, 1:n-1:2, 1+color:o-1:2] * h2) / (6.0)
-    U[1:m-1:2, 1:n-1:2, 2-color:o-1:2] = (U[0:m-2:2, 1:n-1:2, 2-color:o-1:2] +
-                                    U[2:m:2, 1:n-1:2, 2-color:o-1:2] +
-                                    U[1:m-1:2, 0:n-2:2, 2-color:o-1:2] +
-                                    U[1:m-1:2, 2:n:2, 2-color:o-1:2] +
-                                    U[1:m-1:2, 1:n-1:2, 1-color:o-2:2] +
-                                    U[1:m-1:2, 1:n-1:2, 3-color:o:2] -
-                                    F[1:m-1:2, 1:n-1:2, 2-color:o-1:2] * h2) / (6.0)
-    U[1:m-1:2, 2:n-1:2, 1+color:o-1:2] = (U[0:m-2:2, 2:n-1:2, 1+color:o-1:2] +
-                                    U[2:m:2, 2:n-1:2, 1+color:o-1:2] +
-                                    U[1:m-1:2, 1:n-2:2, 1+color:o-1:2] +
-                                    U[1:m-1:2, 3:n:2, 1+color:o-1:2] +
-                                    U[1:m-1:2, 2:n-1:2, color:o-2:2] +
-                                    U[1:m-1:2, 2:n-1:2, 2+color:o:2] -
-                                    F[1:m-1:2, 2:n-1:2, 1+color:o-1:2] * h2) / (6.0)
-    U[2:m-1:2, 2:n-1:2, 2-color:o-1:2] = (U[1:m-2:2, 2:n-1:2, 2-color:o-1:2] +
-                                    U[3:m:2, 2:n-1:2, 2-color:o-1:2] +
-                                    U[2:m-1:2, 1:n-2:2, 2-color:o-1:2] +
-                                    U[2:m-1:2, 3:n:2, 2-color:o-1:2] +
-                                    U[2:m-1:2, 2:n-1:2, 1-color:o-2:2] +
-                                    U[2:m-1:2, 2:n-1:2, 3-color:o:2] -
-                                    F[2:m-1:2, 2:n-1:2, 2-color:o-1:2] * h2) / (6.0)
+    U[2:m - 1:2, 1:n - 1:2, 1 + color:o - 1:2] = (
+        U[1:m - 2:2, 1:n - 1:2, 1 + color:o - 1:2] +
+        U[3:m:2, 1:n - 1:2, 1 + color:o - 1:2] +
+        U[2:m - 1:2, 0:n - 2:2, 1 + color:o - 1:2] +
+        U[2:m - 1:2, 2:n:2, 1 + color:o - 1:2] +
+        U[2:m - 1:2, 1:n - 1:2, color:o - 2:2] +
+        U[2:m - 1:2, 1:n - 1:2, 2 + color:o:2] -
+        F[2:m - 1:2, 1:n - 1:2, 1 + color:o - 1:2] * h2) / (6.0)
+
+    U[1:m - 1:2, 1:n - 1:2, 2 - color:o - 1:2] = (
+        U[0:m - 2:2, 1:n - 1:2, 2 - color:o - 1:2] +
+        U[2:m:2, 1:n - 1:2, 2 - color:o - 1:2] +
+        U[1:m - 1:2, 0:n - 2:2, 2 - color:o - 1:2] +
+        U[1:m - 1:2, 2:n:2, 2 - color:o - 1:2] +
+        U[1:m - 1:2, 1:n - 1:2, 1 - color:o - 2:2] +
+        U[1:m - 1:2, 1:n - 1:2, 3 - color:o:2] -
+        F[1:m - 1:2, 1:n - 1:2, 2 - color:o - 1:2] * h2) / (6.0)
+
+    U[1:m - 1:2, 2:n - 1:2, 1 + color:o - 1:2] = (
+        U[0:m - 2:2, 2:n - 1:2, 1 + color:o - 1:2] +
+        U[2:m:2, 2:n - 1:2, 1 + color:o - 1:2] +
+        U[1:m - 1:2, 1:n - 2:2, 1 + color:o - 1:2] +
+        U[1:m - 1:2, 3:n:2, 1 + color:o - 1:2] +
+        U[1:m - 1:2, 2:n - 1:2, color:o - 2:2] +
+        U[1:m - 1:2, 2:n - 1:2, 2 + color:o:2] -
+        F[1:m - 1:2, 2:n - 1:2, 1 + color:o - 1:2] * h2) / (6.0)
+
+    U[2:m - 1:2, 2:n - 1:2, 2 - color:o - 1:2] = (
+        U[1:m - 2:2, 2:n - 1:2, 2 - color:o - 1:2] +
+        U[3:m:2, 2:n - 1:2, 2 - color:o - 1:2] +
+        U[2:m - 1:2, 1:n - 2:2, 2 - color:o - 1:2] +
+        U[2:m - 1:2, 3:n:2, 2 - color:o - 1:2] +
+        U[2:m - 1:2, 2:n - 1:2, 1 - color:o - 2:2] +
+        U[2:m - 1:2, 2:n - 1:2, 3 - color:o:2] -
+        F[2:m - 1:2, 2:n - 1:2, 2 - color:o - 1:2] * h2) / (6.0)
+
 # ----------------
+
