@@ -12,7 +12,7 @@ def prolongation(e, fine_shape):
     # indicator for Dimension
     alpha = len(e.shape)
     # initialize result with respect to the wanted shape
-    w = np.empty(fine_shape)
+    w = np.zeros(fine_shape)
     # Index of the second to the last element to mention in e (depends on the
     # shape of w)
     end = e.shape[0] - (w.shape[0] + 1) % 2
@@ -51,8 +51,47 @@ def prolongation(e, fine_shape):
                              w[1:wend:2, 2:wend:2]) / 4
     # Case: Dimension 3
     elif alpha == 3:
-        # TODO
-        raise ValueError('prolongation: dimension not implemented')
+        # copy elements from e to w
+        w[:-1:2, :-1:2, :-1:2] = e[:-1, :-1, :-1]
+        w[:-1:2, -1, -1] = e[:-1, -1, -1]
+        w[-1, :-1:2, -1] = e[-1, :-1, -1]
+        w[-1, -1, :-1:2] = e[-1, -1, :-1]
+        w[:-1:2, :-1:2, -1] = e[:-1, :-1, -1]
+        w[:-1:2, -1, :-1:2] = e[:-1, -1, :-1]
+        w[-1, :-1:2, :-1:2] = e[-1, :-1, :-1]
+        w[-1, -1, -1] = e[-1, -1, -1]
+
+        # interpolate elements horizontally
+        w[:-1:2, 1:-1:2, :-1:2] = (e[:-1, :end - 1, :-1] + e[:-1, 1:end, :-1]) / 2
+        w[:-1:2, -1, 1:-1:2] = (e[:-1, -1, :end-1] + e[:-1, -1, 1:end]) / 2
+        w[:-1:2, :-1:2, 1:-1:2] = (e[:-1, :- 1, :end-1] + e[:-1, :-1, 1:end]) / 2
+        w[:-1:2, 1:-1:2, -1] = (e[:-1, :end - 1, -1] + e[:-1, 1:end, -1]) / 2
+        w[:-1:2, 1:-1:2, 1:-1:2] = (e[:-1, :end - 1, :end - 1] + e[:-1, 1:end, 1:end] +
+                                    e[:-1, :end - 1, 1:end] + e[:-1, 1:end, :end-1]) / 4
+        # special case
+        w[-1, 1:-1:2, :-1:2] = (e[-1, :end - 1, :-1] + e[-1, 1:end, :-1]) / 2
+        w[-1, -1, 1:-1:2] = (e[-1, -1, :end-1] + e[-1, -1, 1:end]) / 2
+        w[-1, :-1:2, 1:-1:2] = (e[-1, :- 1, :end-1] + e[-1, :-1, 1:end]) / 2
+        w[-1, 1:-1:2, -1] = (e[-1, :end - 1, -1] + e[-1, 1:end, -1]) / 2
+        w[-1, 1:-1:2, 1:-1:2] = (e[-1, :end - 1, :end - 1] + e[-1, 1:end, 1:end] +
+                                    e[-1, :end - 1, 1:end] + e[-1, 1:end, :end-1]) / 4
+
+        # interpolate elements vertically
+        w[1:-1:2, :-1:2, :-1:2] = (e[:end-1, :- 1, :-1] + e[1:end, :-1, :-1]) / 2
+        w[1:-1:2, -1, :-1:2] = (e[:end-1, -1, :-1] + e[1:end, -1, :-1]) / 2
+        w[1:-1:2, :-1:2, -1] = (e[:end-1, :-1, -1] + e[1:end, :-1, -1]) / 2
+        w[1:-1:2, -1, -1] = (e[:end-1, -1, -1] + e[1:end, -1, -1]) / 2
+        w[1:-1:2, -1, 1:-1:2] = (w[1:-1:2, -1, :wend-1:2] + w[1:-1:2, -1, 2:wend:2]) / 2
+        w[1:-1:2, :-1:2, 1:-1:2] = (w[1:-1:2, :-1:2, :wend-1:2] + w[1:-1:2, :-1:2, 2:wend:2]) / 2
+        w[1:-1:2, 1:-1:2, -1] = (w[1:-1:2, :wend-1:2, -1] + w[1:-1:2, 2:wend:2, -1]) / 2
+        w[1:-1:2, 1:-1:2, :-1:2] = (w[1:-1:2, :wend-1:2, :-1:2] + w[1:-1:2, 2:wend:2, :-1:2]) / 2
+        w[1:-1:2, 1:-1:2, 1:-1:2] = (w[1:-1:2, 1:-1:2, :wend-1:2] + w[1:-1:2, 1:-1:2, 2:wend:2]) / 2
+
+
+        # ol/4 + or/4 + ul/4 + ur/4
+        # ((ol+ul)/2 + (ur + ur)/2)/2
+
+        # raise ValueError('prolongation: dimension not implemented')
     # Case: Error
     else:
         raise ValueError('prolongation: invalid dimension')
@@ -79,3 +118,13 @@ def weighted_prolongation(e, fine_shape):
     else:
         raise ValueError('prolongation: invalid dimension')
     return w
+
+
+# if __name__ == "__main__":
+#     from restriction import restriction
+
+#     dim = 7
+#     A = np.arange(dim*dim*dim).reshape((dim,dim,dim))
+#     B = restriction(A)
+#     C = prolongation(B, (dim,dim,dim))
+#     print(C)

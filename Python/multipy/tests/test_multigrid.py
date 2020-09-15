@@ -10,7 +10,7 @@ from ..tools import util
 
 
 def test_MG_Restriction_Prolongation_Shapes_1D_even():
-    A = util.MatrixGenerator((100,))
+    A = util.MatrixGenerator((10,))
     B = mg.restriction(A)
     C = mg.prolongation(B, A.shape)
 
@@ -18,7 +18,7 @@ def test_MG_Restriction_Prolongation_Shapes_1D_even():
 
 
 def test_MG_Restriction_Prolongation_Shapes_1D_odd():
-    A = util.MatrixGenerator((99,))
+    A = util.MatrixGenerator((9,))
     B = mg.restriction(A)
     C = mg.prolongation(B, A.shape)
 
@@ -26,7 +26,7 @@ def test_MG_Restriction_Prolongation_Shapes_1D_odd():
 
 
 def test_MG_Restriction_Prolongation_Shapes_2D_even():
-    A = util.MatrixGenerator((100, 100))
+    A = util.MatrixGenerator((10, 10))
     B = mg.restriction(A)
     C = mg.prolongation(B, A.shape)
 
@@ -34,25 +34,23 @@ def test_MG_Restriction_Prolongation_Shapes_2D_even():
 
 
 def test_MG_Restriction_Prolongation_Shapes_2D_odd():
-    A = util.MatrixGenerator((99, 99))
+    A = util.MatrixGenerator((9, 9))
     B = mg.restriction(A)
     C = mg.prolongation(B, A.shape)
 
     assert A.shape == C.shape
 
 
-@pytest.mark.skip("Not yet implemented")
 def test_MG_Restriction_Prolongation_Shapes_3D_even():
-    A = util.MatrixGenerator((100, 100, 100))
+    A = util.MatrixGenerator((10, 10, 10))
     B = mg.restriction(A)
     C = mg.prolongation(B, A.shape)
 
     assert A.shape == C.shape
 
 
-@pytest.mark.skip("Not yet implemented")
 def test_MG_Restriction_Prolongation_Shapes_3D_odd():
-    A = util.MatrixGenerator((99, 99, 99))
+    A = util.MatrixGenerator((9, 9, 9))
     B = mg.restriction(A)
     C = mg.prolongation(B, A.shape)
 
@@ -232,7 +230,7 @@ def test_MG_weighted_restriction_2D_random8():
     assert np.allclose(ret, correct, atol=1e-8)
 
 
-def test_MG_prolongation():
+def test_MG_prolongation_2D():
     A = np.random.uniform(0, 1, (4, 4))
     ret6 = mg.prolongation(A, (6, 6))
     ret7 = mg.prolongation(A, (7, 7))
@@ -250,3 +248,54 @@ def test_MG_prolongation():
     assert np.array_equal(ret7[::2, :1], A[::, :1])
     assert np.array_equal(ret7[-1::, ::2], A[-1::, ::])
     assert np.array_equal(ret7[::2, -1::], A[::, -1::])
+
+
+def test_MG_prolongation_3D():
+    """check if values are copied correctly"""
+
+    A = np.random.uniform(0, 1, (4, 4, 4))
+    ret6 = mg.prolongation(A, (6, 6, 6))
+    ret7 = mg.prolongation(A, (7, 7, 7))
+
+    assert np.array_equal(ret6[:-1:2, :-1:2, :-1:2], A[:-1, :-1, :-1])
+    assert np.array_equal(ret6[-1, :-1:2, :-1:2], A[-1, :-1, :-1])
+    assert np.array_equal(ret6[:-1:2, -1, :-1:2], A[:-1, -1, :-1])
+    assert np.array_equal(ret6[:-1:2, :-1:2, -1], A[:-1, :-1, -1])
+
+    assert np.array_equal(ret7[::2, ::2, ::2], A)
+
+
+def test_MG_Restriction_Prolongation_1D():
+    A1 = np.arange(9)
+    A2 = np.arange(10)
+    B1 = mg.restriction(A1)
+    B2 = mg.restriction(A2)
+    C1 = mg.prolongation(B1, A1.shape)
+    C2 = mg.prolongation(B2, A2.shape)
+
+    assert np.array_equal(A1, C1)
+    assert np.array_equal(A2, C2)
+
+
+def test_MG_Restriction_Prolongation_2D():
+    A1 = np.arange(9*9).reshape((9,9))
+    A2 = np.arange(10*10).reshape((10,10))
+    B1 = mg.restriction(A1)
+    B2 = mg.restriction(A2)
+    C1 = mg.prolongation(B1, A1.shape)
+    C2 = mg.prolongation(B2, A2.shape)
+
+    assert np.array_equal(A1, C1)
+    assert np.array_equal(A2, C2)
+
+
+def test_MG_Restriction_Prolongation_3D():
+    A1 = np.arange(9*9*9).reshape((9,9,9))
+    A2 = np.arange(10*10*10).reshape((10,10,10))
+    B1 = mg.restriction(A1)
+    B2 = mg.restriction(A2)
+    C1 = mg.prolongation(B1, A1.shape)
+    C2 = mg.prolongation(B2, A2.shape)
+
+    assert np.array_equal(A1, C1)
+    assert np.array_equal(A2, C2)
