@@ -99,9 +99,10 @@ void sweep(T, size_t Dim : 2, Color color)(in Slice!(T*, 2) F, Slice!(T*, 2) U, 
 
     foreach (i; 1 .. m - 1)
     {
+        const flatrow = i * m;
         for (size_t j = 1 + (i + 1 + color) % 2; j < n - 1; j += 2)
         {
-            auto flatindex = i * m + j;
+            const flatindex = flatrow + j;
             UF[flatindex] = (
                     UF[flatindex - m] +
                     UF[flatindex + m] +
