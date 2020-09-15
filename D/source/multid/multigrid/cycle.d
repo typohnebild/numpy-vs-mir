@@ -142,6 +142,13 @@ protected:
     }
 
 public:
+    /++
+       Params:
+        F = Dim-slice as righthandside
+        mu = indicator for type of cycle
+        l = the depth of the multigrid cycle if it is set to 0, the maxmium depth is choosen
+        h = is the distance between the grid points if set to 0 1 / F.shape[0] is used
+    +/
     this(Slice!(T*, Dim) F, uint mu, uint l, T h)
     {
         super(F, mu, l, h);
@@ -163,6 +170,7 @@ unittest
     import std.algorithm : fill, all;
 
     const size_t N = 10;
+    immutable h = 1.0 / N;
 
     auto U = slice!double([N, N], 1.0);
     U.field.fill(generate!(() => uniform(0.0, 1.0)));
@@ -172,11 +180,24 @@ unittest
     U[1 .. $, $ - 1] = 0.0;
 
     auto F = slice!double([N, N], 0.0);
-    auto p = new PoissonCycle!(double, 2, 2, 2)(F, 2, 0, 0);
+    import multid.tools.apply_poisson : compute_residual;
+    import multid.tools.norm : nrmL2;
+
+    auto norm_before = compute_residual(F, U, h).nrmL2;
+    F[0][0 .. $] = 1.0;
+    F[1 .. $, 0] = 1.0;
+    F[$ - 1][1 .. $] = 0.0;
+    F[1 .. $, $ - 1] = 0.0;
+    auto p = new PoissonCycle!(double, 2, 2, 2)(F, 2, 0, h);
     p.cycle(U);
+
+    auto norm_after = compute_residual(F, U, h).nrmL2;
 
     assert(U[0][0 .. $].all!"a == 1.0");
     assert(U[1 .. $, 0].all!"a == 1.0");
     assert(U[$ - 1][1 .. $].all!"a== 0.0");
     assert(U[1 .. $, $ - 1].all!"a == 0.0");
+
+    // it should be at least a bit smaller than before
+    assert(norm_after <= norm_before);
 }
