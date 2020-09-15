@@ -3,6 +3,13 @@ module multid.gaussseidel.slow_sweep;
 import mir.ndslice : slice, sliced, Slice, strided;
 import multid.gaussseidel.redblack : Color;
 
+void slow_sweep(T, size_t Dim : 1, Color color)(in Slice!(T*, 1) F, Slice!(T*, 1) U, in T h2)
+{
+}
+void slow_sweep(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 3) U, in T h2)
+{
+}
+
 void slow_sweep(T, size_t Dim : 2, Color color)(in Slice!(T*, 2) F, Slice!(T*, 2) U, in T h2)
 {
     const auto m = F.shape[0];
