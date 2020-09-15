@@ -63,6 +63,13 @@ def simulate_2D_multigrid(N, iter_cycle=5, numba=True):
 
 
 @util.timer
+def simulate_3D_multigrid(N, iter_cycle=5, numba=True):
+    U = hm.initMap_3D(N)
+    F = hm.heat_sources_3D(N)
+    return poisson_multigrid(F, U, 0, 2, 2, 2, iter_cycle, numba=numba)
+
+
+@util.timer
 def simulate_2D_general_multigrid(N, iter_cycle=5):
     grid = hm.initMap_2D(N)
     rhs = hm.heat_sources_2D(N)

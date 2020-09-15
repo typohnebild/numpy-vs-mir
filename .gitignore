@@ -19,3 +19,4 @@ multid-test-library
 multid-static
 trace.*
 *.log
+*problem_3D_100.npy
