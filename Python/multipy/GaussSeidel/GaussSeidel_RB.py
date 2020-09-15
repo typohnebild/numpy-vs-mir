@@ -74,14 +74,10 @@ def sweep_1D(color, F, U, h2):
     @param h2 is distance between grid points squared
     """
     n = F.shape[0]
-    if color == 1:
-        # red
-        U[1:n - 1:2] = (U[0:n - 2:2] + U[2::2] - F[1:n - 1:2] * h2) / (2.0)
-    else:
-        # black
-        U[2:n - 1:2] = (U[1:n - 2:2] + U[3::2] - F[2:n - 1:2] * h2) / (2.0)
+    U[2-color:n - 1:2] = (U[1-color:n - 2:2] + U[3-color::2] - F[2-color:n - 1:2] * h2) / (2.0)
+# ----------------
 
-
+# --- 2D Fall ---
 @jit(nopython=True, fastmath=True)
 def sweep_2D(color, F, U, h2):
     """
@@ -92,52 +88,56 @@ def sweep_2D(color, F, U, h2):
 
     m, n = F.shape
 
-    if color == 1:
-        # red
-        U[1:m - 1:2, 2:n - 1:2] = (U[0:m - 2:2, 2:n - 1:2] +
-                                   U[2::2, 2:n - 1:2] +
-                                   U[1:m - 1:2, 1:n - 2:2] +
-                                   U[1:m - 1:2, 3::2] -
-                                   F[1:m - 1:2, 2:n - 1:2] * h2) / (4.0)
-        U[2:m - 1:2, 1:n - 1:2] = (U[1:m - 2:2, 1:n - 1:2] +
-                                   U[3::2, 1:n - 1:2] +
-                                   U[2:m - 1:2, 0:n - 2:2] +
-                                   U[2:m - 1:2, 2::2] -
-                                   F[2:m - 1:2, 1:n - 1:2] * h2) / (4.0)
-    else:
-        # black
-        U[1:m - 1:2, 1:n - 1:2] = (U[0:m - 2:2, 1:n - 1:2] +
-                                   U[2::2, 1:n - 1:2] +
-                                   U[1:m - 1:2, 0:n - 2:2] +
-                                   U[1:m - 1:2, 2::2] -
-                                   F[1:m - 1:2, 1:n - 1:2] * h2) / (4.0)
-        U[2:m - 1:2, 2:n - 1:2] = (U[1:m - 2:2, 2:n - 1:2] +
-                                   U[3::2, 2:n - 1:2] +
-                                   U[2:m - 1:2, 1:n - 2:2] +
-                                   U[2:m - 1:2, 3::2] -
-                                   F[2:m - 1:2, 2:n - 1:2] * h2) / (4.0)
+    U[1:m - 1:2, 1+color:n - 1:2] = (U[0:m - 2:2, 1+color:n - 1:2] +
+                                U[2::2, 1+color:n - 1:2] +
+                                U[1:m - 1:2, color:n - 2:2] +
+                                U[1:m - 1:2, 2+color::2] -
+                                F[1:m - 1:2, 1+color:n - 1:2] * h2) / (4.0)
+    U[2:m - 1:2, 2-color:n - 1:2] = (U[1:m - 2:2, 2-color:n - 1:2] +
+                                U[3::2, 2-color:n - 1:2] +
+                                U[2:m - 1:2, 1-color:n - 2:2] +
+                                U[2:m - 1:2, 3-color::2] -
+                                F[2:m - 1:2, 2-color:n - 1:2] * h2) / (4.0)
 # ----------------
 
 
 # --- 3D Fall ---
 @jit(nopython=True, fastmath=True)
-def sweep_3D(color, F, U, h):
+def sweep_3D(color, F, U, h2):
     """
     Does the sweeps
     @param color 1 = red 0 for black
     @param h is distance between grid points
     """
 
-    m, n, o = F.shape
+    m, n, o= F.shape
 
-    for k in range(1, o - 1):
-        for j in range(1, n - 1):
-            for i in range(1, m - 1):
-                if (i + j + k) % 2 == color:
-                    U[i, j, k] = (U[i - 1, j, k] +
-                                  U[i + 1, j, k] +
-                                  U[i, j - 1, k] +
-                                  U[i, j + 1, k] +
-                                  U[i, j, k - 1] +
-                                  U[i, j, k + 1] -
-                                  F[i, j, k]) / 6.0
+    U[2:m-1:2, 1:n-1:2, 1+color:o-1:2] = (U[1:m-2:2, 1:n-1:2, 1+color:o-1:2] +
+                                    U[3:m:2, 1:n-1:2, 1+color:o-1:2] +
+                                    U[2:m-1:2, 0:n-2:2, 1+color:o-1:2] +
+                                    U[2:m-1:2, 2:n:2, 1+color:o-1:2] +
+                                    U[2:m-1:2, 1:n-1:2, color:o-2:2] +
+                                    U[2:m-1:2, 1:n-1:2, 2+color:o:2] -
+                                    F[2:m-1:2, 1:n-1:2, 1+color:o-1:2] * h2) / (6.0)
+    U[1:m-1:2, 1:n-1:2, 2-color:o-1:2] = (U[0:m-2:2, 1:n-1:2, 2-color:o-1:2] +
+                                    U[2:m:2, 1:n-1:2, 2-color:o-1:2] +
+                                    U[1:m-1:2, 0:n-2:2, 2-color:o-1:2] +
+                                    U[1:m-1:2, 2:n:2, 2-color:o-1:2] +
+                                    U[1:m-1:2, 1:n-1:2, 1-color:o-2:2] +
+                                    U[1:m-1:2, 1:n-1:2, 3-color:o:2] -
+                                    F[1:m-1:2, 1:n-1:2, 2-color:o-1:2] * h2) / (6.0)
+    U[1:m-1:2, 2:n-1:2, 1+color:o-1:2] = (U[0:m-2:2, 2:n-1:2, 1+color:o-1:2] +
+                                    U[2:m:2, 2:n-1:2, 1+color:o-1:2] +
+                                    U[1:m-1:2, 1:n-2:2, 1+color:o-1:2] +
+                                    U[1:m-1:2, 3:n:2, 1+color:o-1:2] +
+                                    U[1:m-1:2, 2:n-1:2, color:o-2:2] +
+                                    U[1:m-1:2, 2:n-1:2, 2+color:o:2] -
+                                    F[1:m-1:2, 2:n-1:2, 1+color:o-1:2] * h2) / (6.0)
+    U[2:m-1:2, 2:n-1:2, 2-color:o-1:2] = (U[1:m-2:2, 2:n-1:2, 2-color:o-1:2] +
+                                    U[3:m:2, 2:n-1:2, 2-color:o-1:2] +
+                                    U[2:m-1:2, 1:n-2:2, 2-color:o-1:2] +
+                                    U[2:m-1:2, 3:n:2, 2-color:o-1:2] +
+                                    U[2:m-1:2, 2:n-1:2, 1-color:o-2:2] +
+                                    U[2:m-1:2, 2:n-1:2, 3-color:o:2] -
+                                    F[2:m-1:2, 2:n-1:2, 2-color:o-1:2] * h2) / (6.0)
+# ----------------

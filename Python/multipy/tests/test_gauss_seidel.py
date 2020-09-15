@@ -223,3 +223,53 @@ def test_sweep_2D_black():
     sweep_2D.py_func(color, F, U2, h * h)
 
     assert np.allclose(U1, U2)
+
+
+def test_sweep_3D_black():
+    N = 10
+    F = util.MatrixGenerator((N, N, N))
+    U1 = util.MatrixGenerator((N, N, N))
+    U2 = U1.copy()
+    h = 1 / N
+    color = 0
+    m, n, o = F.shape
+
+    for k in range(1, o - 1):
+        for j in range(1, n - 1):
+            for i in range(1, m - 1):
+                if (i + j + k) % 2 == color:
+                    U2[i, j, k] = (U2[i - 1, j, k] +
+                                  U2[i + 1, j, k] +
+                                  U2[i, j - 1, k] +
+                                  U2[i, j + 1, k] +
+                                  U2[i, j, k - 1] +
+                                  U2[i, j, k + 1] -
+                                  F[i, j, k] * h * h) / 6.0
+    sweep_3D.py_func(color, F, U1, h * h)
+    print (U1)
+    assert np.allclose(U1, U2)
+
+
+def test_sweep_3D_red():
+    N = 5
+    F = util.MatrixGenerator((N, N, N))
+    U1 = util.MatrixGenerator((N, N, N))
+    U2 = U1.copy()
+    h = 1 / N
+    color = 1
+    m, n, o = F.shape
+
+    for k in range(1, o - 1):
+        for j in range(1, n - 1):
+            for i in range(1, m - 1):
+                if (i + j + k) % 2 == color:
+                    U2[i, j, k] = (U2[i - 1, j, k] +
+                                  U2[i + 1, j, k] +
+                                  U2[i, j - 1, k] +
+                                  U2[i, j + 1, k] +
+                                  U2[i, j, k - 1] +
+                                  U2[i, j, k + 1] -
+                                  F[i, j, k] * h * h) / 6.0
+    sweep_3D.py_func(color, F, U1, h * h)
+    print (U1)
+    assert np.allclose(U1, U2)
