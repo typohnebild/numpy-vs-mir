@@ -8,6 +8,7 @@ problempath=${2:-'../problems/'}
 
 get_infos(){
     ../scripts/getinfos.sh "np"
+    echo "#size:dim:time:cycles:error:flops*:"
 }
 
 [ -e "${OUTFILE}_1_numba" ] || get_infos >> "${OUTFILE}_1_numba" || exit 1
@@ -27,6 +28,7 @@ benchmark(){
     export NUMEXPR_NUM_THREADS=$threads
     export VECLIB_MAXIMUM_THREADS=$threads
     export OMP_NUM_THREADS=$threads
+    export NUMBA_NUM_THREADS=$threads
     cmd="./measure.py -p $problem -d $delay $numba"
     if [ "$perf" = true ]
     then
