@@ -49,19 +49,20 @@ benchmark(){
 
 paranoid=$(cat /proc/sys/kernel/perf_event_paranoid)
 perf=false
+reps=3
 if [ "$paranoid" -lt 3 ]  && perf list eventgroups | grep -q FLOPS
 then
     perf=true
 fi
+for problem in "$problempath/"*.npy; do
+    dim=$(echo "$problem" | awk -F'_' '{print $2}')
+    N=$(echo "$problem" | awk -F'_' '{print $3}')
+    N=${N%%\.npy}
 
-for threads in 1 8; do
-    for numba in "-n" " "; do
+    for threads in 1 8; do
+        for numba in "-n" " "; do
 
-        for problem in "$problempath/"*.npy; do
-            dim=$(echo "$problem" | awk -F'_' '{print $2}')
-            N=$(echo "$problem" | awk -F'_' '{print $3}')
-            N=${N%%\.npy}
-            for _ in $(seq 5); do
+            for _ in $(seq $reps); do
                 # x=$(perf stat -M GFLOPS ./measure.py $N "$numba" 2>&1 | grep -i 'fp\|elapsed' | awk '{ print $1}' | tr '\n' ':')
                 EXTENSION=$([ "$numba" = " " ] && echo "nonumba" || echo "numba")
                 x=$(benchmark $perf $threads "$problem" "$numba")
