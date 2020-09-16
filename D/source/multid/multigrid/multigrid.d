@@ -1,7 +1,6 @@
 module multid.multigrid.multigrid;
 
-import std.stdio;
-
+import std.experimental.logger : logf, infof;
 import multid.multigrid.cycle;
 import mir.ndslice : Slice;
 
@@ -15,10 +14,10 @@ Slice!(T*, Dim) multigrid(T, size_t Dim)(Cycle!(T, Dim) cycle, Slice!(T*, Dim) U
 
         U = cycle.cycle(U);
         auto norm = cycle.norm(U);
-        writefln("Residual has a L2-Norm of %f after %d iterations", norm, i);
+        logf("Residual has a L2-Norm of %f after %d iterations", norm, i);
         if (norm <= eps)
         {
-            writefln("MG converged after %d iterations with %f error", i, norm);
+            infof("MG converged after %d iterations with %f error", i, norm);
             break;
         }
     }

@@ -1,6 +1,6 @@
 {
   "name": "multid",
-  "mainSourceFile" : "source/app.d",
+  "mainSourceFile": "source/app.d",
   "dependencies": {
     "mir-algorithm": "~>3.9.6",
     "mir-random": "~>2.2.14",
@@ -17,7 +17,7 @@
       "name": "multid-static",
       "targetType": "executable",
       "targetName": "multid-static",
-      "compiler": "ldc",
+      "compiler": "ldc2",
       "dflags-ldc": ["--static"],
       "buildOptiones": ["releaseMode", "optimize", "inline", "noBoundsCheck"]
     }

@@ -4,6 +4,7 @@ import std.datetime.stopwatch : StopWatch, msecs;
 import std.getopt : getopt;
 import core.thread : Thread;
 import std.conv : to;
+import std.experimental.logger : info, globalLogLevel, LogLevel;
 
 import loadproblem : npyload, getDim;
 import multid.multigrid.multigrid : poisson_multigrid;
@@ -29,6 +30,8 @@ void main(string[] argv)
         sw.reset;
     }
 
+    globalLogLevel(LogLevel.info);
+
     sw.reset;
     sw.start;
 
@@ -39,8 +42,13 @@ void main(string[] argv)
         poisson_multigrid!(double, 1, 2, 2)(UF1[1].slice, UF1[0].slice, 0, 2, 1);
     }
 
+    bool verbose = false;
     string path = default_path;
-    getopt(argv, "p|P", &path, "d|D", &delay);
+    getopt(argv, "p|P", &path, "d|D", &delay, "v", &verbose);
+    if (verbose)
+    {
+        globalLogLevel(LogLevel.all);
+    }
 
     const uint dim = getDim(path);
 
@@ -69,7 +77,7 @@ void main(string[] argv)
         throw new Exception("wrong dimension!");
     }
     sw.stop;
-    writeln(sw.peek
+    info(sw.peek
             .total!"msecs"
             .to!double / 1_000.0);
 }
