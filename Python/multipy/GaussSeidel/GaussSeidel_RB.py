@@ -6,8 +6,8 @@ from numba import jit
 from ..tools.apply_poisson import apply_poisson
 from ..tools.util import timer
 
-logger = logging.getLogger("GS")
-logger.setLevel(logging.WARNING)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 # @timer
@@ -54,7 +54,7 @@ def GS_RB(
             r = F - apply_poisson(U, h)
             norm = np.linalg.norm(r)
             if norm <= eps:
-                logger.info(f"converged after {it} iterations with {norm:.4}")
+                logger.debug(f"converged after {it} iterations with {norm:.4}")
                 break
 
         # rote Halbiteration
@@ -152,4 +152,3 @@ def sweep_3D(color, F, U, h2):
         F[2:m - 1:2, 2:n - 1:2, 2 - color:o - 1:2] * h2) / (6.0)
 
 # ----------------
-

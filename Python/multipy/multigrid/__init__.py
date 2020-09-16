@@ -6,8 +6,8 @@ from .cycle import GeneralCycle, PoissonCycle
 from .prolongation import prolongation
 from .restriction import restriction, weighted_restriction
 
-logger = logging.getLogger('MG')
-logger.setLevel(logging.DEBUG)
+logger = logging.getLogger(__name__)
+# logger.setLevel(logging.INFO)
 
 
 def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle, numba=True):
@@ -33,7 +33,7 @@ def multigrid(cycle, U, eps, iter_cycle):
         logger.debug(f"Residual has a L2-Norm of {norm:.4} after {i} MGcycle")
         if norm <= eps:
             logger.info(
-                f"MG converged after {i} iterations with {norm:.4} error")
+                f"converged after {i} cycle with {norm:.4} error")
             break
     return U
 

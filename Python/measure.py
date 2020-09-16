@@ -3,9 +3,14 @@
 import sys
 import optparse
 import time
+import logging
+
 
 from multipy.multigrid import poisson_multigrid
 from multipy.tools.util import load_problem, timer
+
+
+logging.basicConfig(level=logging.INFO)
 
 
 def measure(F, U, numba=True):
@@ -33,9 +38,11 @@ def main():
     # problems
     U1, F1 = load_problem(default_problem)
     poisson_multigrid(F1, U1, 0, 1, 1, 1, 1, numba=options.numba)
+
     if options.verbose:
-        import logging
-        logging.basicConfig(level=logging.INFO)
+        logging.getLogger('multipy.multigrid').setLevel(level=logging.DEBUG)
+    else:
+        logging.getLogger('multipy.multigrid').setLevel(level=logging.INFO)
 
     rest = options.delay / 1000 - (time.perf_counter() - start)
     if 0 < rest:
@@ -43,7 +50,7 @@ def main():
 
     start = time.perf_counter()
     measure(F, U, options.numba)
-    print(time.perf_counter() - start)
+    logging.info(time.perf_counter() - start)
 
 
 if __name__ == '__main__':
