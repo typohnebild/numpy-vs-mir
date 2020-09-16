@@ -33,7 +33,7 @@ def multigrid(cycle, U, eps, iter_cycle):
         logger.debug(f"Residual has a L2-Norm of {norm:.4} after {i} MGcycle")
         if norm <= eps:
             logger.info(
-                f"converged after {i} cycle with {norm:.4} error")
+                f"converged after {i} cycles with {norm:.4} error")
             break
     return U
 
