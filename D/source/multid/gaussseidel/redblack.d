@@ -23,10 +23,10 @@ enum Color
 This is a Gauss Seidel Red Black implementation
 it solves AU = F, with A being a poisson matrix like this
         1 1 1 1 .. 1
-        1 4 1 0 .. 1
-        1 1 4 1 .. 1
+        1 4 -1 0 .. 1
+        1 -1 4 -1 .. 1
         .          .
-        . 0..1 4 1 .
+        . 0..-1 4 1 .
         1 .. 1 1 1 1
 so the borders of U remain unchanged
 Params:

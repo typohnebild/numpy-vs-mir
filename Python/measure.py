@@ -18,19 +18,33 @@ def measure(F, U, numba=True):
 
 
 def main():
-    default_problem = '../problems/problem_1D_100.npy'
     start = time.perf_counter()
+
+    default_problem = '../problems/problem_1D_100.npy'
+
     parser = optparse.OptionParser()
-    parser.add_option('-n', action='store_true', dest='numba', default=False)
-    parser.add_option('-v', action='store_true', dest='verbose', default=False)
+    parser.add_option(
+        '-n',
+        action='store_true',
+        dest='numba',
+        default=False,
+        help='activates numba')
+    parser.add_option(
+        '-v',
+        action='store_true',
+        dest='verbose',
+        default=False,
+        help='makes it more verbose')
     parser.add_option(
         '-d',
         action='store',
         dest='delay',
         type=int,
-        default=500)
+        default=500,
+        help='delays the start of the run by DELAY ms (default:500)')
     parser.add_option('-p', action='store', dest='path',
-                      default=default_problem)
+                      default=default_problem,
+                      help='path to a problem (npy file) that is loaded')
     options, _ = parser.parse_args()
 
     U, F = load_problem(options.path)
