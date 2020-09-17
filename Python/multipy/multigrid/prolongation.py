@@ -3,10 +3,10 @@ import numpy as np
 
 def prolongation(e, fine_shape):
     """
-        This interpolates/ prolongates to a grid of fine_shape
-        @param e
-        @param fine_shape targeted shape
-        @return grid with fine_shape
+    This interpolates/ prolongates to a grid of fine_shape
+    @param e
+    @param fine_shape targeted shape
+    @return grid with fine_shape
     """
 
     # indicator for Dimension
@@ -25,7 +25,7 @@ def prolongation(e, fine_shape):
         # copy e to every second index in w
         w[:-1:2] = e[:-1]
         # Interpolate the missing elements in w with their two neighbors
-        w[1:-1:2] = (e[:end - 1] + e[1:end]) / 2
+        w[1:-1:2] = (e[: end - 1] + e[1:end]) / 2
         # set last index since this one was skipped before
         w[-1] = e[-1]
     # Case: Dimension 2
@@ -37,18 +37,20 @@ def prolongation(e, fine_shape):
         w[-1, -1] = e[-1, -1]
 
         # interpolate elements horizontally
-        w[:-1:2, 1:-1:2] = (e[:-1, :end - 1] + e[:-1, 1:end]) / 2
-        w[-1, 1:-1:2] = (e[-1, :end - 1] + e[-1, 1:end]) / 2
+        w[:-1:2, 1:-1:2] = (e[:-1, : end - 1] + e[:-1, 1:end]) / 2
+        w[-1, 1:-1:2] = (e[-1, : end - 1] + e[-1, 1:end]) / 2
 
         # interpolate elements vertically
-        w[1:-1:2, :-1:2] = (e[:end - 1, :-1] + e[1:end, :-1]) / 2
-        w[1:-1:2, -1] = (e[:end - 1, -1] + e[1:end, -1]) / 2
+        w[1:-1:2, :-1:2] = (e[: end - 1, :-1] + e[1:end, :-1]) / 2
+        w[1:-1:2, -1] = (e[: end - 1, -1] + e[1:end, -1]) / 2
 
         # interpolate missing elements: average of 4 neighbors
-        w[1:-1:2, 1:-1:2] = (w[2:wend:2, 1:wend:2] +
-                             w[:wend - 1:2, 1:wend:2] +
-                             w[1:wend:2, :wend - 1:2] +
-                             w[1:wend:2, 2:wend:2]) / 4
+        w[1:-1:2, 1:-1:2] = (
+            w[2:wend:2, 1:wend:2] +
+            w[: wend - 1: 2, 1:wend:2] +
+            w[1:wend:2, : wend - 1: 2] +
+            w[1:wend:2, 2:wend:2]
+        ) / 4
     # Case: Dimension 3
     elif alpha == 3:
         # copy elements from e to w
@@ -62,39 +64,58 @@ def prolongation(e, fine_shape):
         w[-1, -1, -1] = e[-1, -1, -1]
 
         # interpolate elements horizontally
-        w[:-1:2, 1:-1:2, :-1:2] = (e[:-1, :end - 1, :-1] + e[:-1, 1:end, :-1]) / 2
-        w[:-1:2, -1, 1:-1:2] = (e[:-1, -1, :end-1] + e[:-1, -1, 1:end]) / 2
-        w[:-1:2, :-1:2, 1:-1:2] = (e[:-1, :- 1, :end-1] + e[:-1, :-1, 1:end]) / 2
-        w[:-1:2, 1:-1:2, -1] = (e[:-1, :end - 1, -1] + e[:-1, 1:end, -1]) / 2
-        w[:-1:2, 1:-1:2, 1:-1:2] = (e[:-1, :end - 1, :end - 1] + e[:-1, 1:end, 1:end] +
-                                    e[:-1, :end - 1, 1:end] + e[:-1, 1:end, :end-1]) / 4
+        w[:-1:2, 1:-1:2, :-1:2] = (
+            e[:-1, : end - 1, :-1] + e[:-1, 1:end, :-1]
+        ) / 2
+        w[:-1:2, -1, 1:-1:2] = (e[:-1, -1, : end - 1] + e[:-1, -1, 1:end]) / 2
+        w[:-1:2, :-1:2, 1:-1:2] = (
+            e[:-1, :-1, : end - 1] + e[:-1, :-1, 1:end]
+        ) / 2
+        w[:-1:2, 1:-1:2, -1] = (e[:-1, : end - 1, -1] + e[:-1, 1:end, -1]) / 2
+        w[:-1:2, 1:-1:2, 1:-1:2] = (
+            e[:-1, : end - 1, : end - 1] +
+            e[:-1, 1:end, 1:end] +
+            e[:-1, : end - 1, 1:end] +
+            e[:-1, 1:end, : end - 1]) / 4
+
         # special case
-        w[-1, 1:-1:2, :-1:2] = (e[-1, :end - 1, :-1] + e[-1, 1:end, :-1]) / 2
-        w[-1, -1, 1:-1:2] = (e[-1, -1, :end-1] + e[-1, -1, 1:end]) / 2
-        w[-1, :-1:2, 1:-1:2] = (e[-1, :- 1, :end-1] + e[-1, :-1, 1:end]) / 2
-        w[-1, 1:-1:2, -1] = (e[-1, :end - 1, -1] + e[-1, 1:end, -1]) / 2
-        w[-1, 1:-1:2, 1:-1:2] = (e[-1, :end - 1, :end - 1] + e[-1, 1:end, 1:end] +
-                                    e[-1, :end - 1, 1:end] + e[-1, 1:end, :end-1]) / 4
+        w[-1, 1:-1:2, :-1:2] = (e[-1, : end - 1, :-1] + e[-1, 1:end, :-1]) / 2
+        w[-1, -1, 1:-1:2] = (e[-1, -1, : end - 1] + e[-1, -1, 1:end]) / 2
+        w[-1, :-1:2, 1:-1:2] = (e[-1, :-1, : end - 1] + e[-1, :-1, 1:end]) / 2
+        w[-1, 1:-1:2, -1] = (e[-1, : end - 1, -1] + e[-1, 1:end, -1]) / 2
+        w[-1, 1:-1:2, 1:-1:2] = (
+            e[-1, : end - 1, : end - 1] +
+            e[-1, 1:end, 1:end] +
+            e[-1, : end - 1, 1:end] +
+            e[-1, 1:end, : end - 1]
+        ) / 4
 
         # interpolate elements vertically
-        w[1:-1:2, :-1:2, :-1:2] = (e[:end-1, :- 1, :-1] + e[1:end, :-1, :-1]) / 2
-        w[1:-1:2, -1, :-1:2] = (e[:end-1, -1, :-1] + e[1:end, -1, :-1]) / 2
-        w[1:-1:2, :-1:2, -1] = (e[:end-1, :-1, -1] + e[1:end, :-1, -1]) / 2
-        w[1:-1:2, -1, -1] = (e[:end-1, -1, -1] + e[1:end, -1, -1]) / 2
-        w[1:-1:2, -1, 1:-1:2] = (w[1:-1:2, -1, :wend-1:2] + w[1:-1:2, -1, 2:wend:2]) / 2
-        w[1:-1:2, :-1:2, 1:-1:2] = (w[1:-1:2, :-1:2, :wend-1:2] + w[1:-1:2, :-1:2, 2:wend:2]) / 2
-        w[1:-1:2, 1:-1:2, -1] = (w[1:-1:2, :wend-1:2, -1] + w[1:-1:2, 2:wend:2, -1]) / 2
-        w[1:-1:2, 1:-1:2, :-1:2] = (w[1:-1:2, :wend-1:2, :-1:2] + w[1:-1:2, 2:wend:2, :-1:2]) / 2
-        w[1:-1:2, 1:-1:2, 1:-1:2] = (w[1:-1:2, 1:-1:2, :wend-1:2] + w[1:-1:2, 1:-1:2, 2:wend:2]) / 2
+        w[1:-1:2, :-1:2, :-1:2] = (
+            e[: end - 1, :-1, :-1] + e[1:end, :-1, :-1]
+        ) / 2
+        w[1:-1:2, -1, :-1:2] = (e[: end - 1, -1, :-1] + e[1:end, -1, :-1]) / 2
+        w[1:-1:2, :-1:2, -1] = (e[: end - 1, :-1, -1] + e[1:end, :-1, -1]) / 2
+        w[1:-1:2, -1, -1] = (e[: end - 1, -1, -1] + e[1:end, -1, -1]) / 2
+        w[1:-1:2, -1, 1:-1:2] = (
+            w[1:-1:2, -1, : wend - 1: 2] + w[1:-1:2, -1, 2:wend:2]
+        ) / 2
+        w[1:-1:2, :-1:2, 1:-1:2] = (
+            w[1:-1:2, :-1:2, : wend - 1: 2] + w[1:-1:2, :-1:2, 2:wend:2]
+        ) / 2
+        w[1:-1:2, 1:-1:2, -1] = (
+            w[1:-1:2, : wend - 1: 2, -1] + w[1:-1:2, 2:wend:2, -1]
+        ) / 2
+        w[1:-1:2, 1:-1:2, :-1:2] = (
+            w[1:-1:2, : wend - 1: 2, :-1:2] + w[1:-1:2, 2:wend:2, :-1:2]
+        ) / 2
+        w[1:-1:2, 1:-1:2, 1:-1:2] = (
+            w[1:-1:2, 1:-1:2, : wend - 1: 2] + w[1:-1:2, 1:-1:2, 2:wend:2]
+        ) / 2
 
-
-        # ol/4 + or/4 + ul/4 + ur/4
-        # ((ol+ul)/2 + (ur + ur)/2)/2
-
-        # raise ValueError('prolongation: dimension not implemented')
     # Case: Error
     else:
-        raise ValueError('prolongation: invalid dimension')
+        raise ValueError("prolongation: invalid dimension")
     return w
 
 
@@ -107,24 +128,15 @@ def weighted_prolongation(e, fine_shape):
 
     # Case: Dimension 1
     if alpha == 1:
-        raise ValueError('prolongation: dimension not implemented')
+        raise ValueError("prolongation: dimension not implemented")
     # Case: Dimension 2
     elif alpha == 2:
-        raise ValueError('prolongation: dimension not implemented')
+        raise ValueError("prolongation: dimension not implemented")
     # Case: Dimension 3
     elif alpha == 3:
-        raise ValueError('prolongation: dimension not implemented')
+        raise ValueError("prolongation: dimension not implemented")
     # Case: Error
     else:
-        raise ValueError('prolongation: invalid dimension')
+        raise ValueError("prolongation: invalid dimension")
     return w
 
-
-# if __name__ == "__main__":
-#     from restriction import restriction
-
-#     dim = 7
-#     A = np.arange(dim*dim*dim).reshape((dim,dim,dim))
-#     B = restriction(A)
-#     C = prolongation(B, (dim,dim,dim))
-#     print(C)

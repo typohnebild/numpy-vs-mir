@@ -17,8 +17,11 @@ import multid.gaussseidel.redblack : GS_RB;
 +/
 void main(string[] argv)
 {
-    uint delay = 500;
     StopWatch sw;
+    sw.reset;
+    sw.start;
+
+    uint delay = 500;
     void wait_till()
     {
         auto rest = delay - sw.peek.total!"msecs";
@@ -31,9 +34,6 @@ void main(string[] argv)
     }
 
     globalLogLevel(LogLevel.info);
-
-    sw.reset;
-    sw.start;
 
     immutable string default_path = "../problems/problem_1D_100.npy";
     void warmup()
