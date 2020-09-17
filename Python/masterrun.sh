@@ -5,7 +5,7 @@ problempath=${1:-'../problems/'}
 # source of virtual Python environment
 run_virtual(){
 	. ./venv/bin/activate || exit 1
-	./run.sh "virtual" "$problempath"
+	./run.sh "openblas" "$problempath"
 	deactivate
 }
 
