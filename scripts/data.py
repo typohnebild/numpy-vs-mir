@@ -88,7 +88,7 @@ def plot(frames, func, base_path):
 
 
 def main():
-    parser = optparse.OptionParser()
+    parser = optparse.OptionParser(usage="usage: %prog [options] files...")
     parser.add_option('-o',
                       action='store',
                       dest='outpath',
@@ -96,6 +96,9 @@ def main():
                       help='path to save pictures')
 
     options, args = parser.parse_args()
+    if not args:
+        parser.print_usage()
+        exit(1)
 
     frames = []
     name = extract_date_host(args[0])
