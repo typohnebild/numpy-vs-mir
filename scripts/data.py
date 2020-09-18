@@ -6,6 +6,7 @@ import optparse
 import matplotlib.pyplot as plt
 import os.path
 
+
 DEFAULT_FILE = '../Python/results/outfile_cip1e3_1609_intel_1_numba'
 DEFAULT_OUT = '../graphs'
 NAMES = [
