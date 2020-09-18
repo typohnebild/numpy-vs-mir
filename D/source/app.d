@@ -70,8 +70,11 @@ void main(string[] argv)
         // GS_RB!(double, 2)(UF[1].slice, UF[0].slice, 1.0 / UF[0].shape[0]);
         break;
     case 3:
-        //auto UF = npyload!(double, 3)(path);
-        //const auto U = poisson_multigrid!(double, 3, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
+        auto UF = npyload!(double, 3)(path);
+        warmup();
+        wait_till();
+        sw.start;
+        const auto U = poisson_multigrid!(double, 3, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
         break;
     default:
         throw new Exception("wrong dimension!");

@@ -37,8 +37,8 @@ def test_red_black_one_iter():
 
 def test_gauss_seidel_vs_linalg():
     grid, rhs = util.load_test_2D_problem()
-    N = grid.shape[0]
-    h = 1 / N
+    # N = grid.shape[0]
+    #h = 1 / N
 
     eps = 1e-12
     N = 20
@@ -59,7 +59,7 @@ def test_gauss_seidel_vs_linalg():
 def test_gauss_seidel_vs_F():
     grid, rhs = util.load_test_2D_problem()
     N = grid.shape[0]
-    h = 1 / N
+    #h = 1 / N
 
     eps = 1e-12
     max_iter = 10000

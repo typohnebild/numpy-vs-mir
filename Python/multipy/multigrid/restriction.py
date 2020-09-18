@@ -75,7 +75,6 @@ def weighted_restriction(A):
         ret[1:-1, 1:-1] += (A[1:-2:2, 1:-2:2] + A[1:-2:2, 3::2] +
                             A[3::2, 1:-2:2] + A[3::2, 3::2]) / 16
     elif alpha == 3:
-        # OBACHT: not tested!!!
         # core
         ret[1:-1, 1:-1, 1:-1] *= 8
         # edges
