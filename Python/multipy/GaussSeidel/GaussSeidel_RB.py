@@ -93,12 +93,16 @@ def sweep_2D(color, F, U, h2):
     m, n = F.shape
 
     U[1:m - 1:2, 1 + color:n - 1:2] = (
-        U[0:m - 2:2, 1 + color:n - 1:2] + U[2::2, 1 + color:n - 1:2] +
-        U[1:m - 1:2, color:n - 2:2] + U[1:m - 1:2, 2 + color::2] -
+        U[0:m - 2:2, 1 + color:n - 1:2] +
+        U[2::2, 1 + color:n - 1:2] +
+        U[1:m - 1:2, color:n - 2:2] +
+        U[1:m - 1:2, 2 + color::2] -
         F[1:m - 1:2, 1 + color:n - 1:2] * h2) / (4.0)
     U[2:m - 1:2, 2 - color:n - 1:2] = (
-        U[1:m - 2:2, 2 - color:n - 1:2] + U[3::2, 2 - color:n - 1:2] +
-        U[2:m - 1:2, 1 - color:n - 2:2] + U[2:m - 1:2, 3 - color::2] -
+        U[1:m - 2:2, 2 - color:n - 1:2] +
+        U[3::2, 2 - color:n - 1:2] +
+        U[2:m - 1:2, 1 - color:n - 2:2] +
+        U[2:m - 1:2, 3 - color::2] -
         F[2:m - 1:2, 2 - color:n - 1:2] * h2) / (4.0)
 
 # ----------------

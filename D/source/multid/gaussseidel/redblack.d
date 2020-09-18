@@ -15,8 +15,8 @@ import multid.gaussseidel.slow_sweep;
 +/
 enum Color
 {
-    red = 0u,
-    black = 1u
+    red = 1u,
+    black = 0u
 }
 
 /++
@@ -39,7 +39,10 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000, size_t norm_i
         in Slice!(T*, Dim) F, Slice!(T*, Dim) U, in T h)
         if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 {
-
+    static if (Dim == 1 || Dim == 2)
+    {
+        alias sweep = slow_sweep;
+    }
     const T h2 = h * h;
 
     foreach (it; 1 .. max_iter + 1)
