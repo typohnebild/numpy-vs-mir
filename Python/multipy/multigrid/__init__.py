@@ -7,7 +7,7 @@ from .prolongation import prolongation
 from .restriction import restriction, weighted_restriction
 
 logger = logging.getLogger(__name__)
-# logger.setLevel(logging.INFO)
+logger.setLevel(logging.INFO)
 
 
 def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle, numba=True):

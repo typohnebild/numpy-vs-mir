@@ -139,4 +139,3 @@ def weighted_prolongation(e, fine_shape):
     else:
         raise ValueError("prolongation: invalid dimension")
     return w
-
