@@ -39,10 +39,6 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000, size_t norm_i
         in Slice!(T*, Dim) F, Slice!(T*, Dim) U, in T h)
         if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 {
-    static if (Dim == 1 || Dim == 2)
-    {
-        alias sweep = slow_sweep;
-    }
     const T h2 = h * h;
 
     foreach (it; 1 .. max_iter + 1)
@@ -174,6 +170,7 @@ unittest
     auto F3 = slice!double([N, N, N], 0.0);
     F3[1, 1, 1] = 1;
     GS_RB!(double, 3, 1)(F3, U3, 1.0);
+
     auto expected3 = slice!double([N, N, N], 1.0);
     expected3[1, 1, 1] = 5.0 / 6.0;
     assert(expected3 == U3);
