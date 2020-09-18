@@ -26,19 +26,27 @@ def test_np_gs():
 
 
 def test_red_black_one_iter():
-    U = np.ones((3, 3))
-    F = np.zeros((3, 3))
+    N = 3
+    U = np.ones((N, N))
+    F = np.zeros((N, N))
     F[1, 1] = 1
-    expected = np.ones((3, 3))
+    expected = np.ones((N, N))
     expected[1, 1] = 0.75
     actual = GS_RB(F, U, h=1, max_iter=1, numba=False)
     assert np.allclose(expected, actual, atol=1e-8)
+    U = np.ones((N, N, N))
+    F = np.zeros((N, N, N))
+    F[1, 1, 1] = 1
+    expected = np.ones((N, N, N))
+    expected[1, 1, 1] = 5. / 6.
+    actual = GS_RB(F, U, h=1, max_iter=1, numba=False)
+    assert np.allclose(expected, actual)
 
 
 def test_gauss_seidel_vs_linalg():
     grid, rhs = util.load_test_2D_problem()
     # N = grid.shape[0]
-    #h = 1 / N
+    # h = 1 / N
 
     eps = 1e-12
     N = 20
@@ -59,7 +67,7 @@ def test_gauss_seidel_vs_linalg():
 def test_gauss_seidel_vs_F():
     grid, rhs = util.load_test_2D_problem()
     N = grid.shape[0]
-    #h = 1 / N
+    # h = 1 / N
 
     eps = 1e-12
     max_iter = 10000
@@ -239,14 +247,14 @@ def test_sweep_3D_black():
             for i in range(1, m - 1):
                 if (i + j + k) % 2 == color:
                     U2[i, j, k] = (U2[i - 1, j, k] +
-                                  U2[i + 1, j, k] +
-                                  U2[i, j - 1, k] +
-                                  U2[i, j + 1, k] +
-                                  U2[i, j, k - 1] +
-                                  U2[i, j, k + 1] -
-                                  F[i, j, k] * h * h) / 6.0
+                                   U2[i + 1, j, k] +
+                                   U2[i, j - 1, k] +
+                                   U2[i, j + 1, k] +
+                                   U2[i, j, k - 1] +
+                                   U2[i, j, k + 1] -
+                                   F[i, j, k] * h * h) / 6.0
     sweep_3D.py_func(color, F, U1, h * h)
-    print (U1)
+    print(U1)
     assert np.allclose(U1, U2)
 
 
@@ -264,12 +272,13 @@ def test_sweep_3D_red():
             for i in range(1, m - 1):
                 if (i + j + k) % 2 == color:
                     U2[i, j, k] = (U2[i - 1, j, k] +
-                                  U2[i + 1, j, k] +
-                                  U2[i, j - 1, k] +
-                                  U2[i, j + 1, k] +
-                                  U2[i, j, k - 1] +
-                                  U2[i, j, k + 1] -
-                                  F[i, j, k] * h * h) / 6.0
+                                   U2[i + 1, j, k] +
+                                   U2[i, j - 1, k] +
+                                   U2[i, j + 1, k] +
+                                   U2[i, j, k - 1] +
+                                   U2[i, j, k + 1] -
+                                   F[i, j, k] * h * h) / 6.0
     sweep_3D.py_func(color, F, U1, h * h)
-    print (U1)
+    print(U1)
     assert np.allclose(U1, U2)
+
