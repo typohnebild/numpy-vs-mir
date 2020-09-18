@@ -446,7 +446,6 @@ unittest
 {
     import mir.ndslice : iota, sliced;
     import std.stdio : writeln;
-    import pretty_array;
 
     auto A = [
         0., 2., 4., 6.,
@@ -466,8 +465,8 @@ unittest
         322., 324., 326., 328.,
         336., 338., 340., 342.
     ].sliced(4, 4, 4);
-    auto correct = iota([7, 7, 7]).slice;
-    auto B = prolongation!(double, 3)(A, [7, 7, 7]);
+    const auto correct = iota([7, 7, 7]).slice;
+    const auto B = prolongation!(double, 3)(A, [7, 7, 7]);
     assert(correct == B);
 
 }
@@ -476,7 +475,6 @@ unittest
 {
     import mir.ndslice : iota, sliced;
     import std.stdio : writeln;
-    import pretty_array;
 
     auto A = [
         0., 2., 4., 5.,
@@ -496,8 +494,8 @@ unittest
         204., 206., 208., 209.,
         210., 212., 214., 215.
     ].sliced(4, 4, 4);
-    auto correct = iota([6, 6, 6]).slice;
-    auto B = prolongation!(double, 3)(A, [6, 6, 6]);
+    const auto correct = iota([6, 6, 6]).slice;
+    const auto B = prolongation!(double, 3)(A, [6, 6, 6]);
     assert(correct == B);
 
 }

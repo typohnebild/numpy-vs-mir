@@ -67,7 +67,6 @@ void main(string[] argv)
         wait_till();
         sw.start;
         poisson_multigrid!(double, 2, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
-        // GS_RB!(double, 2)(UF[1].slice, UF[0].slice, 1.0 / UF[0].shape[0]);
         break;
     case 3:
         auto UF = npyload!(double, 3)(path);
