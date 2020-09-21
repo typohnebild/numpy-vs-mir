@@ -38,8 +38,8 @@ void main(string[] argv)
     immutable string default_path = "../problems/problem_2D_100.npy";
     void warmup()
     {
-        auto UF1 = npyload!(double, 1)(default_path);
-        poisson_multigrid!(double, 1, 2, 2)(UF1[1].slice, UF1[0].slice, 0, 2, 1);
+        auto UF1 = npyload!(double, 2)(default_path);
+        poisson_multigrid!(double, 2, 2, 2)(UF1[1].slice, UF1[0].slice, 0, 2, 1);
     }
 
     bool verbose = false;
@@ -73,7 +73,7 @@ void main(string[] argv)
         warmup();
         wait_till();
         sw.start;
-        const auto U = poisson_multigrid!(double, 3, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
+        poisson_multigrid!(double, 3, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
         break;
     default:
         throw new Exception("wrong dimension!");

@@ -417,15 +417,13 @@ unittest
 
 unittest
 {
-    import std.range : generate;
-    import std.random : uniform;
-    import std.algorithm : fill;
+    import multid.tools.util : randomMatrix;
+
     import mir.ndslice : strided;
 
     immutable size_t N = 4;
-    auto A = slice!double(N, N);
-    auto fun = generate!(() => uniform(0.0, 1.0));
-    A.field.fill(fun);
+
+    auto A = randomMatrix!(double, 2)(N);
 
     auto ret6 = prolongation!(double, 2)(A, [6, 6]);
     auto ret7 = prolongation!(double, 2)(A, [7, 7]);
@@ -468,7 +466,6 @@ unittest
     const auto correct = iota([7, 7, 7]).slice;
     const auto B = prolongation!(double, 3)(A, [7, 7, 7]);
     assert(correct == B);
-
 }
 
 unittest
@@ -497,5 +494,4 @@ unittest
     const auto correct = iota([6, 6, 6]).slice;
     const auto B = prolongation!(double, 3)(A, [6, 6, 6]);
     assert(correct == B);
-
 }
