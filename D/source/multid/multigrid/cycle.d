@@ -7,6 +7,9 @@ import std.conv : to;
 import std.traits : isFloatingPoint;
 import multid.multigrid.prolongation : prolongation;
 
+import multid.gaussseidel.redblack : SweepType;
+
+
 /++
     Abstract base class for the Cycles it implements the base MG sheme
 +/
@@ -106,13 +109,14 @@ public:
 }
 
 /++ Poisson Cycle:
-    T = a floatingpoint datatype 
+    T = a floatingpoint datatype
     Dim = dimension {1,2,3}
     v1 = number of presmoothing steps
     v2 = number of postsmoothing steps
-    eps = the epsilon the is used in the cycle esspecially in the solve step as stopcriteria 
+    eps = the epsilon the is used in the cycle esspecially in the solve step as stopcriteria
 +/
-class PoissonCycle(T, size_t Dim, uint v1, uint v2, T eps = 1e-8) : Cycle!(T, Dim)
+class PoissonCycle(T, size_t Dim, uint v1, uint v2, SweepType sweep = SweepType.field,
+        T eps = 1e-8) : Cycle!(T, Dim)
         if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 {
     import multid.gaussseidel.redblack : GS_RB;
@@ -121,13 +125,13 @@ protected:
     override Slice!(T*, Dim) presmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
 
-        return GS_RB!(T, Dim, v1, 1_000, eps)(F, U, current_h);
+        return GS_RB!(T, Dim, v1, 1_000, eps, sweep)(F, U, current_h);
     }
 
     override Slice!(T*, Dim) postsmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
 
-        return GS_RB!(T, Dim, v2, 1_000, eps)(F, U, current_h);
+        return GS_RB!(T, Dim, v2, 1_000, eps, sweep)(F, U, current_h);
     }
 
     override Slice!(T*, Dim) compute_residual(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
@@ -139,7 +143,7 @@ protected:
 
     override Slice!(T*, Dim) solve(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
-        return GS_RB!(T, Dim, 100_000, 1_000, eps)(F, U, current_h);
+        return GS_RB!(T, Dim, 100_000, 1_000, eps, sweep)(F, U, current_h);
     }
 
     override Slice!(T*, Dim) restriction(Slice!(T*, Dim) U)

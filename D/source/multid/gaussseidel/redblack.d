@@ -7,7 +7,7 @@ import mir.ndslice : slice, sliced, Slice, strided;
 import std.traits : isFloatingPoint;
 
 import std.stdio : writeln;
-import multid.gaussseidel.slow_sweep;
+import multid.gaussseidel.sweep;
 
 /++
     red is for even indicies
@@ -17,6 +17,14 @@ enum Color
 {
     red = 1u,
     black = 0u
+}
+
+/++ enum to differentiate between sweep types +/
+enum SweepType
+{
+    field = "field",
+    slice = "slice",
+    naive = "naive"
 }
 
 /++
@@ -35,10 +43,13 @@ Params:
     h = the distance between the grid points
 Returns: U
 +/
-Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000, size_t norm_iter = 1_000, double eps = 1e-8)(
-        in Slice!(T*, Dim) F, Slice!(T*, Dim) U, in T h)
+Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000, size_t norm_iter = 1_000,
+        double eps = 1e-8, SweepType sweeptype = SweepType.field)
+        (in Slice!(T*, Dim) F, Slice!(T*, Dim) U, in T h)
         if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 {
+    mixin("alias sweep = sweep_" ~ sweeptype ~ ";");
+
     const T h2 = h * h;
 
     foreach (it; 1 .. max_iter + 1)
@@ -60,92 +71,7 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000, size_t norm_i
     return U;
 }
 
-/++
-This is a sweep implementation for 1D
-    it calculates U[i] = (U[i-1] + U[i+1])/2
-    for every cell except the borders
-Params:
-    F  = slice of dimension Dim
-    U  = slice of dimension Dim
-    h2 = the squared distance between the grid points
-+/
-void sweep(T, size_t Dim : 1, Color color)(in Slice!(T*, 1) F, Slice!(T*, 1) U, in T h2)
-{
-    const auto N = F.shape[0];
-    auto UF = U.field;
-    auto FF = F.field;
-    for (size_t i = 2u - color; i < N - 1u; i += 2u)
-    {
-        UF[i] = (UF[i - 1u] + UF[i + 1u] - FF[i] * h2) / 2.0;
-    }
-}
 
-/++
-This is a sweep implementation for 2D
-    it calculates U[i,j] = (U[i-1, j] + U[i+1, j] + U[i, j-1] +U[i, j+1] - h2 * F[i,j])/4
-    for every cell except the borders
-Params:
-    F  = slice of dimension Dim
-    U  = slice of dimension Dim
-    h2 = the squared distance between the grid points
-+/
-void sweep(T, size_t Dim : 2, Color color)(in Slice!(T*, 2) F, Slice!(T*, 2) U, in T h2)
-{
-    const auto m = F.shape[0];
-    const auto n = F.shape[1];
-    auto UF = U.field;
-    auto FF = F.field;
-
-    foreach (i; 1 .. m - 1)
-    {
-        const flatrow = i * m;
-        for (size_t j = 1 + (i + 1 + color) % 2; j < n - 1; j += 2)
-        {
-            const flatindex = flatrow + j;
-            UF[flatindex] = (
-                    UF[flatindex - m] +
-                    UF[flatindex + m] +
-                    UF[flatindex - 1] +
-                    UF[flatindex + 1] - h2 * FF[flatindex]) / cast(T) 4;
-        }
-    }
-}
-
-/++
-This is a sweep implementation for 3D
-    it calculates U[i,j,k] = (U[i-1,j,k] + U[i+1,j,k] + U[i,j-1,k] +U[i,j+1,k] ... - h2 * F[i,j,k])/4
-    for every cell except the borders
-Params:
-    F  = slice of dimension Dim
-    U  = slice of dimension Dim
-    h2 = the squared distance between the grid points
-+/
-void sweep(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 3) U, in T h2)
-{
-    const auto m = F.shape[0];
-    const auto n = F.shape[1];
-    const auto l = F.shape[2];
-    auto UF = U.field;
-    auto FF = F.field;
-    foreach (i; 1 .. m - 1)
-    {
-        foreach (j; 1 .. n - 1)
-        {
-            const auto flatindex2d = i * (n * l) + j * l;
-            for (size_t k = 1u + (i + j + 1 + color) % 2; k < l - 1u; k += 2)
-            {
-                const flatindex = flatindex2d + k;
-                UF[flatindex] = (
-                        UF[flatindex - n * l] +
-                        UF[flatindex + n * l] +
-                        UF[flatindex - l] +
-                        UF[flatindex + l] +
-                        UF[flatindex - 1] +
-                        UF[flatindex + 1] - h2 * FF[flatindex]) / 6.0;
-            }
-        }
-    }
-}
 
 unittest
 {
@@ -178,7 +104,7 @@ unittest
 
 unittest
 {
-    import multid.gaussseidel.slow_sweep : slow_sweep, sweep_naive;
+    import multid.gaussseidel.sweep;
     import multid.tools.util : randomMatrix;
 
     const size_t N = 10;
@@ -190,14 +116,14 @@ unittest
     const auto F = slice!double([N], 1.0);
 
     sweep_naive!(double, 1, Color.red)(F, U, h2);
-    sweep!(double, 1, Color.red)(F, U1, h2);
-    slow_sweep!(double, 1, Color.red)(F, U2, h2);
+    sweep_field!(double, 1, Color.red)(F, U1, h2);
+    sweep_slice!(double, 1, Color.red)(F, U2, h2);
     assert(U == U1);
     assert(U1 == U2);
 
     sweep_naive!(double, 1, Color.black)(F, U, h2);
-    sweep!(double, 1, Color.black)(F, U1, h2);
-    slow_sweep!(double, 1, Color.black)(F, U2, h2);
+    sweep_field!(double, 1, Color.black)(F, U1, h2);
+    sweep_slice!(double, 1, Color.black)(F, U2, h2);
     assert(U == U1);
     assert(U1 == U2);
 
@@ -205,7 +131,7 @@ unittest
 
 unittest
 {
-    import multid.gaussseidel.slow_sweep : sweep_naive, slow_sweep;
+    import multid.gaussseidel.sweep;
     import multid.tools.util : randomMatrix;
 
     const size_t N = 10;
@@ -217,21 +143,21 @@ unittest
     const auto F = slice!double([N, N], 1.0);
 
     sweep_naive!(double, 2, Color.red)(F, U, h2);
-    sweep!(double, 2, Color.red)(F, U1, h2);
-    slow_sweep!(double, 2, Color.red)(F, U2, h2);
+    sweep_field!(double, 2, Color.red)(F, U1, h2);
+    sweep_slice!(double, 2, Color.red)(F, U2, h2);
     assert(U == U1);
     assert(U1 == U2);
 
     sweep_naive!(double, 2, Color.black)(F, U, h2);
-    sweep!(double, 2, Color.black)(F, U1, h2);
-    slow_sweep!(double, 2, Color.black)(F, U2, h2);
+    sweep_field!(double, 2, Color.black)(F, U1, h2);
+    sweep_slice!(double, 2, Color.black)(F, U2, h2);
     assert(U == U1);
     assert(U1 == U2);
 }
 
 unittest
 {
-    import multid.gaussseidel.slow_sweep : sweep_naive, slow_sweep;
+    import multid.gaussseidel.sweep;
     import multid.tools.util : randomMatrix;
 
     const size_t N = 10;
@@ -242,14 +168,14 @@ unittest
     const double h2 = 1.0;
 
     sweep_naive!(double, 3, Color.red)(F, U, h2);
-    sweep!(double, 3, Color.red)(F, U1, h2);
-    slow_sweep!(double, 3, Color.red)(F, U2, h2);
+    sweep_field!(double, 3, Color.red)(F, U1, h2);
+    sweep_slice!(double, 3, Color.red)(F, U2, h2);
     assert(U == U1);
     assert(U1 == U2);
 
     sweep_naive!(double, 3, Color.black)(F, U, h2);
-    sweep!(double, 3, Color.black)(F, U1, h2);
-    slow_sweep!(double, 3, Color.black)(F, U2, h2);
+    sweep_field!(double, 3, Color.black)(F, U1, h2);
+    sweep_slice!(double, 3, Color.black)(F, U2, h2);
     assert(U == U1);
     assert(U1 == U2);
 }

@@ -44,7 +44,8 @@ void main(string[] argv)
 
     bool verbose = false;
     string path = default_path;
-    getopt(argv, "p|P", &path, "d|D", &delay, "v", &verbose);
+    string sweep = "field";
+    getopt(argv, "p|P", &path, "d|D", &delay, "v", &verbose, "s", &sweep);
     if (verbose)
     {
         globalLogLevel(LogLevel.all);
@@ -59,21 +60,21 @@ void main(string[] argv)
         warmup();
         wait_till();
         sw.start;
-        poisson_multigrid!(double, 1, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
+        poisson_multigrid!(double, 1, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100, sweep);
         break;
     case 2:
         auto UF = npyload!(double, 2)(path);
         warmup();
         wait_till();
         sw.start;
-        poisson_multigrid!(double, 2, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
+        poisson_multigrid!(double, 2, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100, sweep);
         break;
     case 3:
         auto UF = npyload!(double, 3)(path);
         warmup();
         wait_till();
         sw.start;
-        poisson_multigrid!(double, 3, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100);
+        poisson_multigrid!(double, 3, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100, sweep);
         break;
     default:
         throw new Exception("wrong dimension!");
