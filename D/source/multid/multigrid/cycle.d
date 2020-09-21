@@ -14,7 +14,6 @@ class Cycle(T, size_t Dim)
 protected:
     uint mu, l;
     Slice!(T*, Dim) F;
-    T eps = 1e-30;
     T h;
 
     abstract Slice!(T*, Dim) presmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h);
@@ -105,7 +104,7 @@ public:
     abstract T norm(Slice!(T*, Dim) U);
 }
 
-class PoissonCycle(T, size_t Dim, uint v1, uint v2) : Cycle!(T, Dim)
+class PoissonCycle(T, size_t Dim, uint v1, uint v2, T eps = 1e-8) : Cycle!(T, Dim)
 {
     import multid.gaussseidel.redblack : GS_RB;
 
@@ -113,13 +112,13 @@ protected:
     override Slice!(T*, Dim) presmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
 
-        return GS_RB!(T, Dim, v1)(F, U, current_h);
+        return GS_RB!(T, Dim, v1, 1000, eps)(F, U, current_h);
     }
 
     override Slice!(T*, Dim) postsmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
 
-        return GS_RB!(T, Dim, v2)(F, U, current_h);
+        return GS_RB!(T, Dim, v2, 1000, eps)(F, U, current_h);
     }
 
     override Slice!(T*, Dim) compute_residual(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
@@ -131,7 +130,7 @@ protected:
 
     override Slice!(T*, Dim) solve(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
-        return GS_RB!(T, Dim, 100_000, 1_000, 1e-8)(F, U, current_h);
+        return GS_RB!(T, Dim, 100_000, 1_000, eps)(F, U, current_h);
     }
 
     override Slice!(T*, Dim) restriction(Slice!(T*, Dim) U)

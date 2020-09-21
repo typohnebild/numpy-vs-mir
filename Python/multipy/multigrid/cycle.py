@@ -10,13 +10,13 @@ from .prolongation import prolongation
 
 
 class AbstractCycle:
-    def __init__(self, F, v1, v2, mu, l):
+    def __init__(self, F, v1, v2, mu, l, eps=1e-8):
         self.v1 = v1
         self.v2 = v2
         self.mu = mu
         self.F = F
         self.l = l
-        self.eps = 1e-30
+        self.eps = eps
         self.h = 1 / F.shape[0]
         if (self.l == 0):
             self.l = int(np.log2(self.F.shape[0])) - 1
@@ -115,7 +115,7 @@ class PoissonCycle(AbstractCycle):
             U=U,
             h=h,
             max_iter=100_000,
-            eps=1e-8,
+            eps=self.eps,
             norm_iter=1_000,
             numba=self.numba)
 
@@ -128,8 +128,8 @@ class PoissonCycle(AbstractCycle):
 
 
 class GeneralCycle(AbstractCycle):
-    def __init__(self, A, F, v1, v2, mu, l):
-        super().__init__(F, v1, v2, mu, l)
+    def __init__(self, A, F, v1, v2, mu, l, eps=1e-8):
+        super().__init__(F, v1, v2, mu, l, eps)
         self.curl = self.l
         # self.A is Array of As for each level
         self.A = [None] * self.l
