@@ -49,8 +49,6 @@ Slice!(T*, Dim) restriction(T, size_t Dim : 2)(in Slice!(T*, Dim) A)
         }
     }
     // special case: borders
-    // ret[0 .. end, $ - 1] = A[0 .. $, $ - 1].strided!(0)(2);
-    // ret[$ - 1, 0 .. end] = A[$ - 1, 0 .. $].strided!(0)(2);
     foreach (i; 0 .. end)
     {
         auto indexrowR = (N - 1) * N + i;
@@ -426,4 +424,3 @@ unittest
 
     assert(approxEqual(ret, correct.fuse, 1e-8, 1e-8));
 }
-
