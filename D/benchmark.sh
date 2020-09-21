@@ -1,22 +1,19 @@
 #!/bin/sh
-OUTFILE="results/outfile_$(hostname -s)_$(date +%d%m)"
 
 problempath=${1:-'../problems/'}
 [ -d "$problempath" ] || exit 1
+binary=${2:-'../multid -s field'}
+sweeptype=$(echo "$binary" | sed -r 's/.+ -s (field|naive|slice)/\1/')
 
-get_infos(){
-    ../scripts/getinfos.sh
-    echo "#size:dim:time:cycles:error:flops*:"
-}
+OUTFILE="results/outfile_$(hostname -s)_$(date +%d%m)_$sweeptype"
 
-[ -e "$OUTFILE" ] || get_infos >> "$OUTFILE" || exit 1
 
 benchmark(){
     perf=$1
     problem=$2
     delay=1000
 
-    cmd="./multid-static -p $problem -d $delay"
+    cmd="$binary -p $problem -d $delay"
     if [ "$perf" = true ]
     then
         cmd="perf stat -M GFLOPS -D $delay $cmd"
@@ -42,6 +39,12 @@ if [ "$paranoid" -lt 3 ]  && perf list eventgroups | grep -q FLOPS
 then
     perf=true
 fi
+
+get_infos(){
+    ../scripts/getinfos.sh "mir" "$perf"
+}
+
+[ -e "$OUTFILE" ] || get_infos $perf >> "$OUTFILE" || exit 1
 
 for problem in "$problempath/"*.npy; do
     dim=$(echo "$problem" | awk -F'_' '{print $2}')

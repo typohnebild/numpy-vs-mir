@@ -6,15 +6,6 @@ OUTFILE="results/outfile_$(hostname -s)_$(date +%d%m)_${1}"
 problempath=${2:-'../problems/'}
 [ -d "$problempath" ] || exit 1
 
-get_infos(){
-    ../scripts/getinfos.sh "np"
-    echo "#size:dim:time:cycles:error:flops*:"
-}
-
-[ -e "${OUTFILE}_1_numba" ] || get_infos >> "${OUTFILE}_1_numba" || exit 1
-[ -e "${OUTFILE}_8_numba" ] || get_infos >> "${OUTFILE}_8_numba" || exit 1
-[ -e "${OUTFILE}_1_nonumba" ] || get_infos >> "${OUTFILE}_1_nonumba" || exit 1
-[ -e "${OUTFILE}_8_nonumba" ] || get_infos >> "${OUTFILE}_8_nonumba" || exit 1
 
 benchmark(){
     perf=$1
@@ -47,6 +38,8 @@ benchmark(){
 
 }
 
+
+
 paranoid=$(cat /proc/sys/kernel/perf_event_paranoid)
 perf=false
 reps=3
@@ -54,6 +47,16 @@ if [ "$paranoid" -lt 3 ]  && perf list eventgroups | grep -q FLOPS
 then
     perf=true
 fi
+
+get_infos(){
+    ../scripts/getinfos.sh "np" "$perf"
+}
+
+[ -e "${OUTFILE}_1_numba" ] || get_infos >> "${OUTFILE}_1_numba" || exit 1
+[ -e "${OUTFILE}_8_numba" ] || get_infos >> "${OUTFILE}_8_numba" || exit 1
+[ -e "${OUTFILE}_1_nonumba" ] || get_infos >> "${OUTFILE}_1_nonumba" || exit 1
+[ -e "${OUTFILE}_8_nonumba" ] || get_infos >> "${OUTFILE}_8_nonumba" || exit 1
+
 for problem in "$problempath/"*.npy; do
     dim=$(echo "$problem" | awk -F'_' '{print $2}')
     N=$(echo "$problem" | awk -F'_' '{print $3}')

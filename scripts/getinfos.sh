@@ -16,3 +16,10 @@ date
 get_cpu_infos
 [ "$1" = "np" ] && get_numpy_config
 echo "############ END INFOS"
+
+if [ "$2" = true ]
+then
+    echo "size:dim:time:cycles:error:scalar_single:scalar_double:128b_packed_double:128b_packed_single:256b_packed_double:256b_packed_single:empty"
+else
+    echo "size:dim:time:cycles:error:empty"
+fi
