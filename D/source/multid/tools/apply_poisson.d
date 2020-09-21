@@ -83,9 +83,7 @@ Slice!(T*, Dim) apply_poisson(T, size_t Dim)(in Slice!(T*, Dim) U, in T h)
                             UF[flatindex + l] +
                             UF[flatindex - 1] +
                             UF[flatindex + 1]) / h2;
-
                 }
-
             }
         }
     }
@@ -151,12 +149,12 @@ unittest
         {
             x[i, j] = (-4.0 * U[i, j] + U[i - 1, j] + U[i + 1, j] + U[i, j - 1]
                     + U[i, j + 1]) / (h * h);
-
         }
     }
     const auto x1 = apply_poisson!(double, 2)(U, h);
     assert(x == x1);
 }
+
 
 unittest
 {
@@ -181,43 +179,11 @@ unittest
                 x[i, j, k] = (-6.0 * U[i, j, k] + U[i - 1, j, k] + U[i + 1,
                         j, k] + U[i, j - 1, k] + U[i, j + 1, k] + U[i, j, k -
                         1] + U[i, j, k + 1]) / (h * h);
-
             }
-
         }
     }
 
     const auto x1 = apply_poisson!(double, 3)(U, h);
 
-    assert(x == x1);
-}
-
-unittest
-{
-
-    import std.range : generate;
-    import std.random : uniform;
-    import std.algorithm : fill;
-
-    const size_t N = 100;
-    immutable auto h = 1.0 / double(100);
-
-    auto U = slice!double([N, N], 1.0);
-    U.field.fill(generate!(() => uniform(0.0, 1.0)));
-
-    immutable m = U.shape[0];
-    immutable n = U.shape[1];
-    auto x = U.dup;
-
-    for (size_t i = 1; i < m - 1; i++)
-    {
-        for (size_t j = 1; j < n - 1; j++)
-        {
-            x[i, j] = (-4.0 * U[i, j] + U[i - 1, j] + U[i + 1, j] + U[i, j - 1]
-                    + U[i, j + 1]) / (h * h);
-
-        }
-    }
-    const auto x1 = apply_poisson!(double, 2)(U, h);
     assert(x == x1);
 }

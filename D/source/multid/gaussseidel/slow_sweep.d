@@ -81,6 +81,7 @@ void slow_sweep(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 3
 
 }
 
+/++ naive sweep for 1D +/
 void sweep_naive(T, size_t Dim : 1, Color color)(const Slice!(T*, 1) F, Slice!(T*, 1) U, T h2)
 {
 
@@ -94,7 +95,7 @@ void sweep_naive(T, size_t Dim : 1, Color color)(const Slice!(T*, 1) F, Slice!(T
     }
 
 }
-
+/++ naive sweep for 2D +/
 void sweep_naive(T, size_t Dim : 2, Color color)(const Slice!(T*, 2) F, Slice!(T*, 2) U, T h2)
 {
     const auto n = F.shape[0];
@@ -111,7 +112,7 @@ void sweep_naive(T, size_t Dim : 2, Color color)(const Slice!(T*, 2) F, Slice!(T
         }
     }
 }
-
+/++ naive sweep for 3D +/
 void sweep_naive(T, size_t Dim : 3, Color color)(const Slice!(T*, 3) F, Slice!(T*, 3) U, T h2)
 {
     const auto n = F.shape[0];
@@ -127,7 +128,6 @@ void sweep_naive(T, size_t Dim : 3, Color color)(const Slice!(T*, 3) F, Slice!(T
                 {
                     U[i, j, k] = (U[i - 1, j, k] + U[i + 1, j, k] + U[i, j - 1,
                             k] + U[i, j + 1, k] + U[i, j, k - 1] + U[i, j, k + 1] - h2 * F[i, j, k]) / 6.0;
-
                 }
             }
         }

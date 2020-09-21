@@ -128,14 +128,14 @@ def weighted_prolongation(e, fine_shape):
 
     # Case: Dimension 1
     if alpha == 1:
-        raise ValueError("prolongation: dimension not implemented")
+        raise ValueError("weighted_prolongation: dimension not implemented")
     # Case: Dimension 2
     elif alpha == 2:
-        raise ValueError("prolongation: dimension not implemented")
+        raise ValueError("weighted_prolongation: dimension not implemented")
     # Case: Dimension 3
     elif alpha == 3:
-        raise ValueError("prolongation: dimension not implemented")
+        raise ValueError("weighted_prolongation: dimension not implemented")
     # Case: Error
     else:
-        raise ValueError("prolongation: invalid dimension")
+        raise ValueError("weighted_prolongation: invalid dimension")
     return w

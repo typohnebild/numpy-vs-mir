@@ -142,7 +142,6 @@ void sweep(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 3) U, 
                         UF[flatindex + l] +
                         UF[flatindex - 1] +
                         UF[flatindex + 1] - h2 * FF[flatindex]) / 6.0;
-
             }
         }
     }
@@ -253,5 +252,4 @@ unittest
     slow_sweep!(double, 3, Color.black)(F, U2, h2);
     assert(U == U1);
     assert(U1 == U2);
-
 }

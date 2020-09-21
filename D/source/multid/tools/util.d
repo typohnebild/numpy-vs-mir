@@ -4,6 +4,7 @@ import std.range : generate;
 import std.random : uniform;
 import std.algorithm : fill;
 
+/++ Timer Template +/
 template Timer()
 {
     import std.datetime.stopwatch;
@@ -24,6 +25,7 @@ template Timer()
     }
 }
 
+/++ Generator for random matrix with dimension Dim and dimension size N +/
 Slice!(T*, Dim) randomMatrix(T, size_t Dim)(size_t N)
 {
     size_t[Dim] shape = N;
