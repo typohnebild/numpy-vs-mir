@@ -6,7 +6,6 @@ import std.math : log2;
 import std.conv : to;
 import std.traits : isFloatingPoint;
 import multid.multigrid.prolongation : prolongation;
-
 import multid.gaussseidel.redblack : SweepType;
 
 
