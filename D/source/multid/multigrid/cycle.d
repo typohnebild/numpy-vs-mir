@@ -4,12 +4,13 @@ import mir.ndslice : Slice, slice;
 import std.exception : enforce;
 import std.math : log2;
 import std.conv : to;
+import std.traits : isFloatingPoint;
 import multid.multigrid.prolongation : prolongation;
 
 /++
-    Abstract base class for the Cycles
+    Abstract base class for the Cycles it implements the base MG sheme
 +/
-class Cycle(T, size_t Dim)
+class Cycle(T, size_t Dim) if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 {
 protected:
     uint mu, l;
@@ -104,8 +105,15 @@ public:
     abstract T norm(Slice!(T*, Dim) U);
 }
 
-/++ Poisson Cycle +/
+/++ Poisson Cycle:
+    T = a floatingpoint datatype 
+    Dim = dimension {1,2,3}
+    v1 = number of presmoothing steps
+    v2 = number of postsmoothing steps
+    eps = the epsilon the is used in the cycle esspecially in the solve step as stopcriteria 
++/
 class PoissonCycle(T, size_t Dim, uint v1, uint v2, T eps = 1e-8) : Cycle!(T, Dim)
+        if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 {
     import multid.gaussseidel.redblack : GS_RB;
 
