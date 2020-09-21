@@ -20,7 +20,7 @@ def measure(F, U, numba=True):
 def main():
     start = time.perf_counter()
 
-    default_problem = '../problems/problem_1D_100.npy'
+    default_problem = '../problems/problem_2D_100.npy'
 
     parser = optparse.OptionParser()
     parser.add_option(

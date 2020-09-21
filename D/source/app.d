@@ -35,7 +35,7 @@ void main(string[] argv)
 
     globalLogLevel(LogLevel.info);
 
-    immutable string default_path = "../problems/problem_1D_100.npy";
+    immutable string default_path = "../problems/problem_2D_100.npy";
     void warmup()
     {
         auto UF1 = npyload!(double, 1)(default_path);
