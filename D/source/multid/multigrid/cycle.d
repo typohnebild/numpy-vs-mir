@@ -165,15 +165,14 @@ public:
 
 unittest
 {
-    import std.range : generate;
-    import std.random : uniform;
-    import std.algorithm : fill, all;
+    import std.algorithm : all;
+    import multid.tools.util : randomMatrix;
 
     const size_t N = 10;
     immutable h = 1.0 / N;
 
-    auto U = slice!double([N, N], 1.0);
-    U.field.fill(generate!(() => uniform(0.0, 1.0)));
+    auto U = randomMatrix!(double, 2)(N);
+
     U[0][0 .. $] = 1.0;
     U[1 .. $, 0] = 1.0;
     U[$ - 1][1 .. $] = 0.0;
