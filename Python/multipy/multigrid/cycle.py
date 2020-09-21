@@ -16,11 +16,7 @@ class AbstractCycle:
         self.mu = mu
         self.F = F
         self.l = l
-<<<<<<< HEAD
         self.eps = eps
-=======
-        self.eps = 1e-8
->>>>>>> a6c45f47cf16b194ec585a8f13168bd525fb5916
         self.h = 1 / F.shape[0]
         if (self.l == 0):
             self.l = int(np.log2(self.F.shape[0])) - 1
