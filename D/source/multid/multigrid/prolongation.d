@@ -46,6 +46,12 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(in Slice!(T*, Dim) e, in size_t[Dim]
                 WF[idxw(2*i, 2*(j+1)-1)] = (EF[idxe(i,j)] + EF[idxe(i,j+1)]) / 2;
                 // the value below a copied one
                 WF[idxw(2*i+1, 2*j)] = (EF[idxe(i+1,j)] + EF[idxe(i,j)]) / 2;
+                // interpolation
+                WF[idxw(2*i+1, 2*j+1)] = (
+                                EF[idxe(i, j)] +
+                                EF[idxe(i, j+1)] +
+                                EF[idxe(i+1, j)] +
+                                EF[idxe(i+1, j+1)]) / 4;
             }
             WF[idxw(2*i, 2*(end-1))] = EF[idxe(i, end-1)];
             WF[idxw(2*i+1, 2*(end-1))] = (EF[idxe(i+1, end-1)] +
@@ -58,17 +64,7 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(in Slice!(T*, Dim) e, in size_t[Dim]
             WF[idxw(2*(end-1), 2*(j+1)-1)] = (EF[idxe(end-1, j)] + EF[idxe(end-1, j+1)]) / 2;
         }
         WF[$ - 1] = EF[$ - 1];
-        for (size_t i = 1; i < wend; i += 2)
-        {
-            for (size_t j = 1; j < wend; j += 2)
-            {
-                //auto flatindex = i * w.shape[0] + j;
-                WF[idxw(i,j)] = (WF[idxw(i, j+NW)] +
-                                WF[idxw(i, j-NW)] +
-                                WF[idxw(i, j-1)] +
-                                WF[idxw(i, j+1)]) / 4;
-            }
-        }
+
         // Since we restrict always to N//2 + 1 we need to handle the case if
         // the finer grid is even sized, because that means between the last
         // and the forelast is no new colomn that needs to be calculated
