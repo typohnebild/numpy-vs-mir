@@ -11,15 +11,15 @@
     {
       "name": "multid",
       "targetType": "executable",
-      "dflags-ldc": ["-mcpu=native"]
+      "compiler": "ldc",
+      "dflags": ["-mcpu=native"]
     },
     {
       "name": "multid-static",
       "targetType": "executable",
       "targetName": "multid-static",
-      "compiler": "ldc2",
-      "dflags-ldc": ["--static"],
-      "buildOptiones": ["releaseMode", "optimize", "inline", "noBoundsCheck"]
+      "compiler": "ldc",
+      "dflags-ldc": ["--static"]
     }
   ]
 }
