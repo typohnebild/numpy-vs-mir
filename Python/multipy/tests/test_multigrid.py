@@ -171,7 +171,7 @@ def test_MultiGrid_VS_GS_RB():
     eps = 1e-3
     # Variables
     U, F = util.load_test_2D_problem()
-    N = U.shape[0]
+    # N = U.shape[0]
 
     A = GS_RB(np.copy(F), np.copy(U), eps=eps, numba=False)
     B = mg.poisson_multigrid(F, U, 2, 2, 2, 2, 100, numba=False)

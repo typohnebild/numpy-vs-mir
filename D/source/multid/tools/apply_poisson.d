@@ -83,9 +83,7 @@ Slice!(T*, Dim) apply_poisson(T, size_t Dim)(in Slice!(T*, Dim) U, in T h)
                             UF[flatindex + l] +
                             UF[flatindex - 1] +
                             UF[flatindex + 1]) / h2;
-
                 }
-
             }
         }
     }
@@ -146,12 +144,12 @@ unittest
         {
             x[i, j] = (-4.0 * U[i, j] + U[i - 1, j] + U[i + 1, j] + U[i, j - 1]
                     + U[i, j + 1]) / (h * h);
-
         }
     }
     const auto x1 = apply_poisson!(double, 2)(U, h);
     assert(x == x1);
 }
+
 
 unittest
 {

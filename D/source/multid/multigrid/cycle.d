@@ -104,6 +104,7 @@ public:
     abstract T norm(Slice!(T*, Dim) U);
 }
 
+/++ Poisson Cycle +/
 class PoissonCycle(T, size_t Dim, uint v1, uint v2, T eps = 1e-8) : Cycle!(T, Dim)
 {
     import multid.gaussseidel.redblack : GS_RB;
@@ -112,13 +113,13 @@ protected:
     override Slice!(T*, Dim) presmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
 
-        return GS_RB!(T, Dim, v1, 1000, eps)(F, U, current_h);
+        return GS_RB!(T, Dim, v1, 1_000, eps)(F, U, current_h);
     }
 
     override Slice!(T*, Dim) postsmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
 
-        return GS_RB!(T, Dim, v2, 1000, eps)(F, U, current_h);
+        return GS_RB!(T, Dim, v2, 1_000, eps)(F, U, current_h);
     }
 
     override Slice!(T*, Dim) compute_residual(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
@@ -181,7 +182,7 @@ unittest
     import multid.tools.apply_poisson : compute_residual;
     import multid.tools.norm : nrmL2;
 
-    auto norm_before = compute_residual(F, U, h).nrmL2;
+    const auto norm_before = compute_residual(F, U, h).nrmL2;
     F[0][0 .. $] = 1.0;
     F[1 .. $, 0] = 1.0;
     F[$ - 1][1 .. $] = 0.0;
@@ -189,7 +190,7 @@ unittest
     auto p = new PoissonCycle!(double, 2, 2, 2)(F, 2, 0, h);
     p.cycle(U);
 
-    auto norm_after = compute_residual(F, U, h).nrmL2;
+    const auto norm_after = compute_residual(F, U, h).nrmL2;
 
     assert(U[0][0 .. $].all!"a == 1.0");
     assert(U[1 .. $, 0].all!"a == 1.0");
