@@ -43,7 +43,7 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(in Slice!(T*, Dim) e, in size_t[Dim]
                 // the value that is copied
                 WF[idxw(2*i, 2*j)] = EF[idxe(i, j)];
                 // the value next a copied one
-                WF[idxw(2*i, 2*(j+1)-1)] = (EF[idxe(i,j)] + EF[idxe(i,j+1)]) / 2;
+                WF[idxw(2*i, 2*j + 1)] = (EF[idxe(i,j)] + EF[idxe(i,j+1)]) / 2;
                 // the value below a copied one
                 WF[idxw(2*i+1, 2*j)] = (EF[idxe(i+1,j)] + EF[idxe(i,j)]) / 2;
                 // interpolation
@@ -56,24 +56,22 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(in Slice!(T*, Dim) e, in size_t[Dim]
             WF[idxw(2*i, 2*(end-1))] = EF[idxe(i, end-1)];
             WF[idxw(2*i+1, 2*(end-1))] = (EF[idxe(i+1, end-1)] +
                     EF[idxe(i, end-1)]) / 2;
-        }
-        // this is for the last row and the last colomn
-        foreach (j; 0 .. end - 1)
-        {
-            WF[idxw(2*(end-1), 2*j)] = EF[idxe(end-1, j)];
-            WF[idxw(2*(end-1), 2*(j+1)-1)] = (EF[idxe(end-1, j)] + EF[idxe(end-1, j+1)]) / 2;
+
+            // this is for the last row and the last colomn
+            WF[idxw(2*(end-1), 2*i)] = EF[idxe(end-1, i)];
+            WF[idxw(2*(end-1), 2*i + 1)] = (EF[idxe(end-1, i)] + EF[idxe(end-1, i+1)]) / 2;
         }
         WF[$ - 1] = EF[$ - 1];
 
         // Since we restrict always to N//2 + 1 we need to handle the case if
         // the finer grid is even sized, because that means between the last
         // and the forelast is no new colomn that needs to be calculated
-        if (fine_shape[0] % 2 == 0) // != e.shape[0] % 2)
+        if (fine_shape[0] % 2 == 0)
         {
             foreach (j; 0 .. end - 1)
             {
                 WF[idxw(NW-1, 2*j)] = EF[idxe(NE-1, j)];
-                WF[idxw(NW-1, 2*(j+1)-1)] = (EF[idxe(NE-1, j)] + EF[idxe(NE-1, j+1)]) / 2;
+                WF[idxw(NW-1, 2*j+1)] = (EF[idxe(NE-1, j)] + EF[idxe(NE-1, j+1)]) / 2;
 
                 WF[idxw(2*j, NW-1)] = EF[idxe(j, NE-1)];
 
