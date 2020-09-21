@@ -109,14 +109,12 @@ Slice!(T*, Dim) compute_residual(T, size_t Dim)(in Slice!(T*, Dim) F, in Slice!(
 
 unittest
 {
-    import std.range : generate;
-    import std.random : uniform;
-    import std.algorithm : fill;
+    import multid.tools.util : randomMatrix;
 
     const size_t N = 100;
-    auto U = slice!double([N], 1.0);
-    U.field.fill(generate!(() => uniform(0.0, 1.0)));
-    immutable auto h = 1.0 / double(100);
+    immutable auto h = 1.0 / double(N);
+
+    auto U = randomMatrix!(double, 1)(N);
 
     auto x = U.dup;
     for (size_t i = 1; i < U.shape[0] - 1; i++)
@@ -131,15 +129,12 @@ unittest
 unittest
 {
 
-    import std.range : generate;
-    import std.random : uniform;
-    import std.algorithm : fill;
+    import multid.tools.util : randomMatrix;
 
-    const size_t N = 1000;
+    const size_t N = 100;
     immutable auto h = 1.0 / double(N);
 
-    auto U = slice!double([N, N], 1.0);
-    U.field.fill(generate!(() => uniform(0.0, 1.0)));
+    auto U = randomMatrix!(double, 2)(N);
 
     immutable m = U.shape[0];
     immutable n = U.shape[1];
@@ -160,16 +155,12 @@ unittest
 
 unittest
 {
-
-    import std.range : generate;
-    import std.random : uniform;
-    import std.algorithm : fill;
+    import multid.tools.util : randomMatrix;
 
     const size_t N = 100;
-    immutable auto h = 1.0 / double(100);
+    immutable auto h = 1.0 / double(N);
 
-    auto U = slice!double([N, N, N], 1.0);
-    U.field.fill(generate!(() => uniform(0.0, 1.0)));
+    auto U = randomMatrix!(double, 3)(N);
 
     auto x = U.dup;
     for (size_t i = 1; i < U.shape[0] - 1; i++)
@@ -178,46 +169,19 @@ unittest
         {
             for (size_t k = 1; k < U.shape[2] - 1; k++)
             {
-                x[i, j, k] = (-6.0 * U[i, j, k] + U[i - 1, j, k] + U[i + 1,
-                        j, k] + U[i, j - 1, k] + U[i, j + 1, k] + U[i, j, k -
-                        1] + U[i, j, k + 1]) / (h * h);
-
+                x[i, j, k] = (-6.0 *
+                        U[i, j, k] +
+                        U[i - 1, j, k] +
+                        U[i + 1, j, k] +
+                        U[i, j - 1, k] +
+                        U[i, j + 1, k] +
+                        U[i, j, k - 1] +
+                        U[i, j, k + 1]) / (h * h);
             }
-
         }
     }
 
     const auto x1 = apply_poisson!(double, 3)(U, h);
 
-    assert(x == x1);
-}
-
-unittest
-{
-
-    import std.range : generate;
-    import std.random : uniform;
-    import std.algorithm : fill;
-
-    const size_t N = 100;
-    immutable auto h = 1.0 / double(100);
-
-    auto U = slice!double([N, N], 1.0);
-    U.field.fill(generate!(() => uniform(0.0, 1.0)));
-
-    immutable m = U.shape[0];
-    immutable n = U.shape[1];
-    auto x = U.dup;
-
-    for (size_t i = 1; i < m - 1; i++)
-    {
-        for (size_t j = 1; j < n - 1; j++)
-        {
-            x[i, j] = (-4.0 * U[i, j] + U[i - 1, j] + U[i + 1, j] + U[i, j - 1]
-                    + U[i, j + 1]) / (h * h);
-
-        }
-    }
-    const auto x1 = apply_poisson!(double, 2)(U, h);
     assert(x == x1);
 }
