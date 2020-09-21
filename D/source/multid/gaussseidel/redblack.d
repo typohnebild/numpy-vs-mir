@@ -74,7 +74,7 @@ void sweep(T, size_t Dim : 1, Color color)(in Slice!(T*, 1) F, Slice!(T*, 1) U, 
     const auto N = F.shape[0];
     auto UF = U.field;
     auto FF = F.field;
-    for (size_t i = 1u + color; i < N - 1u; i += 2u)
+    for (size_t i = 2u - color; i < N - 1u; i += 2u)
     {
         UF[i] = (UF[i - 1u] + UF[i + 1u] - FF[i] * h2) / 2.0;
     }
@@ -179,116 +179,79 @@ unittest
 
 unittest
 {
-    import std.range : generate;
-    import std.random : uniform;
-    import std.algorithm : fill;
+    import multid.gaussseidel.slow_sweep : slow_sweep, sweep_naive;
+    import multid.tools.util : randomMatrix;
 
     const size_t N = 10;
-    auto U = slice!double([N], 1.0);
-    U.field.fill(generate!(() => uniform(0.0, 1.0)));
-    auto U1 = U.dup;
-    const auto F = slice!double([N], 0.0);
     const double h2 = 1.0;
-    for (size_t i = 1u + Color.red; i < N - 1u; i += 2u)
-    {
-        U[i] = (U[i - 1u] + U[i + 1u] - F[i] * h2) / 2.0;
-    }
+
+    auto U = randomMatrix!(double, 1)(N);
+    auto U1 = U.dup;
+    auto U2 = U.dup;
+    const auto F = slice!double([N], 1.0);
+
+    sweep_naive!(double, 1, Color.red)(F, U, h2);
     sweep!(double, 1, Color.red)(F, U1, h2);
+    slow_sweep!(double, 1, Color.red)(F, U2, h2);
     assert(U == U1);
+    assert(U1 == U2);
 
-    for (size_t i = 1u + Color.black; i < N - 1u; i += 2u)
-    {
-        U[i] = (U[i - 1u] + U[i + 1u] - F[i] * h2) / 2.0;
-    }
+    sweep_naive!(double, 1, Color.black)(F, U, h2);
     sweep!(double, 1, Color.black)(F, U1, h2);
+    slow_sweep!(double, 1, Color.black)(F, U2, h2);
     assert(U == U1);
+    assert(U1 == U2);
 
 }
 
 unittest
 {
-    import std.range : generate;
-    import std.random : uniform;
-    import std.algorithm : fill;
+    import multid.gaussseidel.slow_sweep : sweep_naive, slow_sweep;
+    import multid.tools.util : randomMatrix;
 
     const size_t N = 10;
-    auto U = slice!double([N, N], 1.0);
-    U.field.fill(generate!(() => uniform(0.0, 1.0)));
-    auto U1 = U.dup;
-    const auto F = slice!double([N, N], 1.0);
     const double h2 = 1.0;
 
-    foreach (i; 1 .. N - 1)
-    {
-        foreach (j; 1 .. N - 1)
-        {
-            if ((i + j) % 2 == Color.red)
-            {
-                U[i, j] = (U[i - 1, j] + U[i + 1, j] + U[i, j - 1] + U[i, j + 1] - h2 * F[i, j]) / 4.0;
-            }
-        }
-    }
+    auto U = randomMatrix!(double, 2)(N);
+    auto U1 = U.dup;
+    auto U2 = U.dup;
+    const auto F = slice!double([N, N], 1.0);
 
+    sweep_naive!(double, 2, Color.red)(F, U, h2);
     sweep!(double, 2, Color.red)(F, U1, h2);
+    slow_sweep!(double, 2, Color.red)(F, U2, h2);
     assert(U == U1);
+    assert(U1 == U2);
 
-    foreach (i; 1 .. N - 1)
-    {
-        foreach (j; 1 .. N - 1)
-        {
-            if ((i + j) % 2 == Color.black)
-            {
-                U[i, j] = (U[i - 1, j] + U[i + 1, j] + U[i, j - 1] + U[i, j + 1] - h2 * F[i, j]) / 4.0;
-            }
-        }
-    }
-
+    sweep_naive!(double, 2, Color.black)(F, U, h2);
     sweep!(double, 2, Color.black)(F, U1, h2);
+    slow_sweep!(double, 2, Color.black)(F, U2, h2);
     assert(U == U1);
-
+    assert(U1 == U2);
 }
 
 unittest
 {
-    import std.range : generate;
-    import std.random : uniform;
-    import std.algorithm : fill;
+    import multid.gaussseidel.slow_sweep : sweep_naive, slow_sweep;
+    import multid.tools.util : randomMatrix;
 
     const size_t N = 10;
-    auto U = slice!double([N, N, N], 1.0);
-    U.field.fill(generate!(() => uniform(0.0, 1.0)));
+    auto U = randomMatrix!(double, 3)(N);
     auto U1 = U.dup;
+    auto U2 = U.dup;
     const auto F = slice!double([N, N, N], 1.0);
     const double h2 = 1.0;
 
-    void sweep_naive(T, size_t Dim : 3, Color color)(const Slice!(T*, 3) F, Slice!(T*, 3) U, T h2)
-    {
-        const auto n = F.shape[0];
-        const auto m = F.shape[1];
-        const auto l = F.shape[2];
-        for (size_t i = 1u; i < n - 1u; i++)
-        {
-            for (size_t j = 1u; j < m - 1u; j++)
-            {
-                for (size_t k = 1u; k < l - 1u; k++)
-                {
-                    if ((i + j + k) % 2 == color)
-                    {
-                        U[i, j, k] = (U[i - 1, j, k] + U[i + 1, j, k] + U[i, j - 1,
-                                k] + U[i, j + 1, k] + U[i, j, k - 1] + U[i, j, k + 1] - h2 * F[i, j, k]) / 6.0;
-
-                    }
-                }
-            }
-        }
-    }
-
     sweep_naive!(double, 3, Color.red)(F, U, h2);
     sweep!(double, 3, Color.red)(F, U1, h2);
+    slow_sweep!(double, 3, Color.red)(F, U2, h2);
     assert(U == U1);
+    assert(U1 == U2);
 
     sweep_naive!(double, 3, Color.black)(F, U, h2);
     sweep!(double, 3, Color.black)(F, U1, h2);
+    slow_sweep!(double, 3, Color.black)(F, U2, h2);
     assert(U == U1);
+    assert(U1 == U2);
 
 }

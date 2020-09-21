@@ -80,3 +80,56 @@ void slow_sweep(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 3
     strideU[] /= cast(T) 6;
 
 }
+
+void sweep_naive(T, size_t Dim : 1, Color color)(const Slice!(T*, 1) F, Slice!(T*, 1) U, T h2)
+{
+
+    const auto n = F.shape[0];
+    foreach (i; 1 .. n - 1)
+    {
+        if (i % 2 == color)
+        {
+            U[i] = (U[i - 1u] + U[i + 1u] - F[i] * h2) / 2.0;
+        }
+    }
+
+}
+
+void sweep_naive(T, size_t Dim : 2, Color color)(const Slice!(T*, 2) F, Slice!(T*, 2) U, T h2)
+{
+    const auto n = F.shape[0];
+    const auto m = F.shape[1];
+
+    foreach (i; 1 .. n - 1)
+    {
+        foreach (j; 1 .. m - 1)
+        {
+            if ((i + j) % 2 == color)
+            {
+                U[i, j] = (U[i - 1, j] + U[i + 1, j] + U[i, j - 1] + U[i, j + 1] - h2 * F[i, j]) / 4.0;
+            }
+        }
+    }
+}
+
+void sweep_naive(T, size_t Dim : 3, Color color)(const Slice!(T*, 3) F, Slice!(T*, 3) U, T h2)
+{
+    const auto n = F.shape[0];
+    const auto m = F.shape[1];
+    const auto l = F.shape[2];
+    for (size_t i = 1u; i < n - 1u; i++)
+    {
+        for (size_t j = 1u; j < m - 1u; j++)
+        {
+            for (size_t k = 1u; k < l - 1u; k++)
+            {
+                if ((i + j + k) % 2 == color)
+                {
+                    U[i, j, k] = (U[i - 1, j, k] + U[i + 1, j, k] + U[i, j - 1,
+                            k] + U[i, j + 1, k] + U[i, j, k - 1] + U[i, j, k + 1] - h2 * F[i, j, k]) / 6.0;
+
+                }
+            }
+        }
+    }
+}
