@@ -30,42 +30,43 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(in Slice!(T*, Dim) e, in size_t[Dim]
     }
     else static if (Dim == 2)
     {
+        immutable NW = fine_shape[1];
+        immutable NE = e.shape[1];
+
+        auto idxe = (size_t i, size_t j) => i * NE + j;
+        auto idxw = (size_t i, size_t j) => i * NW + j;
+
         foreach (i; 0 .. end - 1)
         {
-            auto flatindexw = 2 * i * w.shape[0];
-            auto flatindexw2 = (2 * i + 1) * w.shape[0];
-            auto flatindexe = i * e.shape[0];
-            auto flatindexe2 = (i + 1) * e.shape[0];
             foreach (j; 0 .. end - 1)
             {
                 // the value that is copied
-                WF[flatindexw + 2 * j] = EF[flatindexe + j];
+                WF[idxw(2*i, 2*j)] = EF[idxe(i, j)];
                 // the value next a copied one
-                WF[flatindexw + 2 * (j + 1) - 1] = (EF[flatindexe + j] + EF[flatindexe + j + 1]) / 2;
+                WF[idxw(2*i, 2*(j+1)-1)] = (EF[idxe(i,j)] + EF[idxe(i,j+1)]) / 2;
                 // the value below a copied one
-                WF[flatindexw2 + 2 * j] = (EF[flatindexe2 + j] + EF[flatindexe + j]) / 2;
+                WF[idxw(2*i+1, 2*j)] = (EF[idxe(i+1,j)] + EF[idxe(i,j)]) / 2;
             }
-            WF[flatindexw + 2 * (end - 1)] = EF[flatindexe + end - 1];
-            WF[flatindexw2 + 2 * (end - 1)] = (EF[flatindexe2 + end - 1] +
-                    EF[flatindexe + end - 1]) / 2;
+            WF[idxw(2*i, 2*(end-1))] = EF[idxe(i, end-1)];
+            WF[idxw(2*i+1, 2*(end-1))] = (EF[idxe(i+1, end-1)] +
+                    EF[idxe(i, end-1)]) / 2;
         }
         // this is for the last row and the last colomn
-        auto flatindexw = 2 * (end - 1) * w.shape[0];
-        auto flatindexe = (end - 1) * e.shape[0];
         foreach (j; 0 .. end - 1)
         {
-            WF[flatindexw + 2 * j] = EF[flatindexe + j];
-            WF[flatindexw + 2 * (j + 1) - 1] = (EF[flatindexe + j] + EF[flatindexe + j + 1]) / 2;
+            WF[idxw(2*(end-1), 2*j)] = EF[idxe(end-1, j)];
+            WF[idxw(2*(end-1), 2*(j+1)-1)] = (EF[idxe(end-1, j)] + EF[idxe(end-1, j+1)]) / 2;
         }
         WF[$ - 1] = EF[$ - 1];
         for (size_t i = 1; i < wend; i += 2)
         {
             for (size_t j = 1; j < wend; j += 2)
             {
-                auto flatindex = i * w.shape[0] + j;
-                WF[flatindex] = (
-                        WF[flatindex + w.shape[0]] + WF[flatindex -
-                        w.shape[0]] + WF[flatindex - 1] + WF[flatindex + 1]) / 4;
+                //auto flatindex = i * w.shape[0] + j;
+                WF[idxw(i,j)] = (WF[idxw(i, j+NW)] +
+                                WF[idxw(i, j-NW)] +
+                                WF[idxw(i, j-1)] +
+                                WF[idxw(i, j+1)]) / 4;
             }
         }
         // Since we restrict always to N//2 + 1 we need to handle the case if
@@ -73,28 +74,22 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(in Slice!(T*, Dim) e, in size_t[Dim]
         // and the forelast is no new colomn that needs to be calculated
         if (fine_shape[0] % 2 == 0) // != e.shape[0] % 2)
         {
-            flatindexw = (w.shape[0] - 1) * w.shape[0];
-            flatindexe = (e.shape[0] - 1) * e.shape[0];
             foreach (j; 0 .. end - 1)
             {
-                WF[flatindexw + 2 * j] = EF[flatindexe + j];
-                WF[flatindexw + 2 * (j + 1) - 1] = (EF[flatindexe + j] + EF[flatindexe + j + 1]) / 2;
+                WF[idxw(NW-1, 2*j)] = EF[idxe(NE-1, j)];
+                WF[idxw(NW-1, 2*(j+1)-1)] = (EF[idxe(NE-1, j)] + EF[idxe(NE-1, j+1)]) / 2;
 
-                WF[(w.shape[0]) * 2 * j + w.shape[0] - 1] = EF[(
-                            e.shape[0]) * j + e.shape[0] - 1];
+                WF[idxw(2*j, NW-1)] = EF[idxe(j, NE-1)];
 
-                WF[w.shape[0] * (2 * j + 1) + w.shape[0] - 1] = (
-                        EF[e.shape[0] * j + e.shape[0] - 1] +
-                        EF[e.shape[0] * (j + 1) + e.shape[0] - 1]) / 2;
+                WF[idxw(2*j+1, NW-1)] = (
+                        EF[idxe(j, NE-1)] +
+                        EF[idxe(j+1, NE-1)]) / 2;
             }
             w[$ - 2 .. $, $ - 2 .. $] = e[$ - 2 .. $, $ - 2 .. $];
-
         }
-
     }
     else static if (Dim == 3)
     {
-        //TODO
         immutable MW = fine_shape[0];
         immutable NW = fine_shape[1];
         immutable OW = fine_shape[2];
