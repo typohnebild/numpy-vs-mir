@@ -6,6 +6,9 @@ import optparse
 import matplotlib.pyplot as plt
 import os.path
 
+import matplotlib.colors as mcolor
+from itertools import cycle
+
 
 DEFAULT_FILE = '../Python/results/outfile_cip1e3_1609_intel_1_numba'
 DEFAULT_OUT = '../graphs'
@@ -66,12 +69,13 @@ def time(df, label):
 
 
 def subplots(frames, base_path, column):
+    color = cycle(mcolor.TABLEAU_COLORS.keys())
     plt.clf()
     fig, axes = plt.subplots(len(frames), 1, sharex=True)
     for i, axe in enumerate(axes):
         name, df = frames[i]
         g = df.groupby('size').median()[column]
-        g.plot(label=name, ax=axe, marker='o')
+        g.plot(label=name, ax=axe, marker='o', color=next(color))
         axe.grid(color='b', linestyle='-', linewidth=0.2, alpha=0.5)
         axe.set(ylabel='FLOP/s')
         axe.set_title(name)
