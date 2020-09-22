@@ -11,28 +11,38 @@
 4. [Implementation](#implementation)
     1. [Python](#python-multigrid)
     2. [D](#d-multigrid)
-5. [Meassurements](#meassurements)
+5. [Measurements](#measurements)
 6. [Results](#results)
 7. [Summary](#summary)
 8. [Footnotes](#footnotes)
 
 ## Motivation
 
-Python is a well known and often used programming language. Its C-based packages like numpy allow an efficient computation.
-But there is another programming language coming up the last years **D**
+Python is a well known and often used programming language. Its C-based package numpy allows an efficient computation for a wide variety of problems.
 
-D combines the best parts of C and Python and is therefore competitive to pythons numpy package. It serves an numpy like D-package called MIR.
-This makes D comparable to Python.
+D combines the best parts of C and Python and is therefore competitive to pythons numpy package. It serves a numpy like D-package called MIR, which makes D comparable to Python.
 
-There are already some comparison of D and Python, like [^fn1] and [^fn2] but compare relative simple instructions.
-We wanted to compare these to with a more complex application from HPC and implemented a multigrid solver in both.
+There are already some comparisons between D and other competitors, like [^fn1] and [^fn2] but they compare relatively simple instructions.
+We compare D with Python with a more complex application from HPC and implement a multigrid solver in both languages. The measurement takes place by solving the poisson equation in 2D with our solvers.
+
+[TODO: Heatmap BILD ggf. als GIF]
+
+It comes out that... tbd
 
 ## Related Work
 
-This [^fn1] and [^fn2].
+In reference [^fn2], D was compared to Python and Julia with respect to simple numerical operations like dot product, multiplication and sorting. Similar to our approach, MIR and Numpy was used in those implementations.
+
+Reference [^fn1] deals with the comparison of D, Chapel and Julia. It aims kernel matrix operations like dot products, exponents, Cauchy, Gaussian, Power and some more.
+
+Based on both works, we compare a more complex application by implementing a multigrid solver in D and Python using MIR and Numpy.
 
 ## Methods
-We want to solve heat maps with multigrids.
+We want to solve the poisson equation with our multigrids.
+
+* Hardware: tbd
+
+* Versions: tbd
 
 ### Multigrid
 see [^fn7]
