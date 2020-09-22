@@ -10,6 +10,9 @@ But there is another programming language comming up the last years **D**
 D combines the best parts of C and Python and is therefore competitive to pythons numpy package. It serves an numpy like D-package called MIR.
 This makes D comparabel to Python. Therefore, we decided to implement a multigrid implementation in both languages and compare their FLOPs.
 
+## Related Work
+
+This [^fn1] and [^fn2].
 
 ## Methods
 ### Python multigrid
@@ -24,3 +27,7 @@ Problemsize: 200, 400, 600 ... 4000
 ![](graphs/cip1e31709_flopss.png?raw=true)
 ![](graphs/cip1e31709_flops.png?raw=true)
 ![](graphs/cip1e31709_time.png?raw=true)
+
+
+[^fn1]: [A Look at Chapel, D, and Julia Using Kernel Matrix Calculations](https://dlang.org/blog/2020/06/03/a-look-at-chapel-d-and-julia-using-kernel-matrix-calculations/)
+[^fn2]: [Mir Benchmark](https://github.com/tastyminerals/mir_benchmarks)
