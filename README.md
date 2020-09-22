@@ -1,7 +1,20 @@
 # Python vs. D using multigrid
 
-## Abstract
-TODO (ist das Kunst oder kann das weg?)
+
+##  Content
+1. [Motivation](#motivation)
+2. [Related Work](#related-work)
+3. [Methods](#methods)
+    1. [Multigrid](#multigrid)
+    2. [Gauss Seidel RedBlack](#gauss-seidel-redblack)
+    3. [Poisson](#poisson)
+4. [Implementation](#implementation)
+    1. [Python](#python-multigrid)
+    2. [D](#d-multigrid)
+5. [Meassurements](#meassurements)
+6. [Results](#results)
+7. [Summary](#summary)
+8. [Footnotes](#footnotes)
 
 ## Motivation
 
@@ -47,6 +60,9 @@ Problemsize: 200, 400, 600 ... 4000
 ![](graphs/cip1e32109_time.png?raw=true)
 ![](graphs/cip1e32109_FLOPS_subplots.png?raw=true)
 ![](graphs/cip1e32109_time_subplots.png?raw=true)
+
+## Summary
+tbd
 
 ## Footnotes
 
