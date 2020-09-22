@@ -51,18 +51,33 @@ def read_file(path):
 
 
 def flops(df, label):
-    df.groupby('size').mean().FLOPS.plot(label=label)
-    plt.ylabel('Flop/s')
+    df.groupby('size').median().FLOPS.plot(label=label)
+    plt.ylabel('FLOP/s')
 
 
 def flop(df, label):
-    df.groupby('size').mean().FLOP.plot(label=label)
+    df.groupby('size').median().FLOP.plot(label=label)
     plt.ylabel('Flop')
 
 
 def time(df, label):
-    df.groupby('size').mean().time.plot(label=label)
+    df.groupby('size').median().time.plot(label=label)
     plt.ylabel('time in s')
+
+
+def subplots(frames, base_path, column):
+    plt.clf()
+    fig, axes = plt.subplots(len(frames), 1, sharex=True)
+    for i, axe in enumerate(axes):
+        name, df = frames[i]
+        g = df.groupby('size').median()[column]
+        g.plot(label=name, ax=axe, marker='o')
+        axe.grid(color='b', linestyle='-', linewidth=0.2, alpha=0.5)
+        axe.set(ylabel='FLOP/s')
+        axe.set_title(name)
+
+    fig.tight_layout()
+    fig.savefig(f'{base_path}_{column}_subplots.png')
 
 
 def extract_name(path):
@@ -94,6 +109,11 @@ def main():
                       dest='outpath',
                       default=DEFAULT_OUT,
                       help='path to save pictures')
+    parser.add_option('-s',
+                      action='store_true',
+                      dest='subs',
+                      default=False,
+                      help='also print a subplot for every single file')
 
     options, args = parser.parse_args()
     if not args:
@@ -111,6 +131,10 @@ def main():
     plot(frames, flops, base_name, 'Floating Point Operations / second')
     plot(frames, flop, base_name, 'Floating Point Operations')
     plot(frames, time, base_name, 'Time in Seconds')
+
+    if options.subs:
+        subplots(frames, base_name, 'FLOPS')
+        subplots(frames, base_name, 'time')
 
 
 if __name__ == '__main__':
