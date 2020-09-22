@@ -28,6 +28,7 @@ Problemsize: 200, 400, 600 ... 4000
 ![](graphs/cip1e31709_flops.png?raw=true)
 ![](graphs/cip1e31709_time.png?raw=true)
 
+## Footnotes
 
 [^fn1]: [A Look at Chapel, D, and Julia Using Kernel Matrix Calculations](https://dlang.org/blog/2020/06/03/a-look-at-chapel-d-and-julia-using-kernel-matrix-calculations/)
 [^fn2]: [Mir Benchmark](https://github.com/tastyminerals/mir_benchmarks)
