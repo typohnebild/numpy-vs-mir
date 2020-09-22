@@ -77,7 +77,7 @@ def subplots(frames, base_path, column):
         g = df.groupby('size').median()[column]
         g.plot(label=name, ax=axe, marker='o', color=next(color))
         axe.grid(color='b', linestyle='-', linewidth=0.2, alpha=0.5)
-        axe.set(ylabel='FLOP/s')
+        axe.set(ylabel=column)
         axe.set_title(name)
 
     fig.tight_layout()
