@@ -19,10 +19,10 @@
 ## Motivation
 
 Python is a well known and often used programming language. Its C-based packages like numpy allow an efficient computation.
-But there is another programming language comming up the last years **D**
+But there is another programming language coming up the last years **D**
 
 D combines the best parts of C and Python and is therefore competitive to pythons numpy package. It serves an numpy like D-package called MIR.
-This makes D comparabel to Python. 
+This makes D comparable to Python.
 
 There are already some comparison of D and Python, like [^fn1] and [^fn2] but compare relative simple instructions.
 We wanted to compare these to with a more complex application from HPC and implemented a multigrid solver in both.
@@ -36,9 +36,9 @@ We want to solve heat maps with multigrids.
 
 ### Multigrid
 see [^fn7]
-### Gauss Seidel RedBlack 
+### Gauss Seidel RedBlack
 see [^fn3]
-### Poisson 
+### Poisson
 see [^fn4]
 
 ## Implementation
@@ -47,12 +47,12 @@ see [^fn4]
 ### D multigrid
 We did the same things as in Python.
 
-## Meassurements
-We meassured some fancy stuff.
+## Measurements
+We measured some fancy stuff.
 
 ## Results
-Benchmark W-cyclce, 2 pre-, postsmooth
-Problemsize: 200, 400, 600 ... 4000
+Benchmark W-cycle, 2 pre-, postsmooth steps
+Problemsize: 100, 200, 300, 400, 600 ..., 1000, 1200, 1400 ... 4000
 
 ### D Benchmark
 
@@ -62,6 +62,7 @@ Problemsize: 200, 400, 600 ... 4000
 ![](graphs/cip1e32109_time_subplots.png?raw=true)
 
 ## Summary
+
 tbd
 
 ## Footnotes
