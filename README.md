@@ -19,7 +19,9 @@ We wanted to compare these to with a more complex application from HPC and imple
 This [^fn1] and [^fn2].
 
 ## Methods
+Multigrid[^fn7] | Gauss Seidel RedBlack [^fn3] | Poisson [^fn4]
 ### Python multigrid
+[^fn5] and [^fn6]
 ### D multigrid
 ### Meassurements
 
@@ -39,3 +41,8 @@ Problemsize: 200, 400, 600 ... 4000
 
 [^fn1]: A Look at Chapel, D, and Julia Using Kernel Matrix Calculations [link](https://dlang.org/blog/2020/06/03/a-look-at-chapel-d-and-julia-using-kernel-matrix-calculations/)
 [^fn2]: Mir Benchmark [link](https://github.com/tastyminerals/mir_benchmarks)
+[^fn3]: Optimierung des Red-Black-Gauss-Seidel-Verfahrens auf ausgewählten x86-Prozessoren [link](https://www10.cs.fau.de/publications/theses/2005/Stuermer_SA_2005.pdf)
+[^fn4]: FINITE DIFFERENCE METHODS FOR POISSON EQUATION [link](https://www.math.uci.edu/~chenlong/226/FDM.pdf)
+[^fn5]: Intel distribution for Python [link](https://software.intel.com/content/www/us/en/develop/tools/distribution-for-python.html)
+[^fn6]: Numba [link](https://numba.pydata.org/)
+[^fn7]: Multigrid Tutorial [link](https://www.math.ust.hk/~mawang/teaching/math532/mgtut.pdf)
