@@ -10,7 +10,7 @@ import os.path
 DEFAULT_FILE = '../Python/results/outfile_cip1e3_1609_intel_1_numba'
 DEFAULT_OUT = '../graphs'
 NAMES = [
-    'N',
+    'size',
     'dimension',
     'time',
     'cycles',
@@ -38,39 +38,37 @@ def read_file(path):
             file_des,
             sep=':',
             comment='#',
-            header=None,
-            thousands=',',
-            names=NAMES)
+            thousands=',')
         del df['empty']
-        df['FLOPS'] = (df['scalar_single'] +
-                       df['scalar_double'] +
-                       df['128b_packed_double'] +
-                       df['128b_packed_single'] +
-                       df['256b_packed_double'] +
-                       df['256b_packed_single'])
-        df['FLOPSS'] = df['FLOPS'] / df['time']
+        df['FLOP'] = (df['scalar_single'] +
+                      df['scalar_double'] +
+                      df['128b_packed_double'] +
+                      df['128b_packed_single'] +
+                      df['256b_packed_double'] +
+                      df['256b_packed_single'])
+        df['FLOPS'] = df['FLOP'] / df['time']
         return infos, df
 
 
-def flopss(df, label):
-    df.groupby('N').mean().FLOPSS.plot(label=label)
-    plt.ylabel('Flops/sec')
-
-
 def flops(df, label):
-    df.groupby('N').mean().FLOPS.plot(label=label)
-    plt.ylabel('Flops')
+    df.groupby('size').mean().FLOPS.plot(label=label)
+    plt.ylabel('Flop/s')
+
+
+def flop(df, label):
+    df.groupby('size').mean().FLOP.plot(label=label)
+    plt.ylabel('Flop')
 
 
 def time(df, label):
-    df.groupby('N').mean().time.plot(label=label)
-    plt.ylabel('Time in sec')
+    df.groupby('size').mean().time.plot(label=label)
+    plt.ylabel('time in s')
 
 
 def extract_name(path):
     parts = os.path.basename(path).split('_')
-    if len(parts) == 3:
-        return 'D with Mir'
+    if len(parts) == 4:
+        return f'D with Mir ({parts[-1]})'
     return ' '.join(parts[-3:])
 
 
@@ -78,8 +76,9 @@ def extract_date_host(path):
     return ''.join(os.path.basename(path).split('_')[1:3])
 
 
-def plot(frames, func, base_path):
+def plot(frames, func, base_path, title):
     plt.clf()
+    plt.title(title)
     for name, df in frames:
         func(df, name)
     plt.legend()
@@ -109,9 +108,9 @@ def main():
         _, df = read_file(arg)
         frames.append((extract_name(arg), df))
 
-    plot(frames, flopss, base_name)
-    plot(frames, flops, base_name)
-    plot(frames, time, base_name)
+    plot(frames, flops, base_name, 'Floating Point Operations / second')
+    plot(frames, flop, base_name, 'Floating Point Operations')
+    plot(frames, time, base_name, 'Time in Seconds')
 
 
 if __name__ == '__main__':
