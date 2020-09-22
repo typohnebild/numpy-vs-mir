@@ -9,6 +9,7 @@ import os.path
 import matplotlib.colors as mcolor
 from itertools import cycle
 
+plt.rcParams['figure.figsize'] = (10, 6)
 
 DEFAULT_FILE = '../Python/results/outfile_cip1e3_1609_intel_1_numba'
 DEFAULT_OUT = '../graphs'
@@ -76,8 +77,21 @@ def subplots(frames, base_path, column):
         name, df = frames[i]
         g = df.groupby('size').median()[column]
         g.plot(label=name, ax=axe, marker='o', color=next(color))
-        axe.grid(color='b', linestyle='-', linewidth=0.2, alpha=0.5)
+        axe.grid(
+            color='b',
+            linestyle='-',
+            linewidth=0.3,
+            alpha=0.5,
+            which='major')
+        axe.grid(
+            color='b',
+            linestyle='-',
+            linewidth=0.1,
+            alpha=0.5,
+            which='minor')
+
         axe.set(ylabel=column)
+        axe.minorticks_on()
         axe.set_title(name)
 
     fig.tight_layout()
