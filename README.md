@@ -28,9 +28,12 @@ This [^fn1] and [^fn2].
 Benchmark W-cyclce, 2 pre-, postsmooth
 Problemsize: 200, 400, 600 ... 4000
 
-![](graphs/cip1e31709_flopss.png?raw=true)
-![](graphs/cip1e31709_flops.png?raw=true)
-![](graphs/cip1e31709_time.png?raw=true)
+### D Benchmark
+
+![](graphs/cip1e32109_flops.png?raw=true)
+![](graphs/cip1e32109_time.png?raw=true)
+![](graphs/cip1e32109_FLOPS_subplots.png?raw=true)
+![](graphs/cip1e32109_time_subplots.png?raw=true)
 
 ## Footnotes
 

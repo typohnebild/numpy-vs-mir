@@ -133,7 +133,7 @@ def main():
         frames.append((extract_name(arg), df))
 
     plot(frames, flops, base_name, 'Floating Point Operations / second')
-    plot(frames, flop, base_name, 'Floating Point Operations')
+    # plot(frames, flop, base_name, 'Floating Point Operations')
     plot(frames, time, base_name, 'Time in Seconds')
 
     if options.subs:

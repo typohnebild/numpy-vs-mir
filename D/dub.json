@@ -10,9 +10,9 @@
   "configurations": [
     {
       "name": "multid",
-      "targetType": "executable",
       "compiler": "ldc",
-      "dflags": ["-mcpu=native"]
+      "dflags": ["-mcpu=native", "--ffast-math", "--boundscheck=off"],
+      "targetType": "executable"
     },
     {
       "name": "multid-static",
