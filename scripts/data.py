@@ -72,7 +72,7 @@ def time(df, label):
 def subplots(frames, base_path, column):
     color = cycle(mcolor.TABLEAU_COLORS.keys())
     plt.clf()
-    fig, axes = plt.subplots(len(frames), 1, sharex=True)
+    fig, axes = plt.subplots(len(frames), 1, sharex=True, figsize=(10, 15))
     for i, axe in enumerate(axes):
         name, df = frames[i]
         g = df.groupby('size').median()[column]
