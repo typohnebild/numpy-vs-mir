@@ -6,11 +6,15 @@ import optparse
 import matplotlib.pyplot as plt
 import os.path
 
+import matplotlib.colors as mcolor
+from itertools import cycle
+
+plt.rcParams['figure.figsize'] = (10, 6)
 
 DEFAULT_FILE = '../Python/results/outfile_cip1e3_1609_intel_1_numba'
 DEFAULT_OUT = '../graphs'
 NAMES = [
-    'N',
+    'size',
     'dimension',
     'time',
     'cycles',
@@ -38,39 +42,66 @@ def read_file(path):
             file_des,
             sep=':',
             comment='#',
-            header=None,
-            thousands=',',
-            names=NAMES)
+            thousands=',')
         del df['empty']
-        df['FLOPS'] = (df['scalar_single'] +
-                       df['scalar_double'] +
-                       df['128b_packed_double'] +
-                       df['128b_packed_single'] +
-                       df['256b_packed_double'] +
-                       df['256b_packed_single'])
-        df['FLOPSS'] = df['FLOPS'] / df['time']
+        df['FLOP'] = (df['scalar_single'] +
+                      df['scalar_double'] +
+                      df['128b_packed_double'] +
+                      df['128b_packed_single'] +
+                      df['256b_packed_double'] +
+                      df['256b_packed_single'])
+        df['FLOPS'] = df['FLOP'] / df['time']
         return infos, df
 
 
-def flopss(df, label):
-    df.groupby('N').mean().FLOPSS.plot(label=label)
-    plt.ylabel('Flops/sec')
-
-
 def flops(df, label):
-    df.groupby('N').mean().FLOPS.plot(label=label)
-    plt.ylabel('Flops')
+    df.groupby('size').median().FLOPS.plot(label=label)
+    plt.ylabel('FLOP/s')
+
+
+def flop(df, label):
+    df.groupby('size').median().FLOP.plot(label=label)
+    plt.ylabel('Flop')
 
 
 def time(df, label):
-    df.groupby('N').mean().time.plot(label=label)
-    plt.ylabel('Time in sec')
+    df.groupby('size').median().time.plot(label=label)
+    plt.ylabel('time in s')
+
+
+def subplots(frames, base_path, column):
+    color = cycle(mcolor.TABLEAU_COLORS.keys())
+    plt.clf()
+    fig, axes = plt.subplots(len(frames), 1, sharex=True)
+    for i, axe in enumerate(axes):
+        name, df = frames[i]
+        g = df.groupby('size').median()[column]
+        g.plot(label=name, ax=axe, marker='o', color=next(color))
+        axe.grid(
+            color='b',
+            linestyle='-',
+            linewidth=0.3,
+            alpha=0.5,
+            which='major')
+        axe.grid(
+            color='b',
+            linestyle='-',
+            linewidth=0.1,
+            alpha=0.5,
+            which='minor')
+
+        axe.set(ylabel=column)
+        axe.minorticks_on()
+        axe.set_title(name)
+
+    fig.tight_layout()
+    fig.savefig(f'{base_path}_{column}_subplots.png')
 
 
 def extract_name(path):
     parts = os.path.basename(path).split('_')
-    if len(parts) == 3:
-        return 'D with Mir'
+    if len(parts) == 4:
+        return f'D with Mir ({parts[-1]})'
     return ' '.join(parts[-3:])
 
 
@@ -78,8 +109,9 @@ def extract_date_host(path):
     return ''.join(os.path.basename(path).split('_')[1:3])
 
 
-def plot(frames, func, base_path):
+def plot(frames, func, base_path, title):
     plt.clf()
+    plt.title(title)
     for name, df in frames:
         func(df, name)
     plt.legend()
@@ -95,6 +127,11 @@ def main():
                       dest='outpath',
                       default=DEFAULT_OUT,
                       help='path to save pictures')
+    parser.add_option('-s',
+                      action='store_true',
+                      dest='subs',
+                      default=False,
+                      help='also print a subplot for every single file')
 
     options, args = parser.parse_args()
     if not args:
@@ -109,9 +146,13 @@ def main():
         _, df = read_file(arg)
         frames.append((extract_name(arg), df))
 
-    plot(frames, flopss, base_name)
-    plot(frames, flops, base_name)
-    plot(frames, time, base_name)
+    plot(frames, flops, base_name, 'Floating Point Operations / second')
+    # plot(frames, flop, base_name, 'Floating Point Operations')
+    plot(frames, time, base_name, 'Time in Seconds')
+
+    if options.subs:
+        subplots(frames, base_name, 'FLOPS')
+        subplots(frames, base_name, 'time')
 
 
 if __name__ == '__main__':
