@@ -9,7 +9,7 @@ import os.path
 import matplotlib.colors as mcolor
 from itertools import cycle
 
-plt.rcParams['figure.figsize'] = (10, 6)
+plt.rcParams['figure.figsize'] = (16, 9)
 
 DEFAULT_FILE = '../Python/results/outfile_cip1e3_1609_intel_1_numba'
 DEFAULT_OUT = '../graphs'
