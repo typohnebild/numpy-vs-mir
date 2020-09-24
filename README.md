@@ -27,6 +27,8 @@ We compare D with Python with a more complex application from HPC and implement 
 
 [TODO: Heatmap BILD ggf. als GIF]
 
+![](graphs/heatmap.gif?raw=true)
+
 It comes out that... tbd
 
 ## Related Work
