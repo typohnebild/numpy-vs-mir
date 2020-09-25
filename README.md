@@ -55,7 +55,6 @@ We want to solve the poisson equation with our multigrids. Therefore, we are usi
         * LDC 1.23
         * mir-algorithm 3.9.6
         * mir-random 2.2.14
-        * numir 2.0.5
 
 ### Multigrid
 see [^fn7]
