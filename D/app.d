@@ -42,6 +42,7 @@ void main(string[] argv)
         poisson_multigrid!(double, 2, 2, 2)(UF1[1].slice, UF1[0].slice, 0, 2, 1);
     }
 
+
     bool verbose = false;
     string path = default_path;
     string sweep = "field";
