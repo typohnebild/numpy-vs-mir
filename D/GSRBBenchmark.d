@@ -1,79 +1,44 @@
 import mir.ndslice : slice;
-import std.stdio : writeln;
-import std.datetime.stopwatch : StopWatch, msecs;
-import std.getopt : getopt;
-import core.thread : Thread;
-import std.conv : to;
-import std.experimental.logger : info, globalLogLevel, LogLevel;
-import std.exception: enforce;
+import std.exception : enforce;
 
+import startup : init;
 import loadproblem : npyload, getDim;
 import multid.gaussseidel.redblack : GS_RB, SweepType;
 
 /++
     This loads and runs a problem that is provided on Commandline and delays the execution of
-    the multigrid till delay is over.
+    the Gauss-Seidel redblack till delay is over.
 
 +/
 void main(string[] argv)
 {
-    StopWatch sw;
-    sw.reset;
-    sw.start;
+    alias i = init!();
+    i.start();
+    i.getopt(argv);
 
-    uint delay = 500;
-    void wait_till()
-    {
-        auto rest = delay - sw.peek.total!"msecs";
-        if (0 < rest)
-        {
-            Thread.sleep(msecs(rest));
-        }
-        sw.stop;
-        sw.reset;
-    }
-
-    globalLogLevel(LogLevel.info);
-
-    immutable string default_path = "../problems/problem_2D_100.npy";
     void warmup()
     {
-        auto UF1 = npyload!(double, 2)(default_path);
-        GS_RB!(double, 2, 10_000_000, 1_000, 1e-8,SweepType.field)(UF1[1].slice, UF1[0].slice, 1);
-        //poisson_multigrid!(double, 2, 2, 2)(UF1[1].slice, UF1[0].slice, 0, 2, 1);
+        auto UF1 = npyload!(double, 2)(i.default_path);
+        GS_RB!(double, 2, 10_000_000, 1_000, 1e-8, SweepType.field)(UF1[1].slice, UF1[0].slice, 1);
     }
 
+    const uint dim = getDim(i.path);
+    enforce(dim == 2, "This benchmark only supports 2D problems");
 
-    bool verbose = false;
-    string path = default_path;
-    string sweep = "field";
-    getopt(argv, "p|P", &path, "d|D", &delay, "v", &verbose, "s", &sweep);
-    if (verbose)
-    {
-        globalLogLevel(LogLevel.all);
-    }
-
-    const uint dim = getDim(path);
-    enforce(dim==2);
-
-    auto UF = npyload!(double, 2)(path);
+    auto UF = npyload!(double, 2)(i.path);
     warmup();
-    wait_till();
-    sw.start;
-    switch (sweep)
+    i.wait_till();
+    switch (i.sweep)
     {
     case "slice":
-        GS_RB!(double, 2, 10_000_000, 1_000, 1e-8,SweepType.slice)(UF[1].slice, UF[0].slice, 1);
+        GS_RB!(double, 2, 10_000_000, 1_000, 1e-8, SweepType.slice)(UF[1].slice, UF[0].slice, 1);
         break;
     case "naive":
-        GS_RB!(double, 2, 10_000_000, 1_000, 1e-8,SweepType.naive)(UF[1].slice, UF[0].slice, 1);
+        GS_RB!(double, 2, 10_000_000, 1_000, 1e-8, SweepType.naive)(UF[1].slice, UF[0].slice, 1);
         break;
     default:
-        GS_RB!(double, 2, 10_000_000, 1_000, 1e-8,SweepType.field)(UF[1].slice, UF[0].slice, 1);
+        GS_RB!(double, 2, 10_000_000, 1_000, 1e-8, SweepType.field)(UF[1].slice, UF[0].slice, 1);
 
     }
-    sw.stop;
-    info(sw.peek
-            .total!"msecs"
-            .to!double / 1_000.0);
+    i.print_time();
 }

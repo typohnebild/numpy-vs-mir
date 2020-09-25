@@ -1,11 +1,6 @@
 import mir.ndslice : slice;
-import std.stdio : writeln;
-import std.datetime.stopwatch : StopWatch, msecs;
-import std.getopt : getopt;
-import core.thread : Thread;
-import std.conv : to;
-import std.experimental.logger : info, globalLogLevel, LogLevel;
 
+import startup : init;
 import loadproblem : npyload, getDim;
 import multid.multigrid.multigrid : poisson_multigrid;
 import multid.gaussseidel.redblack : GS_RB;
@@ -17,71 +12,40 @@ import multid.gaussseidel.redblack : GS_RB;
 +/
 void main(string[] argv)
 {
-    StopWatch sw;
-    sw.reset;
-    sw.start;
+    alias i = init!();
+    i.start();
+    i.getopt(argv);
 
-    uint delay = 500;
-    void wait_till()
-    {
-        auto rest = delay - sw.peek.total!"msecs";
-        if (0 < rest)
-        {
-            Thread.sleep(msecs(rest));
-        }
-        sw.stop;
-        sw.reset;
-    }
-
-    globalLogLevel(LogLevel.info);
-
-    immutable string default_path = "../problems/problem_2D_100.npy";
     void warmup()
     {
-        auto UF1 = npyload!(double, 2)(default_path);
+        auto UF1 = npyload!(double, 2)(i.default_path);
         poisson_multigrid!(double, 2, 2, 2)(UF1[1].slice, UF1[0].slice, 0, 2, 1);
     }
 
-
-    bool verbose = false;
-    string path = default_path;
-    string sweep = "field";
-    getopt(argv, "p|P", &path, "d|D", &delay, "v", &verbose, "s", &sweep);
-    if (verbose)
-    {
-        globalLogLevel(LogLevel.all);
-    }
-
-    const uint dim = getDim(path);
+    const uint dim = getDim(i.path);
 
     switch (dim)
     {
     case 1:
-        auto UF = npyload!(double, 1)(path);
+        auto UF = npyload!(double, 1)(i.path);
         warmup();
-        wait_till();
-        sw.start;
-        poisson_multigrid!(double, 1, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100, sweep);
+        i.wait_till();
+        poisson_multigrid!(double, 1, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100, i.sweep);
         break;
     case 2:
-        auto UF = npyload!(double, 2)(path);
+        auto UF = npyload!(double, 2)(i.path);
         warmup();
-        wait_till();
-        sw.start;
-        poisson_multigrid!(double, 2, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100, sweep);
+        i.wait_till();
+        poisson_multigrid!(double, 2, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100, i.sweep);
         break;
     case 3:
-        auto UF = npyload!(double, 3)(path);
+        auto UF = npyload!(double, 3)(i.path);
         warmup();
-        wait_till();
-        sw.start;
-        poisson_multigrid!(double, 3, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100, sweep);
+        i.wait_till();
+        poisson_multigrid!(double, 3, 2, 2)(UF[1].slice, UF[0].slice, 0, 2, 100, i.sweep);
         break;
     default:
         throw new Exception("wrong dimension!");
     }
-    sw.stop;
-    info(sw.peek
-            .total!"msecs"
-            .to!double / 1_000.0);
+    i.print_time();
 }

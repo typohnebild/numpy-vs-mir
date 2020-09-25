@@ -17,6 +17,7 @@ venv
 multid-test-multid
 multid-test-library
 multid-static
+gsrb
 trace.*
 *.log
 *problem_3D_100.npy
