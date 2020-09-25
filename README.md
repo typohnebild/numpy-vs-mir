@@ -76,8 +76,22 @@ Problemsize: 100, 200, 300, 400, 600 ..., 1000, 1200, 1400 ... 4000
 
 ### D Benchmark
 
+![](graphs/cip1e32109D_flops.png?raw=true)
+![](graphs/cip1e32109D_time.png?raw=true)
+
+### Python Benchmark
+
+![](graphs/cip1e32109numba_flops.png?raw=true)
+![](graphs/cip1e32109numba_time.png?raw=true)
+
+![](graphs/cip1e32109nonumba_flops.png?raw=true)
+![](graphs/cip1e32109nonumba_time.png?raw=true)
+
+### Benchmarks combined
+
 ![](graphs/cip1e32109_flops.png?raw=true)
 ![](graphs/cip1e32109_time.png?raw=true)
+
 ![](graphs/cip1e32109_FLOPS_subplots.png?raw=true)
 ![](graphs/cip1e32109_time_subplots.png?raw=true)
 

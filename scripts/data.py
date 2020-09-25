@@ -133,6 +133,12 @@ def main():
                       default=False,
                       help='also print a subplot for every single file')
 
+    parser.add_option('-g',
+                      action='store_true',
+                      dest='groups',
+                      default=False,
+                      help='also print a plots for every group')
+
     options, args = parser.parse_args()
     if not args:
         parser.print_usage()
@@ -149,6 +155,23 @@ def main():
     plot(frames, flops, base_name, 'Floating Point Operations / second')
     # plot(frames, flop, base_name, 'Floating Point Operations')
     plot(frames, time, base_name, 'Time in Seconds')
+
+    if options.groups:
+        only_D = [x for x in frames if x[0].startswith("D")]
+        only_numba = [x for x in frames if x[0].split(" ")[-1] == "numba"]
+        only_nonumba = [x for x in frames if x[0].split(" ")[-1] == "nonumba"]
+        plot(only_D, flops, f'{base_name}D',
+             'Floating Point Operations / second')
+        plot(only_D, time, f'{base_name}D', 'Time in Seconds')
+        plot(only_numba, flops, f'{base_name}numba',
+             'Floating Point Operations / second')
+        plot(only_numba, time, f'{base_name}numba', 'Time in Seconds')
+        plot(
+            only_nonumba,
+            flops,
+            f'{base_name}nonumba',
+            'Floating Point Operations / second')
+        plot(only_nonumba, time, f'{base_name}nonumba', 'Time in Seconds')
 
     if options.subs:
         subplots(frames, base_name, 'FLOPS')
