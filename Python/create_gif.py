@@ -15,7 +15,6 @@ def main():
     U, F = load_problem(DEFAULT_FILE)
     cycle = PoissonCycle(F, 2, 2, 2, 0, True)
     ims = []
-    oldU = U.copy()
     fig = plt.figure()
     for i in range(100):
         im = plt.imshow(U, cmap='RdBu_r', interpolation='nearest')
@@ -31,7 +30,6 @@ def main():
     ani = animation.ArtistAnimation(fig, ims, interval=1000, repeat=True)
     writer = animation.PillowWriter(fps=2)
     ani.save('../graphs/heatmap.gif', writer=writer)
-    # plt.show()
 
 
 if __name__ == "__main__":
