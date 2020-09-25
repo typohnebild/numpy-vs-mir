@@ -49,19 +49,19 @@ solver in D and Python using MIR and Numpy.
 ## Methods
 We want to solve the poisson equation with our multigrids and measure the FLOPs/sec for various
 2D problems. Therefore, we are using the following hardware and software configurations:
-* Hardware:
+* **Hardware:**
     * Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz | CPU max MHz: 4700 | CPU min MHz: 800
     * RAM: 64GB | Speed: ??? MHz
     * Kernel: Linux cip1e3 4.19.144-1-cip-amd64 x86_64 (gcc version 8.3.0 (Debian 8.3.0-6))
-* Versions:
-    * Python
+* **Versions:**
+    * *Python*
         * Python 3.7.3
         * Numpy 1.19.0
         * Numba 0.50.1
         * Intel Python Distribution 2020.2.902
             * Numpy 1.18.5
             * Numba 0.49.1
-    * D
+    * *D*
         * LDC 1.23
         * mir-algorithm 3.9.6
         * mir-random 2.2.14
