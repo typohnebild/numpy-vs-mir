@@ -49,6 +49,8 @@ We want to solve the poisson equation with our multigrids. Therefore, we are usi
         * Numpy 1.19.0
         * Numba 0.50.1
         * Intel Python Distribution 2020.2.902
+            * Numpy 1.18.5
+            * Numba 0.49.1
     * D
         * LDC 1.23
         * mir-algorithm 3.9.6
