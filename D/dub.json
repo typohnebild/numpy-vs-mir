@@ -1,6 +1,6 @@
 {
   "name": "multid",
-  "mainSourceFile": "source/app.d",
+
   "dependencies": {
     "mir-algorithm": "~>3.9.6",
     "mir-random": "~>2.2.14",
@@ -10,16 +10,25 @@
   "configurations": [
     {
       "name": "multid",
+      "mainSourceFile": "app.d",
       "compiler": "ldc",
-      "dflags": ["-mcpu=native", "--ffast-math", "--boundscheck=off"],
+      "dflags-ldc": ["-mcpu=native", "--boundscheck=off"],
       "targetType": "executable"
     },
     {
       "name": "multid-static",
+      "mainSourceFile": "app.d",
       "targetType": "executable",
       "targetName": "multid-static",
       "compiler": "ldc",
       "dflags-ldc": ["--static"]
+    },
+    {
+      "name": "gsrb",
+      "mainSourceFile": "GSRBBenchmark.d",
+      "targetName": "gsrb",
+      "dflags-ldc": ["-mcpu=native", "--boundscheck=off"],
+      "targetType": "executable"
     }
   ]
 }
