@@ -25,8 +25,6 @@ D combines the best parts of C and Python and is therefore competitive to python
 There are already some comparisons between D and other competitors, like [^fn1] and [^fn2] but they compare relatively simple instructions.
 We compare D with Python with a more complex application from HPC and implement a multigrid solver in both languages. The measurement takes place by solving the poisson equation in 2D with our solvers.
 
-[TODO: Heatmap BILD ggf. als GIF]
-
 ![](graphs/heatmap.gif?raw=true)
 
 It comes out that... tbd
@@ -37,14 +35,24 @@ In reference [^fn2], D was compared to Python and Julia with respect to simple n
 
 Reference [^fn1] deals with the comparison of D, Chapel and Julia. It aims kernel matrix operations like dot products, exponents, Cauchy, Gaussian, Power and some more.
 
-Based on both works, we compare a more complex application by implementing a multigrid solver in D and Python using MIR and Numpy.
+Based on the ideas both works, we compare a more complex application by implementing a multigrid solver in D and Python using MIR and Numpy.
 
 ## Methods
-We want to solve the poisson equation with our multigrids.
-
-* Hardware: tbd
-
-* Versions: tbd
+We want to solve the poisson equation with our multigrids. Therefore, we are using the following hardware and software configurations:
+* Hardware:
+    * Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz | CPU max MHz: 4700 | CPU min MHz: 800
+    * RAM: 64GB | Speed: ??? MHz
+    * Kernel: Linux cip1e3 4.19.144-1-cip-amd64 x86_64 (gcc version 8.3.0 (Debian 8.3.0-6))
+* Versions:
+    * Python
+        * Python 3.8.3
+        * Numpy 1.19.0
+        * ? Scipy 1.4.1 ???
+        * Numba 0.50.1 ???
+        * Intel Python Distribution 2020.2.902
+    * D
+        * DMD ???
+        * LDC ???
 
 ### Multigrid
 see [^fn7]
