@@ -18,12 +18,17 @@
 
 ## Motivation
 
-Python is a well known and often used programming language. Its C-based package numpy allows an efficient computation for a wide variety of problems.
+Python is a well known and often used programming language. Its C-based package numpy allows an
+efficient computation for a wide variety of problems.
 
-D combines the best parts of C and Python and is therefore competitive to pythons numpy package. It serves a numpy like D-package called MIR, which makes D comparable to Python.
+D combines the best parts of C and Python and is therefore competitive to pythons numpy package.
+It serves a numpy like D-package called MIR, which makes D comparable to Python.
 
-There are already some comparisons between D and other competitors, like [^fn1] and [^fn2] but they compare relatively simple instructions.
-We compare D with Python with a more complex application from HPC and implement a multigrid solver in both languages. The measurement takes place by solving the poisson equation in 2D with our solvers.
+There are already some comparisons between D and other competitors, like [^fn1] and [^fn2] but they
+compare relatively simple instructions.
+We compare D with Python with a more complex application from HPC and implement a multigrid solver
+in both languages. The measurement takes place by solving the poisson equation in 2D with our
+solvers.
 
 ![](graphs/heatmap.gif?raw=true)
 
@@ -31,14 +36,19 @@ It comes out that... tbd
 
 ## Related Work
 
-In reference [^fn2], D was compared to Python and Julia with respect to simple numerical operations like dot product, multiplication and sorting. Similar to our approach, MIR and Numpy was used in those implementations.
+In reference [^fn2], D was compared to Python and Julia with respect to simple numerical operations
+like dot product, multiplication and sorting. Similar to our approach, MIR and Numpy was used in
+those implementations.
 
-Reference [^fn1] deals with the comparison of D, Chapel and Julia. It aims kernel matrix operations like dot products, exponents, Cauchy, Gaussian, Power and some more.
+Reference [^fn1] deals with the comparison of D, Chapel and Julia. It aims kernel matrix operations
+like dot products, exponents, Cauchy, Gaussian, Power and some more.
 
-Based on the ideas both works, we compare a more complex application by implementing a multigrid solver in D and Python using MIR and Numpy.
+Based on the ideas both works, we compare a more complex application by implementing a multigrid
+solver in D and Python using MIR and Numpy.
 
 ## Methods
-We want to solve the poisson equation with our multigrids. Therefore, we are using the following hardware and software configurations:
+We want to solve the poisson equation with our multigrids and measure the FLOPs/sec for various
+2D problems. Therefore, we are using the following hardware and software configurations:
 * Hardware:
     * Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz | CPU max MHz: 4700 | CPU min MHz: 800
     * RAM: 64GB | Speed: ??? MHz
@@ -57,11 +67,13 @@ We want to solve the poisson equation with our multigrids. Therefore, we are usi
         * mir-random 2.2.14
 
 ### Multigrid
-see [^fn7]
+see [^fn7]. The idea of Multigrid is to split the problem in smaler problems.
+These smaler problems are computed by a solver - here Gauss Seidel RedBlack - and interpolated back
+to the original problem size. The original problem shall be a poisson equation.
 ### Gauss Seidel RedBlack
-see [^fn3]
+see [^fn3]. Gauss Seidel RedBlack does things ...
 ### Poisson
-see [^fn4]
+see [^fn4]. Since we want to solve a poisson equation, we should cover this problem type here...
 
 ## Implementation
 ### Python multigrid
@@ -98,6 +110,8 @@ Problemsize: 100, 200, 300, 400, 600 ..., 1000, 1200, 1400 ... 4000
 ![](graphs/cip1e32109_time_subplots.png?raw=true)
 
 ## Summary
+
+Everything was fine :smiley:
 
 tbd
 
