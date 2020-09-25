@@ -64,7 +64,7 @@ We measured some fancy stuff.
 
 ## Results
 Benchmark W-cycle, 2 pre-, postsmooth steps
-Problemsize: 100, 200, 300, 400, 600 ..., 1000, 1200, 1400 ... 4000
+Problemsize: 100, 200, 300, 400, 600 ..., 2000, 2200, 1400 ... 4000
 
 ### D Benchmark
 
