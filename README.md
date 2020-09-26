@@ -78,7 +78,9 @@ see [^fn4]. Since we want to solve a poisson equation, we should cover this prob
 The Poisson Equation is &Delta;u = f
 
 The discrete version looks like this:
-(&Delta;u)<sub>i,j</sub> = <sup>1</sup>&frasl;<sub>(h<sup>2</sup>)</sub> (u<sub>i+1,j</sub> + u<sub>i - 1, j</sub> + u<sub>i, j+1</sub> + u<sub>i, j-1</sub> - 4* u<sub>i, j</sub> )
+(&Nabla;<sup>2</sup>u)<sub>i,j</sub> = <sup>1</sup>&boxh;<sub>(h<sup>2</sup>)</sub> (u<sub>i+1,j</sub> + u<sub>i - 1, j</sub> + u<sub>i, j+1</sub> + u<sub>i, j-1</sub> - 4* u<sub>i, j</sub> )
+
+Where h is distance between the grid points.
 
 ## Implementation
 ### Python multigrid
