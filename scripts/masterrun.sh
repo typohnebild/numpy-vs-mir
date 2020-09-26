@@ -20,7 +20,7 @@ generate_problems(){
 run_virtual(){
 	cd ../Python/ || exit 1
 	. ./venv/bin/activate || exit 1
-	./run.sh "openblas" "$problempath"
+	./run.sh "openblas" "$problempath" "${buildconf}"
 	deactivate
 }
 
@@ -28,7 +28,7 @@ run_virtual(){
 run_intel(){
 	cd ../Python/ || exit 1
 	. /tmp/intelpython3/bin/activate || exit 1
-	./run.sh "intel" "$problempath"
+	./run.sh "intel" "$problempath" "${buildconf}"
 	conda deactivate
 }
 
