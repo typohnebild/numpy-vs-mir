@@ -6,17 +6,20 @@ buildconf=${2:-'multid'}
 generate_problems(){
 	# delete existing problems
 	rm -f "$problempath/"*.npy
-
+	STEP=$([$buildconf='multid'] && echo "100" || echo "5")
 	# generate new problems
 	for i in $(seq 1 20)
 	do
-		../Python/problemgenerator/generate.py "$problempath" 2 $((i*100))
+		../Python/problemgenerator/generate.py "$problempath" 2 $((i*${STEP}))
 	done
-	N=2000
-	for i in $(seq 1 10)
-	do
-		../Python/problemgenerator/generate.py "$problempath" 2 $((N +  i*200))
-	done
+	if [$buildconf='multid']
+	then
+		N=2000
+		for i in $(seq 1 10)
+		do
+			../Python/problemgenerator/generate.py "$problempath" 2 $((N +  i*200))
+		done
+	fi
 }
 
 # source of virtual Python environment
