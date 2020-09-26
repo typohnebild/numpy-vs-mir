@@ -6,7 +6,7 @@
 2. [Related Work](#related-work)
 3. [Methods](#methods)
    1. [Multigrid](#multigrid)
-   2. [Gauss Seidel RedBlack](#gauss-seidel-redblack)
+   2. [Red-Black Gauss Seidel](#gauss-seidel-redblack)
    3. [Poisson](#poisson)
 4. [Implementation](#implementation)
    1. [Python](#python-multigrid)
@@ -27,7 +27,7 @@ It serves a numpy like D-package called MIR, which makes D comparable to Python.
 There are already some comparisons between D and other competitors, like [^fn1] and [^fn2] but they
 compare relatively simple instructions.
 We compare D with Python with a more complex application from HPC and implement a multigrid solver
-in both languages. The measurement takes place by solving the poisson equation in 2D with our
+in both languages. The measurement takes place by solving the Poisson equation in 2D with our
 solvers.
 
 ![](graphs/heatmap.gif?raw=true)
@@ -48,7 +48,43 @@ solver in D and Python using MIR and Numpy.
 
 ## Methods
 
-We want to solve the poisson equation with our multigrids and measure the FLOPs/sec for various
+### Poisson Equation
+
+see [^fn4]. Since we want to solve a Poisson equation, we should cover this problem type here...
+
+The Poisson Equation is &Delta;u = f
+
+The discrete version looks like this:
+
+(&Nabla;<sup>2</sup>u)<sub>i,j</sub> = <sup>1</sup>&frasl;<sub>(h<sup>2</sup>)</sub> (u<sub>i+1,j</sub> + u<sub>i - 1, j</sub> + u<sub>i, j+1</sub> + u<sub>i, j-1</sub> - 4\* u<sub>i, j</sub> )
+
+Where h is distance between the grid points.
+
+### Red-Black Gauss Seidel
+
+see [^fn3]. Red-Black Gauss Seidel does things ...
+
+### Multigrid
+
+see [^fn7]. The idea of Multigrid is to split the problem in smaller problems.
+These smaller problems are computed by a solver - here Red-Black Gauss Seidel - and interpolated back
+to the original problem size. The original problem shall be a Poisson equation.
+
+## Implementation
+
+### Python multigrid
+
+[^fn5] and [^fn6]
+
+### D multigrid
+
+We did the same things as in Python.
+
+## Measurements
+
+### Used Hardware/Software
+
+We want to solve the Poisson equation with our multigrids and measure the FLOPs/sec for various
 2D problems. Therefore, we are using the following hardware and software configurations:
 
 - **Hardware:**
@@ -67,41 +103,6 @@ We want to solve the poisson equation with our multigrids and measure the FLOPs/
     - LDC 1.23
     - mir-algorithm 3.9.6
     - mir-random 2.2.14
-
-### Poisson Equation
-
-see [^fn4]. Since we want to solve a poisson equation, we should cover this problem type here...
-
-The Poisson Equation is &Delta;u = f
-
-The discrete version looks like this:
-
-(&Nabla;<sup>2</sup>u)<sub>i,j</sub> = <sup>1</sup>&frasl;<sub>(h<sup>2</sup>)</sub> (u<sub>i+1,j</sub> + u<sub>i - 1, j</sub> + u<sub>i, j+1</sub> + u<sub>i, j-1</sub> - 4\* u<sub>i, j</sub> )
-
-Where h is distance between the grid points.
-
-
-### Red-Black Gauss Seidel
-
-see [^fn3]. Red-Black Gauss Seidel does things ...
-
-### Multigrid
-
-see [^fn7]. The idea of Multigrid is to split the problem in smaller problems.
-These smaller problems are computed by a solver - here Red-Black Gauss Seidel - and interpolated back
-to the original problem size. The original problem shall be a poisson equation.
-
-## Implementation
-
-### Python multigrid
-
-[^fn5] and [^fn6]
-
-### D multigrid
-
-We did the same things as in Python.
-
-## Measurements
 
 We measured some fancy stuff.
 
