@@ -47,14 +47,50 @@ Slice!(T*, Dim) poisson_multigrid(T, size_t Dim, uint v1, uint v2)(
     Cycle!(T, Dim) cycle;
     switch (sweep)
     {
-        case "slice":
-            cycle = new PoissonCycle!(T, Dim, v1, v2, SweepType.slice)(F, mu, level, cast(T)(0));
-            break;
-        case "naive":
-            cycle = new PoissonCycle!(T, Dim, v1, v2, SweepType.naive)(F, mu, level, cast(T)(0));
-            break;
-        default:
-            cycle = new PoissonCycle!(T, Dim, v1, v2, SweepType.field)(F, mu, level, cast(T)(0));
+    case "slice":
+        cycle = new PoissonCycle!(T, Dim, v1, v2, SweepType.slice)(F, mu, level, cast(T)(0));
+        break;
+    case "naive":
+        cycle = new PoissonCycle!(T, Dim, v1, v2, SweepType.naive)(F, mu, level, cast(T)(0));
+        break;
+    default:
+        cycle = new PoissonCycle!(T, Dim, v1, v2, SweepType.field)(F, mu, level, cast(T)(0));
     }
     return multigrid!(T, Dim)(cycle, U, iter_cycles, eps);
+}
+
+unittest
+{
+
+    import multid.tools.util : randomMatrix;
+    import multid.gaussseidel.redblack : GS_RB;
+    import mir.ndslice : slice;
+    import std.experimental.logger : globalLogLevel, LogLevel;
+
+    globalLogLevel(LogLevel.off);
+
+    const size_t N = 50;
+    immutable h = 1.0 / N;
+
+    auto U = randomMatrix!(double, 2)(N);
+
+    U[0][0 .. $] = 1.0;
+    U[1 .. $, 0] = 1.0;
+    U[$ - 1][1 .. $] = 0.0;
+    U[1 .. $, $ - 1] = 0.0;
+
+    auto F = slice!double([N, N], 0.0);
+    F[0][0 .. $] = 1.0;
+    F[1 .. $, 0] = 1.0;
+    F[$ - 1][1 .. $] = 0.0;
+    F[1 .. $, $ - 1] = 0.0;
+    auto U1 = U.dup;
+    poisson_multigrid!(double, 2, 2, 2)(F, U, 0, 2, 100, "field", 1e-9);
+
+    GS_RB!(double, 2)(F, U1, h);
+
+    import numir : approxEqual;
+
+    assert(approxEqual(U, U1, 1e-8));
+
 }
