@@ -54,10 +54,10 @@ get_infos(){
     ../scripts/getinfos.sh "np" "$perf"
 }
 
-[ -e "${OUTFILE}_1_numba" ] || get_infos >> "${OUTFILE}_1_numba" || exit 1
-[ -e "${OUTFILE}_8_numba" ] || get_infos >> "${OUTFILE}_8_numba" || exit 1
-[ -e "${OUTFILE}_1_nonumba" ] || get_infos >> "${OUTFILE}_1_nonumba" || exit 1
-[ -e "${OUTFILE}_8_nonumba" ] || get_infos >> "${OUTFILE}_8_nonumba" || exit 1
+[ -e "${OUTFILE}_1_numba_${TYPE}" ] || get_infos >> "${OUTFILE}_1_numba_${TYPE}" || exit 1
+[ -e "${OUTFILE}_8_numba_${TYPE}" ] || get_infos >> "${OUTFILE}_8_numba_${TYPE}" || exit 1
+[ -e "${OUTFILE}_1_nonumba_${TYPE}" ] || get_infos >> "${OUTFILE}_1_nonumba_${TYPE}" || exit 1
+[ -e "${OUTFILE}_8_nonumba_${TYPE}" ] || get_infos >> "${OUTFILE}_8_nonumba_${TYPE}" || exit 1
 
 for problem in "$problempath/"*.npy; do
     dim=$(echo "$problem" | awk -F'_' '{print $2}')
@@ -71,7 +71,7 @@ for problem in "$problempath/"*.npy; do
                 # x=$(perf stat -M GFLOPS ./measure.py $N "$numba" 2>&1 | grep -i 'fp\|elapsed' | awk '{ print $1}' | tr '\n' ':')
                 EXTENSION=$([ "$numba" = " " ] && echo "nonumba" || echo "numba")
                 x=$(benchmark $perf $threads "$problem" "$numba")
-                printf "%b:%b:%b\n" "$N" "$dim" "$x" >> "${OUTFILE}_${threads}_${EXTENSION}"
+                printf "%b:%b:%b\n" "$N" "$dim" "$x" >> "${OUTFILE}_${threads}_${EXTENSION}_${TYPE}"
             done
         done
     done
