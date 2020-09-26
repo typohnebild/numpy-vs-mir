@@ -5,9 +5,7 @@ buildconf=${2:-'multid'}
 
 generate_problems(){
 	# delete existing problems
-	for problem in "$problempath/"*.npy; do
-		rm -f "${problem}"
-	done
+	rm -f "$problempath/"*.npy
 
 	# generate new problems
 	for i in $(seq 1 20)
