@@ -1,16 +1,16 @@
 # Python vs. D using multigrid
 
+## Content
 
-##  Content
 1. [Motivation](#motivation)
 2. [Related Work](#related-work)
 3. [Methods](#methods)
-    1. [Multigrid](#multigrid)
-    2. [Gauss Seidel RedBlack](#gauss-seidel-redblack)
-    3. [Poisson](#poisson)
+   1. [Multigrid](#multigrid)
+   2. [Gauss Seidel RedBlack](#gauss-seidel-redblack)
+   3. [Poisson](#poisson)
 4. [Implementation](#implementation)
-    1. [Python](#python-multigrid)
-    2. [D](#d-multigrid)
+   1. [Python](#python-multigrid)
+   2. [D](#d-multigrid)
 5. [Measurements](#measurements)
 6. [Results](#results)
 7. [Summary](#summary)
@@ -47,51 +47,66 @@ Based on the ideas both works, we compare a more complex application by implemen
 solver in D and Python using MIR and Numpy.
 
 ## Methods
+
 We want to solve the poisson equation with our multigrids and measure the FLOPs/sec for various
 2D problems. Therefore, we are using the following hardware and software configurations:
-* **Hardware:**
-    * Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz | CPU max MHz: 4700 | CPU min MHz: 800
-    * RAM: 64GB | Speed: ??? MHz
-    * Kernel: Linux cip1e3 4.19.144-1-cip-amd64 x86_64 (gcc version 8.3.0 (Debian 8.3.0-6))
-* **Versions:**
-    * *Python*
-        * Python 3.7.3
-        * Numpy 1.19.0
-        * Numba 0.50.1
-        * Intel Python Distribution 2020.2.902
-            * Numpy 1.18.5
-            * Numba 0.49.1
-    * *D*
-        * LDC 1.23
-        * mir-algorithm 3.9.6
-        * mir-random 2.2.14
 
-### Multigrid
-see [^fn7]. The idea of Multigrid is to split the problem in smaler problems.
-These smaler problems are computed by a solver - here Gauss Seidel RedBlack - and interpolated back
-to the original problem size. The original problem shall be a poisson equation.
-### Gauss Seidel RedBlack
-see [^fn3]. Gauss Seidel RedBlack does things ...
-### Poisson
+- **Hardware:**
+  - Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz | CPU max MHz: 4700 | CPU min MHz: 800
+  - RAM: 64GB | Speed: ??? MHz
+  - Kernel: Linux cip1e3 4.19.144-1-cip-amd64 x86_64 (gcc version 8.3.0 (Debian 8.3.0-6))
+- **Versions:**
+  - _Python_
+    - Python 3.7.3
+    - Numpy 1.19.0
+    - Numba 0.50.1
+    - Intel Python Distribution 2020.2.902
+      - Numpy 1.18.5
+      - Numba 0.49.1
+  - _D_
+    - LDC 1.23
+    - mir-algorithm 3.9.6
+    - mir-random 2.2.14
+
+### Poisson Equation
+
 see [^fn4]. Since we want to solve a poisson equation, we should cover this problem type here...
 
 The Poisson Equation is &Delta;u = f
 
 The discrete version looks like this:
-(&Nabla;<sup>2</sup>u)<sub>i,j</sub> = <sup>1</sup>&boxh;<sub>(h<sup>2</sup>)</sub> (u<sub>i+1,j</sub> + u<sub>i - 1, j</sub> + u<sub>i, j+1</sub> + u<sub>i, j-1</sub> - 4* u<sub>i, j</sub> )
+
+(&Nabla;<sup>2</sup>u)<sub>i,j</sub> = <sup>1</sup>&frasl;<sub>(h<sup>2</sup>)</sub> (u<sub>i+1,j</sub> + u<sub>i - 1, j</sub> + u<sub>i, j+1</sub> + u<sub>i, j-1</sub> - 4\* u<sub>i, j</sub> )
 
 Where h is distance between the grid points.
 
+
+### Red-Black Gauss Seidel
+
+see [^fn3]. Red-Black Gauss Seidel does things ...
+
+### Multigrid
+
+see [^fn7]. The idea of Multigrid is to split the problem in smaller problems.
+These smaller problems are computed by a solver - here Red-Black Gauss Seidel - and interpolated back
+to the original problem size. The original problem shall be a poisson equation.
+
 ## Implementation
+
 ### Python multigrid
+
 [^fn5] and [^fn6]
+
 ### D multigrid
+
 We did the same things as in Python.
 
 ## Measurements
+
 We measured some fancy stuff.
 
 ## Results
+
 Benchmark W-cycle, 2 pre-, postsmooth steps
 Problemsize: 100, 200, 300, 400, 600 ..., 2000, 2200, 1400 ... 4000
 
