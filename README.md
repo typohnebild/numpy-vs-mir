@@ -75,6 +75,11 @@ see [^fn3]. Gauss Seidel RedBlack does things ...
 ### Poisson
 see [^fn4]. Since we want to solve a poisson equation, we should cover this problem type here...
 
+The Poisson Equation is &Delta;u = f
+
+The discrete version looks like this:
+(&Delta;u)<sub>i,j</sub> = 1/(h<sup>2</sup>) (u<sub>i+1,j</sub> + u<sub>i - 1, j</sub> + u<sub>i, j+1</sub> + u<sub>i, j-1</sub> - 4* u<sub>i, j</sub> )
+
 ## Implementation
 ### Python multigrid
 [^fn5] and [^fn6]
