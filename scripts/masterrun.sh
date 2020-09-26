@@ -41,7 +41,7 @@ generate_problems
 oldpwd=$(pwd)
 
 cd ../D || exit 1
-dub build --force --compiler=ldc --build=release-nobounds --config=${buildconf}
+dub build --force --compiler=ldc --build=release-nobounds --config="$buildconf"
 for x in "field" "naive" "slice"
 do
 	run_d "./multid -s $x"
