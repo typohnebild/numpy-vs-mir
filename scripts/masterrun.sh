@@ -4,11 +4,16 @@ problempath=${1:-'/tmp/problems/'}
 buildconf=${2:-'multid'}
 
 generate_problems(){
+	# delete existing problems
+	for problem in "$problempath/"*.npy; do
+		rm -f "${problem}"
+	done
+
+	# generate new problems
 	for i in $(seq 1 20)
 	do
 		../Python/problemgenerator/generate.py "$problempath" 2 $((i*100))
 	done
-
 	N=2000
 	for i in $(seq 1 10)
 	do
