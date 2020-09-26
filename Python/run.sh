@@ -4,8 +4,10 @@
 OUTFILE="results/outfile_$(hostname -s)_$(date +%d%m)_${1}"
 
 problempath=${2:-'../problems/'}
-[ -d "$problempath" ] || exit 1
+TYPE=${3:-'multid'}
 
+[ -d "$problempath" ] || exit 1
+[ -e "./benchmark_${TYPE}.py" ] || exit 1
 
 benchmark(){
     perf=$1
@@ -20,7 +22,7 @@ benchmark(){
     export VECLIB_MAXIMUM_THREADS=$threads
     export OMP_NUM_THREADS=$threads
     export NUMBA_NUM_THREADS=$threads
-    cmd="./measure.py -p $problem -d $delay $numba"
+    cmd="./benchmark_${TYPE}.py -p $problem -d $delay $numba"
     if [ "$perf" = true ]
     then
         cmd="perf stat -M GFLOPS -D $delay $cmd"
