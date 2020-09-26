@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-
+import os
 import numpy as np
 
 from heatmap import create_problem_1D, create_problem_2D, create_problem_3D
@@ -38,7 +38,10 @@ def generate_problem(dim):
 
 
 def save_problem(base, dim, tensor):
-    save_to_npy(f"{base}/problem_{dim}D_{N}", tensor)
+    filename = f"{base}/problem_{dim}D_{N}"
+    if os.path.exists(filename):
+        os.remove(filename)
+    save_to_npy(filename, tensor)
 
 
 if __name__ == "__main__":

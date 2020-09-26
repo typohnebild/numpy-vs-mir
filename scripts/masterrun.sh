@@ -1,6 +1,7 @@
 #!/bin/sh
 
 problempath=${1:-'/tmp/problems/'}
+buildconf=${2:-'multid'}
 
 generate_problems(){
 	for i in $(seq 1 20)
@@ -40,7 +41,7 @@ generate_problems
 oldpwd=$(pwd)
 
 cd ../D || exit 1
-dub build --force --compiler=ldc --build=release-nobounds --config=multid
+dub build --force --compiler=ldc --build=release-nobounds --config=${buildconf}
 for x in "field" "naive" "slice"
 do
 	run_d "./multid -s $x"
