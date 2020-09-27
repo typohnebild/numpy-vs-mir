@@ -56,21 +56,26 @@ The Poisson Equation is &Delta;u = f
 
 The discrete version looks like this:
 
-(&nabla;<sup>2</sup>u)<sub>i,j</sub> = <sup>1</sup>&frasl;<sub>(h<sup>2</sup>)</sub> (u<sub>i+1,j</sub> + u<sub>i - 1, j</sub> + u<sub>i, j+1</sub> + u<sub>i, j-1</sub> - 4\* u<sub>i, j</sub> )
+(&nabla;<sup>2</sup>u)<sub>i,j</sub> = <sup>1</sup>&frasl;<sub>(h<sup>2</sup>)</sub> (u<sub>i+1,j</sub> + u<sub>i - 1, j</sub> + u<sub>i, j+1</sub> + u<sub>i, j-1</sub> - 4 \* u<sub>i, j</sub> )
 
 Where h is distance between the grid points.
 
 ### Red-Black Gauss Seidel
 
 see [^fn3]. Red-Black Gauss Seidel does things ...
-A common iterative solver for linear equation systems is the Gauss-Seidel
-method.
+The Gauss-Seidel method is common iterative technique to solve systems of linear equations.
 
 For Ax = b the element wise formula is this:
 
 x<sup>k+1</sup><sub>i</sub> =
 <sup>1</sup>&frasl;<sub>(a<sub>i,i</sub>)</sub>
-(b<sub>i</sub> - &Sigma; <sub>i&lt;j</sub> a <sub>i,j</sub> x <sup>k+1</sup> <sub>i,j</sub> - &Sigma; <sub>i&gt;j</sub> a <sub>i,j</sub> x <sup>k</sup><sub>i,j</sub>)
+(b<sub>i</sub> - &Sigma; <sub>i&lt;j</sub> a <sub>i,j</sub> x<sub>i,j</sub><sup>(k+1)</sup> - &Sigma; <sub>i&gt;j</sub> a <sub>i,j</sub> x<sub>i,j</sub><sup>(k)</sup>)
+
+Not not good to parallelize Red-Black version
+First calculate updates where the sum of indices is even, because they are
+independent and this step can be done in parallel. Afterwards the same is done
+for the cells where the sum of indices is odd.
+
 
 ### Multigrid
 
