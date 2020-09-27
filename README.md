@@ -70,7 +70,7 @@ For Ax = b the element wise formula is this:
 
 x<sup>k+1</sup><sub>i</sub> =
 <sup>1</sup>&frasl;<sub>(a<sub>i,i</sub>)</sub>
-(b<sub>i</sub> - &Sigma<sub>i&lt;j<sub> a<sub>i,j</sub> x<sup>k+1</sup><sub>i,j</sub> - &Sigma<sub>i&gt;j<sub> a<sub>i,j</sub> x<sup>k</sup><sub>i,j</sub>)
+(b<sub>i</sub> - &Sigma; <sub>i&lt;j</sub> a <sub>i,j</sub> x <sup>k+1</sup> <sub>i,j</sub> - &Sigma; <sub>i&gt;j</sub> a <sub>i,j</sub> x <sup>k</sup><sub>i,j</sub>)
 
 ### Multigrid
 
