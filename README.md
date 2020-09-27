@@ -5,9 +5,9 @@
 1. [Motivation](#motivation)
 2. [Related Work](#related-work)
 3. [Methods](#methods)
-   1. [Multigrid](#multigrid)
+   1. [Poisson](#poisson)
    2. [Red-Black Gauss Seidel](#gauss-seidel-redblack)
-   3. [Poisson](#poisson)
+   3. [Multigrid](#multigrid)
 4. [Implementation](#implementation)
    1. [Python](#python-multigrid)
    2. [D](#d-multigrid)
@@ -71,11 +71,10 @@ x<sup>k+1</sup><sub>i</sub> =
 <sup>1</sup>&frasl;<sub>(a<sub>i,i</sub>)</sub>
 (b<sub>i</sub> - &Sigma; <sub>i&lt;j</sub> a <sub>i,j</sub> x<sub>i,j</sub><sup>(k+1)</sup> - &Sigma; <sub>i&gt;j</sub> a <sub>i,j</sub> x<sub>i,j</sub><sup>(k)</sup>)
 
-Not not good to parallelize Red-Black version
+Not not good to parallelize => Red-Black version
 First calculate updates where the sum of indices is even, because they are
 independent and this step can be done in parallel. Afterwards the same is done
 for the cells where the sum of indices is odd.
-
 
 ### Multigrid
 
