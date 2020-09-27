@@ -13,6 +13,7 @@ __dummy.html
 __pycache__
 *.pytest_cache
 venv
+intelpython3
 */multid
 multid-test-multid
 multid-test-library

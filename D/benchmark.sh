@@ -6,8 +6,8 @@ binary=${2:-'../multid -s field'}
 sweeptype=$(echo "$binary" | sed -r 's/.+ -s (field|naive|slice)/\1/')
 type=$(echo "$binary"| sed -r 's/.+(multid|gsrb) .+/\1/')
 
-OUTFILE="results/outfile_$(hostname -s)_$(date +%d%m)_$sweeptype_$type"
-
+OUTFILE="results/outfile_$(hostname -s)_$(date +%d%m)_${sweeptype}_${type}"
+echo $OUTFILE
 
 benchmark(){
     perf=$1
