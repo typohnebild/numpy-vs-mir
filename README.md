@@ -22,7 +22,7 @@ Python is a well known and often used programming language. Its C-based package 
 efficient computation for a wide variety of problems.
 
 D combines the best parts of C and Python and is therefore competitive to pythons numpy package.
-It serves a numpy like D-package called MIR, which makes D comparable to Python.
+It serves a numpy like D-package called MIR [^fn0], which makes D comparable to Python.
 
 There are already some comparisons between D and other competitors, like [^fn1] and [^fn2] but they
 compare relatively simple instructions.
@@ -63,6 +63,14 @@ Where h is distance between the grid points.
 ### Red-Black Gauss Seidel
 
 see [^fn3]. Red-Black Gauss Seidel does things ...
+A common iterative solver for linear equation systems is the Gauss-Seidel
+method.
+
+For Ax = b the element wise formula is this:
+
+x<sup>k+1</sup><sub>i</sub> =
+<sup>1</sup>&frasl;<sub>(a<sub>i,i</sub>)</sub>
+(b<sub>i</sub> - &Sigma<sub>i&lt;j<sub> a<sub>i,j</sub> x<sup>k+1</sup><sub>i,j</sub> - &Sigma<sub>i&gt;j<sub> a<sub>i,j</sub> x<sup>k</sup><sub>i,j</sub>)
 
 ### Multigrid
 
@@ -82,7 +90,7 @@ We did the same things as in Python.
 
 ## Measurements
 
-### Used Hardware/Software
+### Hardware/Software Setup
 
 We want to solve the Poisson equation with our multigrids and measure the FLOPs/sec for various
 2D problems. Therefore, we are using the following hardware and software configurations:
@@ -140,6 +148,7 @@ tbd
 
 ## Footnotes
 
+[^fn0]: Mir Software Library [link](https://www.libmir.org/)
 [^fn1]: A Look at Chapel, D, and Julia Using Kernel Matrix Calculations [link](https://dlang.org/blog/2020/06/03/a-look-at-chapel-d-and-julia-using-kernel-matrix-calculations/)
 [^fn2]: Mir Benchmark [link](https://github.com/tastyminerals/mir_benchmarks)
 [^fn3]: Optimierung des Red-Black-Gauss-Seidel-Verfahrens auf ausgewählten x86-Prozessoren [link](https://www10.cs.fau.de/publications/theses/2005/Stuermer_SA_2005.pdf)
