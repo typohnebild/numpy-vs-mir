@@ -5,9 +5,9 @@
 1. [Motivation](#motivation)
 2. [Related Work](#related-work)
 3. [Methods](#methods)
-   1. [Multigrid](#multigrid)
+   1. [Poisson](#poisson)
    2. [Red-Black Gauss Seidel](#gauss-seidel-redblack)
-   3. [Poisson](#poisson)
+   3. [Multigrid](#multigrid)
 4. [Implementation](#implementation)
    1. [Python](#python-multigrid)
    2. [D](#d-multigrid)
@@ -22,7 +22,7 @@ Python is a well known and often used programming language. Its C-based package 
 efficient computation for a wide variety of problems.
 
 D combines the best parts of C and Python and is therefore competitive to pythons numpy package.
-It serves a numpy like D-package called MIR, which makes D comparable to Python.
+It serves a numpy like D-package called MIR [^fn0], which makes D comparable to Python.
 
 There are already some comparisons between D and other competitors, like [^fn1] and [^fn2] but they
 compare relatively simple instructions.
@@ -56,13 +56,25 @@ The Poisson Equation is &Delta;u = f
 
 The discrete version looks like this:
 
-(&nabla;<sup>2</sup>u)<sub>i,j</sub> = <sup>1</sup>&frasl;<sub>(h<sup>2</sup>)</sub> (u<sub>i+1,j</sub> + u<sub>i - 1, j</sub> + u<sub>i, j+1</sub> + u<sub>i, j-1</sub> - 4\* u<sub>i, j</sub> )
+(&nabla;<sup>2</sup>u)<sub>i,j</sub> = <sup>1</sup>&frasl;<sub>(h<sup>2</sup>)</sub> (u<sub>i+1,j</sub> + u<sub>i - 1, j</sub> + u<sub>i, j+1</sub> + u<sub>i, j-1</sub> - 4 \* u<sub>i, j</sub> )
 
 Where h is distance between the grid points.
 
 ### Red-Black Gauss Seidel
 
 see [^fn3]. Red-Black Gauss Seidel does things ...
+The Gauss-Seidel method is common iterative technique to solve systems of linear equations.
+
+For Ax = b the element wise formula is this:
+
+x<sup>k+1</sup><sub>i</sub> =
+<sup>1</sup>&frasl;<sub>(a<sub>i,i</sub>)</sub>
+(b<sub>i</sub> - &Sigma; <sub>i&lt;j</sub> a <sub>i,j</sub> x<sub>i,j</sub><sup>(k+1)</sup> - &Sigma; <sub>i&gt;j</sub> a <sub>i,j</sub> x<sub>i,j</sub><sup>(k)</sup>)
+
+Not not good to parallelize => Red-Black version
+First calculate updates where the sum of indices is even, because they are
+independent and this step can be done in parallel. Afterwards the same is done
+for the cells where the sum of indices is odd.
 
 ### Multigrid
 
@@ -82,7 +94,7 @@ We did the same things as in Python.
 
 ## Measurements
 
-### Used Hardware/Software
+### Hardware/Software Setup
 
 We want to solve the Poisson equation with our multigrids and measure the FLOPs/sec for various
 2D problems. Therefore, we are using the following hardware and software configurations:
@@ -140,6 +152,7 @@ tbd
 
 ## Footnotes
 
+[^fn0]: Mir Software Library [link](https://www.libmir.org/)
 [^fn1]: A Look at Chapel, D, and Julia Using Kernel Matrix Calculations [link](https://dlang.org/blog/2020/06/03/a-look-at-chapel-d-and-julia-using-kernel-matrix-calculations/)
 [^fn2]: Mir Benchmark [link](https://github.com/tastyminerals/mir_benchmarks)
 [^fn3]: Optimierung des Red-Black-Gauss-Seidel-Verfahrens auf ausgewählten x86-Prozessoren [link](https://www10.cs.fau.de/publications/theses/2005/Stuermer_SA_2005.pdf)
