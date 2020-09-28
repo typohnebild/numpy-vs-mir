@@ -14,11 +14,11 @@ __pycache__
 *.pytest_cache
 venv
 intelpython3
-*/multid
+*/multigrid
+*/gsrb
 multid-test-multid
 multid-test-library
 multid-static
-gsrb
 trace.*
 *.log
 *problem_3D_100.npy

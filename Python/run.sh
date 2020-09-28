@@ -14,8 +14,12 @@ benchmark(){
     threads=$2
     problem=$3
     numba=$4
-    delay=1000
-    delayPerf=1500
+    # Loading the interpreter takes round about 500ms,
+    #   so the delay is acutally delayed by additionally 500ms.
+    # We want to make sure that perf starts measuring when 
+    #   Python benchmark is in wait state.
+    delay=1500
+    delayPerf=1700
 
     export OPENBLAS_NUM_THREADS=$threads
     export MKL_NUM_THREADS=$threads
