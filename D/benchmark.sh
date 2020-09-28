@@ -14,22 +14,14 @@ benchmark(){
     problem=$2
     delay=1000
 
-    cmd="$binary -p $problem -d $delay"
+    cmd="$binary $( [ $type = 'gsrb' ] && echo '-v') -p $problem -d $delay"
     if [ "$perf" = true ]
     then
         cmd="perf stat -M GFLOPS -D $delay $cmd"
     fi
 
     x=$($cmd 2>&1 || exit 1)
-    if [ $type = 'multid' ]
-    then
-        out=$(echo "$x" | head -n 2 | tr '\n' ':' | tr ' ' ':' | awk -F':' '{print $12 ":" $5 ":" $8 ":"}')
-    fi
-
-    if [ $type = 'gsrb' ]
-    then
-        out=$(echo "$x" | head -n 1 | awk -F':' '{print $3 ":0:0:"}')
-    fi
+    out=$(echo "$x" | head -n 2 | tr '\n' ':' | tr ' ' ':' | awk -F':' '{print $12 ":" $5 ":" $8 ":"}')
     
     if [ "$perf" = true ]
     then
