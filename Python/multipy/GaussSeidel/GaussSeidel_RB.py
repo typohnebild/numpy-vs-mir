@@ -54,7 +54,8 @@ def GS_RB(
             r = F - apply_poisson(U, h)
             norm = np.linalg.norm(r)
             if norm <= eps:
-                logger.debug(f"converged after {it} iterations with {norm:.4}")
+                logger.debug(
+                    f"converged after {it} iterations with {norm:.4} error")
                 break
 
         # rote Halbiteration
