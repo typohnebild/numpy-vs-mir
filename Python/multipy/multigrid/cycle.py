@@ -57,7 +57,7 @@ class AbstractCycle:
     def _compute_correction(self, r, l, h):
         e = np.zeros_like(r)
         for _ in range(self.mu):
-            e = self.do_cycle(r.copy(), e, l, h)
+            e = self.do_cycle(r, e, l, h)
         return e
 
     def do_cycle(self, F, U, l, h=None):
