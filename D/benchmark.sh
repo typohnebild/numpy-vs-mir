@@ -21,7 +21,16 @@ benchmark(){
     fi
 
     x=$($cmd 2>&1 || exit 1)
-    out=$(echo "$x" | head -n 2 | tr '\n' ':' | tr ' ' ':' | awk -F':' '{print $23 ":" $11 ":" $14 ":"}')
+    if [ $type = 'multid' ]
+    then
+        out=$(echo "$x" | head -n 2 | tr '\n' ':' | tr ' ' ':' | awk -F':' '{print $12 ":" $5 ":" $8 ":"}')
+    fi
+
+    if [ $type = 'gsrb' ]
+    then
+        out=$(echo "$x" | head -n 1 | awk -F':' '{print $3 ":0:0:"}')
+    fi
+    
     if [ "$perf" = true ]
     then
         flops=$(echo "$x" | tail -n +3 | grep -i 'fp' | awk '{ print $1}' | tr '\n' ':')
