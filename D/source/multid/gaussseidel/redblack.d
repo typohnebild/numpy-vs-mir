@@ -6,8 +6,8 @@ import multid.tools.norm : nrmL2;
 import mir.ndslice : slice, sliced, Slice, strided;
 import std.traits : isFloatingPoint;
 
-import std.stdio : writeln;
 import multid.gaussseidel.sweep;
+import std.experimental.logger;
 
 /++
     red is for even indicies
@@ -44,8 +44,7 @@ Params:
 Returns: U
 +/
 Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000, size_t norm_iter = 1_000,
-        double eps = 1e-8, SweepType sweeptype = SweepType.field)
-        (in Slice!(T*, Dim) F, Slice!(T*, Dim) U, in T h)
+        double eps = 1e-8, SweepType sweeptype = SweepType.field)(in Slice!(T*, Dim) F, Slice!(T*, Dim) U, in T h)
         if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 {
     mixin("alias sweep = sweep_" ~ sweeptype ~ ";");
@@ -59,6 +58,7 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000, size_t norm_i
             const auto norm = compute_residual!(T, Dim)(F, U, h).nrmL2;
             if (norm <= eps)
             {
+                logf("GS_RB converged after %d iterations with %f error", it, norm);
                 break;
             }
 
@@ -70,8 +70,6 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000, size_t norm_i
     }
     return U;
 }
-
-
 
 unittest
 {
