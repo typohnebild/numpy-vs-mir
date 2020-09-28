@@ -29,7 +29,8 @@
       "mainSourceFile": "GSRBBenchmark.d",
       "targetName": "gsrb",
       "dflags-ldc": ["-mcpu=native", "--boundscheck=off"],
-      "targetType": "executable"
+      "targetType": "executable",
+      "compiler": "ldc"
     }
   ]
 }
