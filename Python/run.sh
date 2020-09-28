@@ -28,7 +28,7 @@ benchmark(){
         cmd="perf stat -M GFLOPS -D $delay $cmd"
     fi
 
-    x=$($cmd 2>&1 || exit 1)
+    x=$($cmd 2>&1)  || exit 1
     if [ $TYPE = 'multid' ]
     then
         out=$(echo "$x" | head -n 2 | tr '\n' ':' | tr ' ' ':' | awk -F':' '{print $12 ":" $5 ":" $8 ":"}')
@@ -82,7 +82,7 @@ for problem in "$problempath/"*.npy; do
             for _ in $(seq $reps); do
                 # x=$(perf stat -M GFLOPS ./measure.py $N "$numba" 2>&1 | grep -i 'fp\|elapsed' | awk '{ print $1}' | tr '\n' ':')
                 EXTENSION=$([ "$numba" = " " ] && echo "nonumba" || echo "numba")
-                x=$(benchmark $perf $threads "$problem" "$numba")
+                x=$(benchmark $perf $threads "$problem" "$numba") || break
                 printf "%b:%b:%b\n" "$N" "$dim" "$x" >> "${OUTFILE}_${threads}_${EXTENSION}_${TYPE}"
             done
         done
