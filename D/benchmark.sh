@@ -14,7 +14,7 @@ benchmark(){
     problem=$2
     delay=1000
 
-    cmd="$binary -p $problem -d $delay"
+    cmd="$binary $( [ $type = 'gsrb' ] && echo '-v') -p $problem -d $delay"
     if [ "$perf" = true ]
     then
         cmd="perf stat -M GFLOPS -D $delay $cmd"
