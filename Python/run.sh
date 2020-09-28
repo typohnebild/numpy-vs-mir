@@ -22,26 +22,14 @@ benchmark(){
     export VECLIB_MAXIMUM_THREADS=$threads
     export OMP_NUM_THREADS=$threads
     export NUMBA_NUM_THREADS=$threads
-    cmd="./benchmark_${TYPE}.py $([ $TYPE = 'gsrb' ] && echo '-v' ) -p $problem -d $delay $numba"
+    cmd="./benchmark_${TYPE}.py $([ "$TYPE" = "gsrb" ] && echo "-v" ) -p $problem -d $delay $numba"
     if [ "$perf" = true ]
     then
         cmd="perf stat -M GFLOPS -D $delay $cmd"
     fi
 
-<<<<<<< HEAD
-    x=$($cmd 2>&1 || exit 1)
-    out=$(echo "$x" | head -n 2 | tr '\n' ':' | tr ' ' ':' | awk -F':' '{print $12 ":" $5 ":" $8 ":"}')
-=======
     x=$($cmd 2>&1)  || exit 1
-    if [ $TYPE = 'multid' ]
-    then
-        out=$(echo "$x" | head -n 2 | tr '\n' ':' | tr ' ' ':' | awk -F':' '{print $12 ":" $5 ":" $8 ":"}')
-    fi
-    if [ $TYPE = 'gsrb' ]
-    then
-        out=$(echo "$x" | head -n 1 | awk -F':' '{print $3 ":0:0:"}')
-    fi
->>>>>>> 1545531f7974b55f985a751796b5b8fc6d5875fa
+    out=$(echo "$x" | head -n 2 | tr '\n' ':' | tr ' ' ':' | awk -F':' '{print $12 ":" $5 ":" $8 ":"}')
 
 
     if [ "$perf" = true ]
