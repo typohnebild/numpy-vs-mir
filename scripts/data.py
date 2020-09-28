@@ -72,9 +72,15 @@ def time(df, label):
 def subplots(frames, base_path, column):
     color = cycle(mcolor.TABLEAU_COLORS.keys())
     plt.clf()
-    fig, axes = plt.subplots(len(frames), 1, sharex=True, figsize=(10, 15))
-    for i, axe in enumerate(axes):
-        name, df = frames[i]
+    fig, axes = plt.subplots((len(frames) + 1) // 2,
+                             2,
+                             figsize=(12, 15))
+    if len(frames) < len(axes.flat):
+        axes.flat[-1].axis('off')
+
+    for i, frame in enumerate(frames):
+        name, df = frame
+        axe = axes.flat[i]
         g = df.groupby('size').median()[column]
         g.plot(label=name, ax=axe, marker='o', color=next(color))
         axe.grid(
@@ -116,7 +122,9 @@ def plot(frames, func, base_path, title):
         func(df, name)
     plt.legend()
     plt.minorticks_on()
-    plt.grid(color='b', linestyle='-', linewidth=0.2, alpha=0.5)
+    plt.grid(color='b', linestyle='-', linewidth=0.3, alpha=0.5, which='major')
+    plt.grid(color='b', linestyle='-', linewidth=0.1, alpha=0.5, which='minor')
+
     plt.savefig(f'{base_path}_{func.__name__}.png')
 
 
