@@ -27,6 +27,10 @@ template init()
 
     void wait_till()
     {
+        if (verbose)
+        {
+            globalLogLevel(LogLevel.all);
+        }
         auto rest = delay - sw.peek.total!"msecs";
         if (0 < rest)
         {
@@ -40,10 +44,6 @@ template init()
     void getopt(string[] argv)
     {
         getopt(argv, "p|P", &path, "d|D", &delay, "v", &verbose, "s", &sweep);
-        if (verbose)
-        {
-            globalLogLevel(LogLevel.all);
-        }
 
     }
 
