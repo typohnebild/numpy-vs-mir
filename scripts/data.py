@@ -160,8 +160,8 @@ def main():
         _, df = read_file(arg)
         frames.append((extract_name(arg), df))
 
-    plot(frames, flops, base_name, 'Floating Point Operations / second')
-    # plot(frames, flop, base_name, 'Floating Point Operations')
+    plot(frames, flops, base_name, 'Floating Point Operations per second')
+
     plot(frames, time, base_name, 'Time in Seconds')
 
     if options.groups:
@@ -169,17 +169,25 @@ def main():
         only_numba = [x for x in frames if x[0].split(" ")[-1] == "numba"]
         only_nonumba = [x for x in frames if x[0].split(" ")[-1] == "nonumba"]
         plot(only_D, flops, f'{base_name}D',
-             'Floating Point Operations / second')
-        plot(only_D, time, f'{base_name}D', 'Time in Seconds')
+             'Floating Point Operations per second D with Mir')
+        plot(only_D, time, f'{base_name}D', 'Time in Seconds D with Mir')
         plot(only_numba, flops, f'{base_name}numba',
-             'Floating Point Operations / second')
-        plot(only_numba, time, f'{base_name}numba', 'Time in Seconds')
+             'Floating Point Operations per second with numba')
+        plot(
+            only_numba,
+            time,
+            f'{base_name}numba',
+            'Time in Seconds with numba')
         plot(
             only_nonumba,
             flops,
             f'{base_name}nonumba',
-            'Floating Point Operations / second')
-        plot(only_nonumba, time, f'{base_name}nonumba', 'Time in Seconds')
+            'Floating Point Operations per second without numba')
+        plot(
+            only_nonumba,
+            time,
+            f'{base_name}nonumba',
+            'Time in Seconds without numba')
 
     if options.subs:
         subplots(frames, base_name, 'FLOPS')
