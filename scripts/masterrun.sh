@@ -9,20 +9,25 @@ generate_problems(){
 	[ -e "$problempath" ] || mkdir -p "$problempath"
 	# delete existing problems
 	rm -f "$problempath/"*.npy
-	STEP=$( [ "$buildconf" = "multigrid" ] && echo "10" || echo "5")
+	STEP=$( [ "$buildconf" = "multigrid" ] && echo "64" || echo "5")
 	# generate new problems
 	for i in $(seq 1 20)
 	do
-		../Python/problemgenerator/generate.py "$problempath" 2 $((i*${STEP}))
+		../Python/problemgenerator/generate.py "$problempath" 2 $((i*STEP))
 	done
-	# if [ "$buildconf" = "multigrid" ]
-	# then
-	# 	N=2000
-	# 	for i in $(seq 1 10)
-	# 	do
-	# 		../Python/problemgenerator/generate.py "$problempath" 2 $((N +  i*200))
-	# 	done
-	# fi
+	if [ "$buildconf" = "multigrid" ]
+	then
+		N=1280
+		for i in $(seq 1 10)
+		do
+			../Python/problemgenerator/generate.py "$problempath" 2 $((N +  i*128))
+		done
+		N=2560
+		for i in $(seq 1 6)
+		do
+			../Python/problemgenerator/generate.py "$problempath" 2 $((N +  i*256))
+		done
+	fi
 }
 
 # source of virtual Python environment
@@ -49,16 +54,16 @@ generate_problems
 
 oldpwd=$(pwd)
 
-# cd ../D || exit 1
-# dub build --force --compiler=ldc2 --build=release-nobounds --config="$buildconf"
-# for x in "field" "naive" "slice"
-# do
-# 	run_d "./$buildconf -s $x"
-# done
-# cd "$oldpwd" || exit 1
-# 
-# run_intel
-# cd "$oldpwd" || exit 1
+cd ../D || exit 1
+dub build --force --compiler=ldc2 --build=release-nobounds --config="$buildconf"
+for x in "field" "naive" "slice"
+do
+	run_d "./$buildconf -s $x"
+done
+cd "$oldpwd" || exit 1
+
+run_intel
+cd "$oldpwd" || exit 1
 
 run_virtual
 cd "$oldpwd" || exit 1
