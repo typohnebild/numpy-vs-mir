@@ -1,11 +1,12 @@
 module startup;
 
+
 template init()
 {
 
     import core.thread : Thread;
     import std.datetime.stopwatch : StopWatch, msecs;
-    import std.experimental.logger : info, globalLogLevel, LogLevel;
+    import std.experimental.logger : infof, globalLogLevel, LogLevel;
     import std.getopt : getopt;
     import std.conv : to;
 
@@ -50,9 +51,9 @@ template init()
     void print_time()
     {
         sw.stop;
-        info(sw.peek
-                .total!"msecs"
-                .to!double / 1_000.0);
+        infof("%e", sw.peek
+                .total!"usecs"
+                .to!double / 1_000_000.0);
 
     }
 
