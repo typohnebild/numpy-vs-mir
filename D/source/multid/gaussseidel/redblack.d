@@ -58,7 +58,7 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000, size_t norm_i
             const auto norm = compute_residual!(T, Dim)(F, U, h).nrmL2;
             if (norm <= eps)
             {
-                logf("GS_RB converged after %d iterations with %f error", it, norm);
+                logf("GS_RB converged after %d iterations with %e error", it, norm);
                 break;
             }
 

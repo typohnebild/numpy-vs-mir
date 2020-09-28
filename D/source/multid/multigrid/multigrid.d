@@ -19,7 +19,7 @@ Slice!(T*, Dim) multigrid(T, size_t Dim)(Cycle!(T, Dim) cycle, Slice!(T*, Dim) U
         logf("Residual has a L2-Norm of %f after %d iterations", norm, i);
         if (norm <= eps)
         {
-            infof("MG converged after %d iterations with %f error", i, norm);
+            infof("MG converged after %d iterations with %e error", i, norm);
             break;
         }
     }
