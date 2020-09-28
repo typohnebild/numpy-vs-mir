@@ -9,7 +9,8 @@
   },
   "configurations": [
     {
-      "name": "multid",
+      "name": "multigrid",
+      "targetName": "multigrid",
       "mainSourceFile": "app.d",
       "compiler": "ldc",
       "dflags-ldc": ["-mcpu=native", "--boundscheck=off"],

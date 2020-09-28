@@ -4,7 +4,7 @@
 OUTFILE="results/outfile_$(hostname -s)_$(date +%d%m)_${1}"
 
 problempath=${2:-'../problems/'}
-TYPE=${3:-'multid'}
+TYPE=${3:-'multigrid'}
 
 [ -d "$problempath" ] || exit 1
 [ -e "./benchmark_${TYPE}.py" ] || exit 1

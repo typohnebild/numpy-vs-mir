@@ -1,19 +1,21 @@
 #!/bin/sh
 
 problempath=${1:-'/tmp/problems/'}
-buildconf=${2:-'multid'}
+buildconf=${2:-'multigrid'}
+
+[ "$buildconf" = "multigrid" || "$buildconf" = "gsrb" ] || exit 1
 
 generate_problems(){
 	[ -e "$problempath" ] || mkdir -p "$problempath"
 	# delete existing problems
 	rm -f "$problempath/"*.npy
-	STEP=$( [ "$buildconf" = "multid" ] && echo "100" || echo "5")
+	STEP=$( [ "$buildconf" = "multigrid" ] && echo "100" || echo "5")
 	# generate new problems
 	for i in $(seq 1 20)
 	do
 		../Python/problemgenerator/generate.py "$problempath" 2 $((i*${STEP}))
 	done
-	if [ "$buildconf" = "multid" ]
+	if [ "$buildconf" = "multigrid" ]
 	then
 		N=2000
 		for i in $(seq 1 10)
