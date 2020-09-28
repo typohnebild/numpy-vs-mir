@@ -4,16 +4,16 @@ problempath=${1:-'/tmp/problems/'}
 buildconf=${2:-'multid'}
 
 generate_problems(){
-    [ -e $problempath ] || mkdir $problempath
+	[ -e "$problempath" ] || mkdir -p "$problempath"
 	# delete existing problems
 	rm -f "$problempath/"*.npy
-	STEP=$( [ $buildconf = 'multid' ] && echo "100" || echo "5")
+	STEP=$( [ "$buildconf" = "multid" ] && echo "100" || echo "5")
 	# generate new problems
 	for i in $(seq 1 20)
 	do
 		../Python/problemgenerator/generate.py "$problempath" 2 $((i*${STEP}))
 	done
-	if [ $buildconf = 'multid' ]
+	if [ "$buildconf" = "multid" ]
 	then
 		N=2000
 		for i in $(seq 1 10)
