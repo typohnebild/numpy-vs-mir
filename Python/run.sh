@@ -15,6 +15,7 @@ benchmark(){
     problem=$3
     numba=$4
     delay=1000
+    delayPerf=1500
 
     export OPENBLAS_NUM_THREADS=$threads
     export MKL_NUM_THREADS=$threads
@@ -25,7 +26,7 @@ benchmark(){
     cmd="./benchmark_${TYPE}.py $([ "$TYPE" = "gsrb" ] && echo "-v" ) -p $problem -d $delay $numba"
     if [ "$perf" = true ]
     then
-        cmd="perf stat -M GFLOPS -D $delay $cmd"
+        cmd="perf stat -M GFLOPS -D $delayPerf $cmd"
     fi
 
     x=$($cmd 2>&1)  || exit 1
