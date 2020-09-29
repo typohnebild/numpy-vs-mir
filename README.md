@@ -116,7 +116,31 @@ We want to solve the Poisson equation with our multigrids and measure the FLOPs/
     - mir-algorithm 3.9.6
     - mir-random 2.2.14
 
-We measured some fancy stuff.
+### Nice meaningful Heading
+
+As performance measures we used the execution time and the number of floating
+point operations per second (FLOP/s).
+To measure the execution time we used the `perf_counter()` from the
+[Python time package](https://docs.python.org/3/library/time.html#time.perf_counter)
+and in the D implementation the `Stopwatch` from the
+[D standard library](https://dlang.org/phobos/std_datetime_stopwatch.html#.StopWatch)
+was used.
+
+To count the floating point operations that occur while execution we used the
+Linux tool [`perf`](https://perf.wiki.kernel.org/index.php/Main_Page), which is
+build into the Linux kernel and allows to gather a enormous variety of
+performance counters, if they are implemented by the CPU.
+The CPU we used offered the performance counters
+_scalar_single_, _scalar_double_, _128b_packed_double_, _128b_packed_single_,
+_256b_packed_double_, _256b_packed_single_ for different floating point operations.
+Perf offers for these the Metric Group *GFLOPS* which counts all this hardware
+events.
+
+Since we have a startup phase, especially in the Python implementation with
+numba were the JIT is running, we want to avoid that perf measure the complete
+execution but only the actual execution of the multigrid. To achieve this we
+used the delay option for perf, which delays the start of the measurement and
+also implementation such a delay in our programs.
 
 ## Results
 
