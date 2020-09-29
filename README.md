@@ -241,6 +241,14 @@ And solved the with a Multigrid W-cycle with 2 pre- and postsmoothing steps and
 stopped when the problem was solved up to an epsilon of 1e-3.
 For each permutation of the setup option a run was done 3 times.
 
+In Python we distinguish measurements between number of threads (1 or 8), with Intel Python
+distribution or OpenBlas and with or without Numba.
+In D we differentiate the measurements between Gauss-Seidel-Red-Black sweep implementations.
+The sweep performs basically the update step. For this purpose, we implemented three different
+approaches:
+1. Slices: Python like. Uses D Slices and Strides for grouping (Red-Black).
+2. Naive: one for-loop for each dimension. Matrix-Access through multi-dimensional Array.
+3. Fields: one for-loop for each dimension. Matrix is flattened. Access through flattened index.
 
 ### How was measured
 
