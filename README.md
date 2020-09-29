@@ -45,7 +45,7 @@ in both languages. The measurement takes place by solving the Poisson equation i
 solvers.
 The animation below shows the result of these calculations.
 
-![](graphs/heatmap.gif?raw=true)
+![Animation](graphs/heatmap.gif?raw=true)
 
 It comes out that... tbd
 
@@ -68,8 +68,8 @@ using MIR and NumPy.
 ## Methods
 
 ### Poisson Equation
-
-Since we want to solve a Poisson equation, we should cover this problem type here...
+***<span style="color:red">TODO: Since we want to solve a Poisson equation, we should cover
+this problem type here...</span>***
 
 The Poisson Equation is &Delta;u = f
 
@@ -341,7 +341,7 @@ tbd
 ## Footnotes
 
 [^fn0]: Mir Software Library [link](https://www.libmir.org/)
-[^fn1]: A Look at Chapel, D, and Julia Using Kernel Matrix Calculations [link](https://dlang.org/blog/2020/06/03/a-look-at-chapel-d-and-julia-using-kernel-matrix-calculations/)
+[^fn1]: Chima-Okereke C., A Look at Chapel, D, and Julia Using Kernel Matrix Calculations [link](https://dlang.org/blog/2020/06/03/a-look-at-chapel-d-and-julia-using-kernel-matrix-calculations/)
 [^fn2]: Mir Benchmark [link](https://github.com/tastyminerals/mir_benchmarks)
 [^fn3]: Optimierung des Red-Black-Gauss-Seidel-Verfahrens auf ausgewählten x86-Prozessoren [link](https://www10.cs.fau.de/publications/theses/2005/Stuermer_SA_2005.pdf)
 [^fn4]: FINITE DIFFERENCE METHODS FOR POISSON EQUATION [link](https://www.math.uci.edu/~chenlong/226/FDM.pdf)
