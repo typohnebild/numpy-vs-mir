@@ -2,27 +2,34 @@
 
 ## Content
 
-1. [Motivation](#motivation)
-2. [Related Work](#related-work)
-3. [Methods](#methods)
-   1. [Poisson](#poisson)
-   2. [Red-Black Gauss Seidel](#gauss-seidel-redblack)
-   3. [Multigrid](#multigrid)
-4. [Implementation](#implementation)
-   1. [Python](#python-multigrid)
-   2. [D](#d-multigrid)
-5. [Measurements](#measurements)
-6. [Results](#results)
-7. [Summary](#summary)
-8. [Footnotes](#footnotes)
+- [Python vs. D using multigrid](#python-vs-d-using-multigrid)
+  - [Content](#content)
+  - [Motivation](#motivation)
+  - [Related Work](#related-work)
+  - [Methods](#methods)
+    - [Poisson Equation](#poisson-equation)
+    - [Red-Black Gauss Seidel](#red-black-gauss-seidel)
+    - [Multigrid](#multigrid)
+  - [Implementation](#implementation)
+    - [Python multigrid](#python-multigrid)
+    - [D multigrid](#d-multigrid)
+  - [Measurements](#measurements)
+    - [Hardware/Software Setup](#hardwaresoftware-setup)
+  - [Results](#results)
+    - [D Benchmark](#d-benchmark)
+    - [Python Benchmark](#python-benchmark)
+    - [Benchmarks combined](#benchmarks-combined)
+  - [Summary](#summary)
+  - [Footnotes](#footnotes)
 
 ## Motivation
 
 Python is a well known and often used programming language. Its C-based package numpy allows an
 efficient computation for a wide variety of problems.
 
-D combines the best parts of C and Python and is therefore competitive to pythons numpy package.
-It serves a numpy like D-package called MIR [^fn0], which makes D comparable to Python.
+D combines the efficency of C and the simplicity of Python and is therefore competitive to Pythons
+Numpy package. It also serves a numpy like D-package called MIR [^fn0], which makes D comparable to
+Python with respect to MIR and Numpy.
 
 There are already some comparisons between D and other competitors, like [^fn1] and [^fn2] but they
 compare relatively simple instructions.
@@ -50,43 +57,94 @@ solver in D and Python using MIR and Numpy.
 
 ### Poisson Equation
 
-see [^fn4]. Since we want to solve a Poisson equation, we should cover this problem type here...
+Since we want to solve a Poisson equation, we should cover this problem type here...
 
 The Poisson Equation is &Delta;u = f
 
 The discrete version looks like this:
 
-(&nabla;<sup>2</sup>u)<sub>i,j</sub> = <sup>1</sup>&frasl;<sub>(h<sup>2</sup>)</sub> (u<sub>i+1,j</sub> + u<sub>i - 1, j</sub> + u<sub>i, j+1</sub> + u<sub>i, j-1</sub> - 4 \* u<sub>i, j</sub> )
+(&nabla;<sup>2</sup>u)<sub>i,j</sub> = <sup>1</sup>&frasl;<sub>(h<sup>2</sup>)</sub>
+(u<sub>i+1,j</sub> + u<sub>i - 1, j</sub> +
+u<sub>i, j+1</sub> + u<sub>i, j-1</sub> - 4 \* u<sub>i, j</sub> )
 
 Where h is distance between the grid points.
+The boundaries are managed by the Dirichlet boundary condition, since no update is performed on the
+boundaries of the Matrices. (see [^fn4])
 
 ### Red-Black Gauss Seidel
 
-see [^fn3]. Red-Black Gauss Seidel does things ...
-The Gauss-Seidel method is common iterative technique to solve systems of linear equations.
+The Gauss-Seidel method is a common iterative technique to solve systems of linear equations.
 
 For Ax = b the element wise formula is this:
 
 x<sup>(k+1)</sup><sub>i</sub> =
 <sup>1</sup>&frasl;<sub>(a<sub>i,i</sub>)</sub>
-(b<sub>i</sub> - &Sigma; <sub>i&lt;j</sub> a <sub>i,j</sub> x<sub>i,j</sub><sup>(k+1)</sup> - &Sigma; <sub>i&gt;j</sub> a <sub>i,j</sub> x<sub>i,j</sub><sup>(k)</sup>)
+(b<sub>i</sub> - &Sigma; <sub>i&lt;j</sub> a <sub>i,j</sub> x<sub>i,j</sub><sup>(k+1)</sup> - &Sigma;
+ <sub>i&gt;j</sub> a <sub>i,j</sub> x<sub>i,j</sub><sup>(k)</sup>)
 
-Not not good to parallelize => Red-Black version
-First calculate updates where the sum of indices is even, because they are
-independent and this step can be done in parallel. Afterwards the same is done
-for the cells where the sum of indices is odd.
+The naive implementation is not good to parallelize since the computation is forced to be sequential
+by construction. This issue is tackled by grouping the grid points into two independent groups.
+The corresponding method is called **Gauss-Seidel-Red-Black**.
+Therefore, the inside of the grid is divided into so-called red and black dots like a
+chessboard. First calculate updates where the sum of indices is even (red), because they are
+independent. This step can be done in parallel. Afterwards the same is done
+for the cells where the sum of indices is odd (black). (see [^fn3])
 
 ### Multigrid
 
-see [^fn7]. The idea of Multigrid is to split the problem in smaller problems.
-These smaller problems are computed by a solver - here Red-Black Gauss Seidel - and interpolated back
-to the original problem size. The original problem shall be a Poisson equation.
+The main idea of multigrid is to accelerate the convergence of a fine grid solution approximation
+by recursively accelerating the convergence of a coarser grid solution approximation based on the
+finer grid. This recursion is done until the costs for solving the grid is negligible.
+Since the coarser grid is a representation of the finer grid, the error can be tracked back by
+computing the prolongated residual in each recursion level.
+**(HIER NOCH IRGENDWAS MIT W UND V CYCLEN?)**
+
+One multigrid cycle looks like the following:
+- Pre-Smoothing – reducing high frequency errors using a few iterations of the Gauss–Seidel method.
+- Residual Computation – computing residual error after the smoothing operation(s).
+- Restriction – downsampling the residual error to a coarser grid.
+- Prolongation – interpolating a correction computed on a coarser grid into a finer grid.
+- Correction – Adding prolongated coarser grid solution onto the finer grid.
+- Post-Smoothing – reducing further errors using a few iterations of the Gauss–Seidel method.
+
+Performing multiple multigrid cycles will reduce the error of the solution
+approximation significantly. (see [^fn7])
+
 
 ## Implementation
 
 ### Python multigrid
 
 [^fn5] and [^fn6]
+
+
+    def _compute_correction(self, r, l, h):
+        e = np.zeros_like(r)
+        for _ in range(self.mu):
+            e = self.do_cycle(r, e, l, h)
+        return e
+
+    def do_cycle(self, F, U, l, h=None):
+        if h is None:
+            h = 1 / U.shape[0]
+
+        if l <= 1 or U.shape[0] <= 1:
+            return self._solve(F, U, h)
+
+        U = self._presmooth(F=F, U=U, h=h)
+
+        r = self._compute_residual(F=F, U=U, h=2 * h)
+
+        r = self.restriction(r)
+
+        e = self._compute_correction(r, l - 1, 2 * h)
+
+        e = prolongation(e, U.shape)
+
+        # correction
+        U = U + e
+
+        return self._postsmooth(F=F, U=U, h=h)
 
 ### D multigrid
 
