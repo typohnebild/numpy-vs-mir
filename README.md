@@ -15,9 +15,9 @@
     - [D multigrid](#d-multigrid)
     - [Differences in the Red-Black Gauss–Seidel Implementation](#differences-in-the-red-black-gaussseidel-implementation)
   - [Measurements](#measurements)
+    - [What was measured](#what-was-measured)
     - [Hardware/Software Setup](#hardwaresoftware-setup)
     - [How was measured](#how-was-measured)
-    - [What was measured](#what-was-measured)
   - [Results](#results)
     - [D Benchmark](#d-benchmark)
     - [Python Benchmark](#python-benchmark)
@@ -151,13 +151,13 @@ logic of a multigrid cycle and how the correction shall be computed.
 
         return self._postsmooth(F=F, U=U, h=h)
 ```
-The class _PoissonCycle_ is a specialization of this abstract class. Here, the class specific
-methods like pre- and post-smoothing are implemented. Both smoothing implementations and the solver
-are based on Gauss-Seidel-Red-Black.
+The class _PoissonCycle_ is a specialization of this abstract _Cycle_. Here, the class specific
+methods like pre- and post-smoothing are implemented. Both smoothing implementations and also
+the solver are based on Gauss-Seidel-Red-Black.
 
 We experimented with _Numba_[^fn6] and the _Intel Python Distribution_[^fn5] here.
 _Numba_ was used to speed up the sweeps in Gauss-Seidel-Red-Black. The efficiency differences of
-Numba and without Numba are considered in the [Python-Benchmark].(#python-benchmark).
+Numba and without Numba are considered in the [Python-Benchmark](#python-benchmark).
 Another speed up method is to use the _Intel Python Distribution_ which also uses _Numba_ in
 combination with many other Python-packages that are optimized for Intel CPUs. The effect of this
 specialized Python Distribution can also be seen in the [Python Benchmark](#python-benchmark).
