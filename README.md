@@ -1,5 +1,7 @@
 # Python vs. D using multigrid
 
+**TODO Update TOC when finished**
+
 ## Content
 
 - [Python vs. D using multigrid](#python-vs-d-using-multigrid)
@@ -28,18 +30,20 @@
 
 ## Motivation
 
-Python is a well known and often used programming language. Its C-based package numpy allows an
+Python is a well known and often used programming language. Its C-based package NumPy allows an
 efficient computation for a wide variety of problems.
+Although Python is popular and commonly used it is worth to look if there are
+other languages and if they perform similar or even better than the established
+Python + NumPy combination.
 
-D combines the efficiency of C and the simplicity of Python and is therefore competitive to Pythons
-Numpy package. It also serves a numpy like D-package called MIR [^fn0], which makes D comparable to
-Python with respect to MIR and Numpy.
+In this sense we want to compare it with the D programming language and
+its library *MIR[^fn0]* and find out to which extend they are comparable and
+how the differences in the performance are.
 
-There are already some comparisons between D and other competitors, like [^fn1] and [^fn2] but they
-compare relatively simple instructions.
-We compare D with Python with a more complex application from HPC and implement a multigrid solver
+To do so we choose a more complex application from HPC and implement a multigrid solver
 in both languages. The measurement takes place by solving the Poisson equation in 2D with our
 solvers.
+The animation below shows the result of these calculations.
 
 ![](graphs/heatmap.gif?raw=true)
 
@@ -47,15 +51,19 @@ It comes out that... tbd
 
 ## Related Work
 
+There are already some comparisons between D and other competitors, like [^fn1] and [^fn2] but they
+compare relatively simple instructions.
+
 In reference [^fn2], D was compared to Python and Julia with respect to simple numerical operations
-like dot product, multiplication and sorting. Similar to our approach, MIR and Numpy was used in
+like dot product, multiplication and sorting. Similar to our approach, MIR and NumPy was used in
 those implementations.
 
 Reference [^fn1] deals with the comparison of D, Chapel and Julia. It aims kernel matrix operations
 like dot products, exponents, Cauchy, Gaussian, Power and some more.
 
-Based on the ideas both works, we compare a more complex application by implementing a multigrid
-solver in D and Python using MIR and Numpy.
+Based on the ideas both works, we compare a more complex application, and not
+just individual functions, by implementing a multigrid solver in D and Python
+using MIR and NumPy.
 
 ## Methods
 
@@ -224,10 +232,10 @@ For this purpose, we implemented three different approaches:
 - **Software:**
   - _Python_
     - Python 3.7.3
-    - Numpy 1.19.0
+    - NumPy 1.19.0
     - Numba 0.50.1
     - Intel Python Distribution 2020.2.902
-      - Numpy 1.18.5
+      - NumPy 1.18.5
       - Numba 0.49.1
   - _D_
     - LDC 1.23
