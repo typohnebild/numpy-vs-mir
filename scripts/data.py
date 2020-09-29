@@ -101,7 +101,7 @@ def subplots(frames, base_path, column):
         axe.set_title(name)
 
     fig.tight_layout()
-    fig.savefig(f'{base_path}_{column}_subplots.png')
+    fig.savefig(f'{base_path}_{column}_subplots.png', bbox_inches='tight')
 
 
 def extract_name(path):
@@ -125,7 +125,7 @@ def plot(frames, func, base_path, title):
     plt.grid(color='b', linestyle='-', linewidth=0.3, alpha=0.5, which='major')
     plt.grid(color='b', linestyle='-', linewidth=0.1, alpha=0.5, which='minor')
 
-    plt.savefig(f'{base_path}_{func.__name__}.png')
+    plt.savefig(f'{base_path}_{func.__name__}.png', bbox_inches='tight')
 
 
 def main():
