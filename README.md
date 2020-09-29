@@ -247,8 +247,8 @@ In D we differentiate the measurements between Gauss-Seidel-Red-Black sweep impl
 The sweep performs basically the update step. For this purpose, we implemented three different
 approaches:
 1. Slices: Python like. Uses D Slices and Strides for grouping (Red-Black).
-2. Naive: one for-loop for each dimension. Matrix-Access through multi-dimensional Array.
-3. Fields: one for-loop for each dimension. Matrix is flattened. Access through flattened index.
+2. Naive: one for-loop for each dimension. Matrix-Access via multi-dimensional Array.
+3. Fields: one for-loop for each dimension. Matrix is flattened. Access via flattened index.
 
 ### How was measured
 
