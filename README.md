@@ -73,7 +73,7 @@ this problem type here...</span>***
 
 The Poisson Equation is &Delta;u = f
 
-The discrete version looks like this:
+The discrete version for 2D looks like this:
 
 (&nabla;<sup>2</sup>u)<sub>i,j</sub> = <sup>1</sup>&frasl;<sub>(h<sup>2</sup>)</sub>
 (u<sub>i+1,j</sub> + u<sub>i - 1, j</sub> +
