@@ -15,7 +15,8 @@
     - [D multigrid](#d-multigrid)
   - [Measurements](#measurements)
     - [Hardware/Software Setup](#hardwaresoftware-setup)
-    - [Measurement Methods](#measurement-methods)
+    - [How was measured](#how-was-measured)
+    - [What was measured](#what-was-measured)
   - [Results](#results)
     - [D Benchmark](#d-benchmark)
     - [Python Benchmark](#python-benchmark)
@@ -98,6 +99,7 @@ by recursively accelerating the convergence of a coarser grid solution approxima
 finer grid. This recursion is done until the costs for solving the grid is negligible.
 Since the coarser grid is a representation of the finer grid, the error can be tracked back by
 computing the prolongated residual in each recursion level.
+
 **(HIER NOCH IRGENDWAS MIT W UND V CYCLEN?)**
 
 One multigrid cycle looks like the following:
@@ -175,7 +177,7 @@ We want to solve the Poisson equation with our multigrids and measure the FLOPs/
     - mir-algorithm 3.9.6
     - mir-random 2.2.14
 
-### Measurement Methods
+### How was measured
 
 As performance measures we used the execution time and the number of
 floating-point operations (FLOP) per second (FLOP/s).
@@ -219,7 +221,7 @@ might be suitable to use tools like [PAPI](http://icl.cs.utk.edu/papi/) or
 measurement. But it would be necessary to provide a interface, especially for D,
 that it can be used in the benchmarks.
 
-### Another meaningful Heading
+### What was measured
 
 We compared the different implementations and setups on this benchmark.
 We create problems in size of 64, 128, 192, .. 1216, 1280, 1408, 1536, ..., 2432,
