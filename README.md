@@ -11,9 +11,10 @@
     - [Red-Black Gauss Seidel](#red-black-gauss-seidel)
     - [Multigrid](#multigrid)
   - [Implementation](#implementation)
-    - [Python multigrid](#python-multigrid)
-    - [D multigrid](#d-multigrid)
-    - [Differences in the Red-Black Gauss–Seidel Implementation](#differences-in-the-red-black-gaussseidel-implementation)
+    - [Multigrid](#multigrid-1)
+      - [Python](#python)
+      - [D](#d)
+    - [Differences in Gauss–Seidel-Red-Black](#differences-in-gaussseidel-red-black)
   - [Measurements](#measurements)
     - [What was measured](#what-was-measured)
     - [Hardware/Software Setup](#hardwaresoftware-setup)
@@ -117,7 +118,8 @@ approximation significantly. (see [^fn7])
 
 ## Implementation
 
-### Python multigrid
+### Multigrid
+#### Python
 
 The Python multigrid implementation is based on an abstract class _Cycle_. It contains the basic
 logic of a multigrid cycle and how the correction shall be computed.
@@ -162,9 +164,9 @@ Another speed up method is to use the _Intel Python Distribution_ which also use
 combination with many other Python-packages that are optimized for Intel CPUs. The effect of this
 specialized Python Distribution can also be seen in the [Python Benchmark](#python-benchmark).
 
-### D multigrid
+#### D
 
-We did the same things as in Python here.
+In D we did basically the same things as in Python.
 
 ```D
     Slice!(T*, Dim) compute_correction(Slice!(T*, Dim) r, uint l, T current_h)
@@ -200,10 +202,10 @@ We did the same things as in Python here.
     }
 ```
 
-### Differences in the Red-Black Gauss–Seidel Implementation
+### Differences in Gauss–Seidel-Red-Black
 
 The implementation of the multigrid differs essentially only in syntactical
-matters. The main difference is in the used solver, though the Gauss-Seidel
+matters. The main difference is in the used solver, so the Gauss-Seidel
 methods.
 **TODO: More Bla on what is the difference and field slice stuff**
 
