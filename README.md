@@ -153,6 +153,13 @@ approximation significantly. (see [^fn7])
 
 We did the same things as in Python.
 
+### Differences in the Red-Black Gauss–Seidel Implementation
+
+The implementation of the multigrid differs essentially only in syntactical
+matters. The main difference is in the used solver, though the Gauss-Seidel
+methods. 
+**TODO: More Bla on what is the difference and field slice stuff**
+
 ## Measurements
 
 ### Hardware/Software Setup
