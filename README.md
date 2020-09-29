@@ -1,6 +1,6 @@
 # Python vs. D using multigrid
 
-**TODO Update TOC when finished**
+**<span style="color:red">TODO Update TOC when finished</span>**
 
 ## Content
 
@@ -227,7 +227,7 @@ For this purpose, we implemented three different approaches:
 
 - **Hardware:**
   - Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz | CPU max MHz: 4700 | CPU min MHz: 800
-  - RAM: 64GB | Speed: ??? MHz
+  - RAM: 64GB | Speed: ***<span style="color:red">???</span>*** MHz
   - Kernel: Linux cip1e3 4.19.144-1-cip-amd64 x86_64 (gcc version 8.3.0 (Debian 8.3.0-6))
 - **Software:**
   - _Python_
@@ -305,6 +305,7 @@ measurement. But it would be necessary to provide a interface, especially for D,
 that it can be used in the benchmarks.
 
 ## Results
+***<span style="color:red">TODO: write some text for each sub-section</span>***
 
 ### D Benchmark
 
@@ -329,6 +330,7 @@ that it can be used in the benchmarks.
 ![](graphs/cip1e32109_time_subplots.png?raw=true)
 
 ## Summary
+***<span style="color:red">TODO</span>***
 
 Compiled languages are faster?
 
