@@ -117,7 +117,7 @@ approximation significantly. (see [^fn7])
 
 [^fn5] and [^fn6]
 
-
+```python
     def _compute_correction(self, r, l, h):
         e = np.zeros_like(r)
         for _ in range(self.mu):
@@ -145,7 +145,7 @@ approximation significantly. (see [^fn7])
         U = U + e
 
         return self._postsmooth(F=F, U=U, h=h)
-
+```
 ### D multigrid
 
 We did the same things as in Python.
