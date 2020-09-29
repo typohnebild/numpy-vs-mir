@@ -13,12 +13,14 @@
     - [Red-Black Gauss Seidel](#red-black-gauss-seidel)
     - [Multigrid](#multigrid)
   - [Implementation](#implementation)
-    - [Python multigrid](#python-multigrid)
-    - [D multigrid](#d-multigrid)
+    - [Multigrid](#multigrid-1)
+      - [Python](#python)
+      - [D](#d)
+    - [Differences in Gauss–Seidel-Red-Black](#differences-in-gaussseidel-red-black)
   - [Measurements](#measurements)
     - [Hardware/Software Setup](#hardwaresoftware-setup)
-    - [How was measured](#how-was-measured)
     - [What was measured](#what-was-measured)
+    - [How was measured](#how-was-measured)
   - [Results](#results)
     - [D Benchmark](#d-benchmark)
     - [Python Benchmark](#python-benchmark)
@@ -124,9 +126,11 @@ approximation significantly. (see [^fn7])
 
 ## Implementation
 
-### Python multigrid
+### Multigrid
+#### Python
 
-[^fn5] and [^fn6]
+The Python multigrid implementation is based on an abstract class _Cycle_. It contains the basic
+logic of a multigrid cycle and how the correction shall be computed.
 
 ```python
     def _compute_correction(self, r, l, h):
@@ -157,29 +161,63 @@ approximation significantly. (see [^fn7])
 
         return self._postsmooth(F=F, U=U, h=h)
 ```
-### D multigrid
+The class _PoissonCycle_ is a specialization of this abstract _Cycle_. Here, the class specific
+methods like pre- and post-smoothing are implemented. Both smoothing implementations and also
+the solver are based on Gauss-Seidel-Red-Black.
 
-We did the same things as in Python.
+We experimented with _Numba_[^fn6] and the _Intel Python Distribution_[^fn5] here.
+_Numba_ was used to speed up the sweeps in Gauss-Seidel-Red-Black. The efficiency differences of
+Numba and without Numba are considered in the [Python-Benchmark](#python-benchmark).
+Another speed up method is to use the _Intel Python Distribution_ which also uses _Numba_ in
+combination with many other Python-packages that are optimized for Intel CPUs. The effect of this
+specialized Python Distribution can also be seen in the [Python Benchmark](#python-benchmark).
 
-### Differences in the Red-Black Gauss–Seidel Implementation
+#### D
+
+In D we did basically the same things as in Python.
+
+```D
+    Slice!(T*, Dim) compute_correction(Slice!(T*, Dim) r, uint l, T current_h)
+    {
+        auto e = slice!T(r.shape, 0);
+        foreach (_; 0 .. mu)
+        {
+            e = do_cycle(r, e, l, current_h);
+
+        }
+        return e;
+    }
+
+    Slice!(T*, Dim) do_cycle(Slice!(T*, Dim) F, Slice!(T*, Dim) U, uint l, T current_h)
+    {
+        if (l <= 0 || U.shape[0] <= 1)
+        {
+            return solve(F, U, current_h);
+        }
+
+        U = presmooth(F, U, current_h);
+
+        auto r = compute_residual(F, U, current_h * 2);
+
+        r = restriction(r);
+
+        auto e = compute_correction(r, l - 1, current_h * 2);
+
+        e = prolongation!(T, Dim)(e, U.shape);
+        U = add_correction(U, e);
+
+        return postsmooth(F, U, current_h);
+    }
+```
+
+### Differences in Gauss–Seidel-Red-Black
 
 The implementation of the multigrid differs essentially only in syntactical
-matters. The main difference is in the used solver, though the Gauss-Seidel
+matters. The main difference is in the used solver, so the Gauss-Seidel
 methods.
 **TODO: More Bla on what is the difference and field slice stuff**
 
 ## Measurements
-
-### What was measured
-
-As performance measures we used the execution time and the number of
-floating-point operations (FLOP) per second (FLOP/s).
-
-As benchmarks we used problems in size of 64, 128, 192, .. 1216, 1280, 1408, 1536, ..., 2432,
-2560, 2816, ..., 3840, 4096.
-And solved the with a Multigrid W-cycle with 2 pre- and postsmoothing steps and
-stopped when the problem was solved up to an epsilon of 1e-3.
-For each permutation of the setup option a run was done 3 times.
 
 ### Hardware/Software Setup
 
@@ -199,6 +237,26 @@ For each permutation of the setup option a run was done 3 times.
     - LDC 1.23
     - mir-algorithm 3.9.6
     - mir-random 2.2.14
+
+### What was measured
+
+As performance measures we used the execution time and the number of
+floating-point operations (FLOP) per second (FLOP/s).
+
+As benchmarks we used problems in size of 64, 128, 192, .. 1216, 1280, 1408, 1536, ..., 2432,
+2560, 2816, ..., 3840, 4096.
+And solved the with a Multigrid W-cycle with 2 pre- and postsmoothing steps and
+stopped when the problem was solved up to an epsilon of 1e-3.
+For each permutation of the setup option a run was done 3 times.
+
+In Python we distinguish measurements between number of threads (1 or 8), with Intel Python
+distribution or OpenBlas and with or without Numba.
+In D we differentiate the measurements between Gauss-Seidel-Red-Black sweep implementations.
+The sweep performs basically the update step. For this purpose, we implemented three different
+approaches:
+1. Slices: Python like. Uses D Slices and Strides for grouping (Red-Black).
+2. Naive: one for-loop for each dimension. Matrix-Access via multi-dimensional Array.
+3. Fields: one for-loop for each dimension. Matrix is flattened. Access via flattened index.
 
 ### How was measured
 
