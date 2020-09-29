@@ -72,8 +72,8 @@ using MIR and NumPy.
 ***<span style="color:red">TODO: Since we want to solve a Poisson equation, we should cover
 this problem type here...</span>***
 
-The Poisson Equation is -&Delta;u = f and has used in various fields to describe
-processes. To solve it is common to use the Finte Differences Method.
+The Poisson Equation is -&Delta;u = f and has used in various fields to describe processes like
+fluid dynamics or heat maps. To solve it, the finte-difference method is usually used.
 The discrete version on rectangular 2D-Grid looks like this:
 
 (&nabla;<sup>2</sup>u)<sub>i,j</sub> = <sup>1</sup>&frasl;<sub>(h<sup>2</sup>)</sub>
