@@ -99,8 +99,8 @@ by recursively accelerating the convergence of a coarser grid solution approxima
 finer grid. This recursion is done until the costs for solving the grid is negligible.
 Since the coarser grid is a representation of the finer grid, the error can be tracked back by
 computing the prolongated residual in each recursion level.
-
-**(HIER NOCH IRGENDWAS MIT W UND V CYCLEN?)**
+During the backtracking, various cycle types can be defined by looping the correction &mu; times.
+Well known cycle types are _V-Cycle_ (&mu; = 1) and _W-Cycle_ (&mu; = 2).
 
 One multigrid cycle looks like the following:
 - Pre-Smoothing – reducing high frequency errors using a few iterations of the Gauss–Seidel method.
