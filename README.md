@@ -69,8 +69,6 @@ using MIR and NumPy.
 ## Methods
 
 ### Poisson Equation
-***<span style="color:red">TODO: Since we want to solve a Poisson equation, we should cover
-this problem type here...</span>***
 
 The Poisson Equation is -&Delta;u = f and has used in various fields to describe processes like
 fluid dynamics or heatmaps. To solve it numerically, the finte-difference method is usually used for discretization.
