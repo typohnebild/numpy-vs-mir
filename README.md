@@ -15,6 +15,8 @@
     - [D multigrid](#d-multigrid)
   - [Measurements](#measurements)
     - [Hardware/Software Setup](#hardwaresoftware-setup)
+    - [How was measured](#how-was-measured)
+    - [What was measured](#what-was-measured)
   - [Results](#results)
     - [D Benchmark](#d-benchmark)
     - [Python Benchmark](#python-benchmark)
@@ -97,6 +99,7 @@ by recursively accelerating the convergence of a coarser grid solution approxima
 finer grid. This recursion is done until the costs for solving the grid is negligible.
 Since the coarser grid is a representation of the finer grid, the error can be tracked back by
 computing the prolongated residual in each recursion level.
+
 **(HIER NOCH IRGENDWAS MIT W UND V CYCLEN?)**
 
 One multigrid cycle looks like the following:
@@ -181,7 +184,7 @@ We want to solve the Poisson equation with our multigrids and measure the FLOPs/
     - mir-algorithm 3.9.6
     - mir-random 2.2.14
 
-### Nice meaningful Heading
+### How was measured
 
 As performance measures we used the execution time and the number of
 floating-point operations (FLOP) per second (FLOP/s).
@@ -198,26 +201,26 @@ performance counters, if they are implemented by the CPU.
 The CPU we used offered the performance counters
 _scalar_single_, _scalar_double_, _128b_packed_double_, _128b_packed_single_,
 _256b_packed_double_, _256b_packed_single_ for different floating-point operations.
-_Perf_ offers for these the Metric Group *GFLOPS* which counts all this hardware
+_Perf_ offers the Metric Group *GFLOPS* for these which counts all this hardware
 events.
 
-Before we can start are our actual benchmark, there is the need for a startup
-phase were the problem is loaded and small problem is solved. This is
-especially crucial for the Python implementation when it is accelerated with
-numba, since in this initialization phase the JIT-Compiler of numba is doing
+Before starting the actual benchmark, there is the need for a startup
+phase were the original problem is loaded and a small warm-up problem is solved.
+This is especially crucial for the Python implementation when it is accelerated
+with numba, since in this initialization phase the JIT-Compiler of numba is doing
 his work.
 So we want to avoid that _perf_ counts the FLOP/s that occur while this phase.
 To achieve this we used the delay option for _perf_, which delays the start of
 the measurement and also implemented a delay in our programs.
-The delay for the program is meant to be a bit longer then the actual startup
-phase so the program needs to sleep for a while till the delay is over.
-In Python implementation this is especially needed because the two delays are
-not synchronized since the it takes some time till the Python interpreter is
+The delay for the program is meant to be a bit longer than the actual startup
+phase. So the program needs to sleep after the warm-up until the delay is over.
+This is especially needed in the Python implementation because the two delays are
+not synchronized since it takes some time till the Python interpreter is
 loaded and starts to run the program. So it is meant that _perf_ starts to
 measure while the benchmark program is waiting till its delay is over.
-This should be no problem, because while waiting there should be no
-floating-point
-operation that would spoil our results and the time is measured separately.
+This should be no problem, because while waiting there should be no floating-point
+operation that would spoil our results. The time is measured separately
+on program side.
 
 This is suitable for our kind and complexity of project, but for more advanced projects it
 might be suitable to use tools like [PAPI](http://icl.cs.utk.edu/papi/) or
@@ -225,7 +228,7 @@ might be suitable to use tools like [PAPI](http://icl.cs.utk.edu/papi/) or
 measurement. But it would be necessary to provide a interface, especially for D,
 that it can be used in the benchmarks.
 
-### Another meaningful Heading
+### What was measured
 
 We compared the different implementations and setups on this benchmark.
 We create problems in size of 64, 128, 192, .. 1216, 1280, 1408, 1536, ..., 2432,
