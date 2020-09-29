@@ -239,7 +239,7 @@ For this purpose, we implemented three different approaches:
       - NumPy 1.18.5
       - Numba 0.49.1
   - _D_
-    - LDC 1.23
+    - LDC 1.23 [pre-built package](https://github.com/ldc-developers/ldc/releases)
     - mir-algorithm 3.9.6
     - mir-random 2.2.14
 
