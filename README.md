@@ -127,6 +127,7 @@ approximation significantly. (see [^fn7])
 ## Implementation
 
 ### Multigrid
+
 #### Python
 
 The Python multigrid implementation is based on an abstract class _Cycle_. It contains the basic
@@ -164,13 +165,6 @@ logic of a multigrid cycle and how the correction shall be computed.
 The class _PoissonCycle_ is a specialization of this abstract _Cycle_. Here, the class specific
 methods like pre- and post-smoothing are implemented. Both smoothing implementations and also
 the solver are based on Gauss-Seidel-Red-Black.
-
-We experimented with _Numba_[^fn6] and the _Intel Python Distribution_[^fn5] here.
-_Numba_ was used to speed up the sweeps in Gauss-Seidel-Red-Black. The efficiency differences of
-Numba and without Numba are considered in the [Python-Benchmark](#python-benchmark).
-Another speed up method is to use the _Intel Python Distribution_ which also uses _Numba_ in
-combination with many other Python-packages that are optimized for Intel CPUs. The effect of this
-specialized Python Distribution can also be seen in the [Python Benchmark](#python-benchmark).
 
 #### D
 
@@ -212,10 +206,20 @@ In D we did basically the same things as in Python.
 
 ### Differences in Gauss–Seidel-Red-Black
 
-The implementation of the multigrid differs essentially only in syntactical
-matters. The main difference is in the used solver, so the Gauss-Seidel
-methods.
-**TODO: More Bla on what is the difference and field slice stuff**
+The implementations of the multigrid only differ essentially in syntactical
+matters. The main difference is in the used solver and smoother. More precisely, the difference
+is the Gauss-Seidel method.
+
+In Python, we used _Numba_[^fn6] to speed up the sweep in Gauss-Seidel-Red-Black. The sweep basically
+performs the update step. The sweep implementation uses the _Numpy_ array slices.
+The efficiency differences of with and without Numba are considered in the
+[Python-Benchmark](#python-benchmark).
+
+In D we implemented three Gauss-Seidel-Red-Black sweep approaches.
+For this purpose, we implemented three different approaches:
+1. Slices: Python like. Uses D Slices and Strides for grouping (Red-Black).
+2. Naive: one for-loop for each dimension. Matrix-Access via multi-dimensional Array.
+3. Fields: one for-loop for each dimension. Matrix is flattened. Access via flattened index.
 
 ## Measurements
 
@@ -249,14 +253,14 @@ And solved the with a Multigrid W-cycle with 2 pre- and postsmoothing steps and
 stopped when the problem was solved up to an epsilon of 1e-3.
 For each permutation of the setup option a run was done 3 times.
 
-In Python we distinguish measurements between number of threads (1 or 8), with Intel Python
-distribution or OpenBlas and with or without Numba.
-In D we differentiate the measurements between Gauss-Seidel-Red-Black sweep implementations.
-The sweep performs basically the update step. For this purpose, we implemented three different
-approaches:
-1. Slices: Python like. Uses D Slices and Strides for grouping (Red-Black).
-2. Naive: one for-loop for each dimension. Matrix-Access via multi-dimensional Array.
-3. Fields: one for-loop for each dimension. Matrix is flattened. Access via flattened index.
+In the [Python-Benchmark](#python-benchmark) we distinguish measurements between number of
+threads (1 or 8) and with or without Numba.
+We also experimented with the _Intel Python Distribution_[^fn5] to speed up our implementation. The
+_Intel Python Distribution_ is a combination of many Python-packages like _Numba_ or _Numpy_
+that is optimized for Intel CPUs.
+
+In the [D-Benchmark](#d-benchmark) we differentiate the measurements between the sweep implementations
+_slice_, _naive_ and _field_.
 
 ### How was measured
 
