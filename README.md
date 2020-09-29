@@ -141,7 +141,7 @@ phase were the problem is loaded and small problem is solved. This is
 especially crucial for the Python implementation when it is accelerated with
 numba, since in this initialization phase the JIT-Compiler of numba is doing
 his work.
-So we want to avoid that _perf_ counts the FLOPs that occur while this phase.
+So we want to avoid that _perf_ counts the FLOP/s that occur while this phase.
 To achieve this we used the delay option for _perf_, which delays the start of
 the measurement and also implemented a delay in our programs.
 The delay for the program is meant to be a bit longer then the actual startup
@@ -153,6 +153,12 @@ measure while the benchmark program is waiting till its delay is over.
 This should be no problem, because while waiting there should be no
 floating-point
 operation that would spoil our results and the time is measured separately.
+
+This is suitable for our kind and complexity of project, but for more advanced projects it
+might be suitable to use tools like [PAPI](http://icl.cs.utk.edu/papi/) or
+[likwid](https://github.com/RRZE-HPC/likwid), which allow a more fine grain
+measurement. But it would be necessary to provide a interface, especially for D,
+that it can be used in the benchmarks.
 
 ## Results
 
