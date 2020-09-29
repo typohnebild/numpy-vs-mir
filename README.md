@@ -47,7 +47,8 @@ The animation below shows the result of these calculations.
 
 ![Animation](graphs/heatmap.gif?raw=true)
 
-It comes out that... tbd
+**<span style="color:red">It comes out that... tbd</span>**
+
 
 ## Related Work
 
