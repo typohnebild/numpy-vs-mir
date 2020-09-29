@@ -16,8 +16,8 @@
       - [D](#d)
     - [Differences in Gauss–Seidel-Red-Black](#differences-in-gaussseidel-red-black)
   - [Measurements](#measurements)
-    - [What was measured](#what-was-measured)
     - [Hardware/Software Setup](#hardwaresoftware-setup)
+    - [What was measured](#what-was-measured)
     - [How was measured](#how-was-measured)
   - [Results](#results)
     - [D Benchmark](#d-benchmark)
@@ -211,17 +211,6 @@ methods.
 
 ## Measurements
 
-### What was measured
-
-As performance measures we used the execution time and the number of
-floating-point operations (FLOP) per second (FLOP/s).
-
-As benchmarks we used problems in size of 64, 128, 192, .. 1216, 1280, 1408, 1536, ..., 2432,
-2560, 2816, ..., 3840, 4096.
-And solved the with a Multigrid W-cycle with 2 pre- and postsmoothing steps and
-stopped when the problem was solved up to an epsilon of 1e-3.
-For each permutation of the setup option a run was done 3 times.
-
 ### Hardware/Software Setup
 
 - **Hardware:**
@@ -240,6 +229,18 @@ For each permutation of the setup option a run was done 3 times.
     - LDC 1.23
     - mir-algorithm 3.9.6
     - mir-random 2.2.14
+
+### What was measured
+
+As performance measures we used the execution time and the number of
+floating-point operations (FLOP) per second (FLOP/s).
+
+As benchmarks we used problems in size of 64, 128, 192, .. 1216, 1280, 1408, 1536, ..., 2432,
+2560, 2816, ..., 3840, 4096.
+And solved the with a Multigrid W-cycle with 2 pre- and postsmoothing steps and
+stopped when the problem was solved up to an epsilon of 1e-3.
+For each permutation of the setup option a run was done 3 times.
+
 
 ### How was measured
 
