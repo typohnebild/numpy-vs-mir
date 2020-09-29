@@ -75,12 +75,13 @@ def subplots(frames, base_path, column):
     fig, axes = plt.subplots((len(frames) + 1) // 2,
                              2,
                              figsize=(12, 15))
-    if len(frames) < len(axes.flat):
-        axes.flat[-1].axis('off')
+    overflow = len(frames) < len(axes.flat)
+    if overflow:
+        axes.flat[3].axis('off')
 
     for i, frame in enumerate(frames):
         name, df = frame
-        axe = axes.flat[i]
+        axe = overflow and axes.flat[i] if i < 3 else axes.flat[i + 1]
         g = df.groupby('size').median()[column]
         g.plot(label=name, ax=axe, marker='o', color=next(color))
         axe.grid(
