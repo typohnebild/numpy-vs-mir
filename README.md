@@ -71,14 +71,13 @@ using MIR and NumPy.
 ***<span style="color:red">TODO: Since we want to solve a Poisson equation, we should cover
 this problem type here...</span>***
 
-The Poisson Equation is -&Delta;u = f and has used in various fields to describe processes.
-
-To solve it is common to use the Finte Differences Method.
+The Poisson Equation is -&Delta;u = f and has used in various fields to describe
+processes. To solve it is common to use the Finte Differences Method.
 The discrete version on rectangular 2D-Grid looks like this:
 
 (&nabla;<sup>2</sup>u)<sub>i,j</sub> = <sup>1</sup>&frasl;<sub>(h<sup>2</sup>)</sub>
 (u<sub>i+1,j</sub> + u<sub>i - 1, j</sub> +
-u<sub>i, j+1</sub> + u<sub>i, j-1</sub> - 4 \* u<sub>i, j</sub> )
+u<sub>i, j+1</sub> + u<sub>i, j-1</sub> - 4 \* u<sub>i, j</sub> ) = f<sub>i,j</sub>
 
 Where h is distance between the grid points.
 The boundaries are managed by the Dirichlet boundary condition, since no update is performed on the
