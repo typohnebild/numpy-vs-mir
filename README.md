@@ -13,6 +13,7 @@
   - [Implementation](#implementation)
     - [Python multigrid](#python-multigrid)
     - [D multigrid](#d-multigrid)
+    - [Differences in the Red-Black Gauss–Seidel Implementation](#differences-in-the-red-black-gaussseidel-implementation)
   - [Measurements](#measurements)
     - [Hardware/Software Setup](#hardwaresoftware-setup)
     - [How was measured](#how-was-measured)
@@ -118,7 +119,8 @@ approximation significantly. (see [^fn7])
 
 ### Python multigrid
 
-[^fn5] and [^fn6]
+The Python multigrid implementation is based on an abstract class _Cycle_. It contains the basic
+logic of a multigrid cycle and how the correction shall be computed.
 
 ```python
     def _compute_correction(self, r, l, h):
@@ -149,15 +151,60 @@ approximation significantly. (see [^fn7])
 
         return self._postsmooth(F=F, U=U, h=h)
 ```
+The class _PoissonCycle_ is a specialization of this abstract class. Here, the class specific
+methods like pre- and post-smoothing are implemented. Both smoothing implementations and the solver
+are based on Gauss-Seidel-Red-Black.
+
+We experimented with _Numba_[^fn6] and the _Intel Python Distribution_[^fn5] here.
+_Numba_ was used to speed up the sweeps in Gauss-Seidel-Red-Black. The efficiency differences of
+Numba and without Numba are considered in the [Python-Benchmark].(#python-benchmark).
+Another speed up method is to use the _Intel Python Distribution_ which also uses _Numba_ in
+combination with many other Python-packages that are optimized for Intel CPUs. The effect of this
+specialized Python Distribution can also be seen in the [Python Benchmark](#python-benchmark).
+
 ### D multigrid
 
-We did the same things as in Python.
+We did the same things as in Python here.
+
+```D
+    Slice!(T*, Dim) compute_correction(Slice!(T*, Dim) r, uint l, T current_h)
+    {
+        auto e = slice!T(r.shape, 0);
+        foreach (_; 0 .. mu)
+        {
+            e = do_cycle(r, e, l, current_h);
+
+        }
+        return e;
+    }
+
+    Slice!(T*, Dim) do_cycle(Slice!(T*, Dim) F, Slice!(T*, Dim) U, uint l, T current_h)
+    {
+        if (l <= 0 || U.shape[0] <= 1)
+        {
+            return solve(F, U, current_h);
+        }
+
+        U = presmooth(F, U, current_h);
+
+        auto r = compute_residual(F, U, current_h * 2);
+
+        r = restriction(r);
+
+        auto e = compute_correction(r, l - 1, current_h * 2);
+
+        e = prolongation!(T, Dim)(e, U.shape);
+        U = add_correction(U, e);
+
+        return postsmooth(F, U, current_h);
+    }
+```
 
 ### Differences in the Red-Black Gauss–Seidel Implementation
 
 The implementation of the multigrid differs essentially only in syntactical
 matters. The main difference is in the used solver, though the Gauss-Seidel
-methods. 
+methods.
 **TODO: More Bla on what is the difference and field slice stuff**
 
 ## Measurements
