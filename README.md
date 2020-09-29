@@ -30,7 +30,7 @@
 Python is a well known and often used programming language. Its C-based package numpy allows an
 efficient computation for a wide variety of problems.
 
-D combines the efficency of C and the simplicity of Python and is therefore competitive to Pythons
+D combines the efficiency of C and the simplicity of Python and is therefore competitive to Pythons
 Numpy package. It also serves a numpy like D-package called MIR [^fn0], which makes D comparable to
 Python with respect to MIR and Numpy.
 
@@ -209,16 +209,24 @@ methods.
 
 ## Measurements
 
-### Hardware/Software Setup
+### What was measured
 
-We want to solve the Poisson equation with our multigrids and measure the FLOPs/sec for various
-2D problems. Therefore, we are using the following hardware and software configurations:
+As performance measures we used the execution time and the number of
+floating-point operations (FLOP) per second (FLOP/s).
+
+As benchmarks we used problems in size of 64, 128, 192, .. 1216, 1280, 1408, 1536, ..., 2432,
+2560, 2816, ..., 3840, 4096.
+And solved the with a Multigrid W-cycle with 2 pre- and postsmoothing steps and
+stopped when the problem was solved up to an epsilon of 1e-3.
+For each permutation of the setup option a run was done 3 times.
+
+### Hardware/Software Setup
 
 - **Hardware:**
   - Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz | CPU max MHz: 4700 | CPU min MHz: 800
   - RAM: 64GB | Speed: ??? MHz
   - Kernel: Linux cip1e3 4.19.144-1-cip-amd64 x86_64 (gcc version 8.3.0 (Debian 8.3.0-6))
-- **Versions:**
+- **Software:**
   - _Python_
     - Python 3.7.3
     - Numpy 1.19.0
@@ -233,8 +241,6 @@ We want to solve the Poisson equation with our multigrids and measure the FLOPs/
 
 ### How was measured
 
-As performance measures we used the execution time and the number of
-floating-point operations (FLOP) per second (FLOP/s).
 To measure the execution time we used the `perf_counter()` from the
 [Python time package](https://docs.python.org/3/library/time.html#time.perf_counter)
 and in the D implementation the `Stopwatch` from the
@@ -275,18 +281,7 @@ might be suitable to use tools like [PAPI](http://icl.cs.utk.edu/papi/) or
 measurement. But it would be necessary to provide a interface, especially for D,
 that it can be used in the benchmarks.
 
-### What was measured
-
-We compared the different implementations and setups on this benchmark.
-We create problems in size of 64, 128, 192, .. 1216, 1280, 1408, 1536, ..., 2432,
-2560, 2816, ..., 3840, 4096. And solved the with a multigrid W-cycle with 2
-pre- and postsmoothing steps up to an epsilon of 1e-3. For each permutation of
-the setup option a run was done 3 times.
-
 ## Results
-
-Benchmark W-cycle, 2 pre-, postsmooth steps
-Problemsize: 100, 200, 300, 400, 600 ..., 2000, 2200, 1400 ... 4000
 
 ### D Benchmark
 
@@ -311,6 +306,8 @@ Problemsize: 100, 200, 300, 400, 600 ..., 2000, 2200, 1400 ... 4000
 ![](graphs/cip1e32109_time_subplots.png?raw=true)
 
 ## Summary
+
+Compiled languages are faster?
 
 Everything was fine :smiley:
 
