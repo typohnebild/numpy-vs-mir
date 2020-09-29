@@ -67,7 +67,7 @@ The Gauss-Seidel method is common iterative technique to solve systems of linear
 
 For Ax = b the element wise formula is this:
 
-x<sup>k+1</sup><sub>i</sub> =
+x<sup>(k+1)</sup><sub>i</sub> =
 <sup>1</sup>&frasl;<sub>(a<sub>i,i</sub>)</sub>
 (b<sub>i</sub> - &Sigma; <sub>i&lt;j</sub> a <sub>i,j</sub> x<sub>i,j</sub><sup>(k+1)</sup> - &Sigma; <sub>i&gt;j</sub> a <sub>i,j</sub> x<sub>i,j</sub><sup>(k)</sup>)
 
@@ -159,6 +159,14 @@ might be suitable to use tools like [PAPI](http://icl.cs.utk.edu/papi/) or
 [likwid](https://github.com/RRZE-HPC/likwid), which allow a more fine grain
 measurement. But it would be necessary to provide a interface, especially for D,
 that it can be used in the benchmarks.
+
+### Another meaningful Heading
+
+We compared the different implementations and setups on this benchmark.
+We create problems in size of 64, 128, 192, .. 1216, 1280, 1408, 1536, ..., 2432,
+2560, 2816, ..., 3840, 4096. And solved the with a multigrid W-cycle with 2
+pre- and postsmoothing steps up to an epsilon of 1e-3. For each permutation of
+the setup option a run was done 3 times.
 
 ## Results
 
