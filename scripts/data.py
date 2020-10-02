@@ -69,12 +69,32 @@ def time(df, label):
     plt.ylabel('time in s')
 
 
+def plot_cache_lines(fig):
+    l1 = 32e3
+    l2 = 256e3
+    l3 = 12288e3
+
+    def cache2size(x):
+        return np.sqrt(x / 8)
+
+    fig.axvline(cache2size(l1), color='black', ls='--')
+    fig.axvline(cache2size(l2), color='black', ls='--')
+    fig.axvline(cache2size(l3), color='black', ls='--')
+
+
+def plot_membandwidth(fig):
+    mem_band = 22945.6 * 1e6  # convert from MB/s to B/s
+    fig.axhline(mem_band / 8)
+
+
 def subplots(frames, base_path, column):
     color = cycle(mcolor.TABLEAU_COLORS.keys())
     plt.clf()
+
     fig, axes = plt.subplots((len(frames) + 1) // 2,
                              2,
                              figsize=(12, 15))
+
     overflow = len(frames) < len(axes.flat)
     if overflow:
         axes.flat[3].axis('off')
@@ -100,9 +120,26 @@ def subplots(frames, base_path, column):
         axe.set(ylabel=column)
         axe.minorticks_on()
         axe.set_title(name)
+        plot_cache_lines(axe)
 
     fig.tight_layout()
     fig.savefig(f'{base_path}_{column}_subplots.png', bbox_inches='tight')
+
+
+def plot(frames, func, base_path, title):
+    plt.clf()
+    if func.__name__ == 'flops' and len(frames) == 11:
+        plot_membandwidth(plt)
+    plt.title(title)
+    for name, df in frames:
+        func(df, name)
+    plt.legend()
+    plt.minorticks_on()
+    plt.grid(color='b', linestyle='-', linewidth=0.3, alpha=0.5, which='major')
+    plt.grid(color='b', linestyle='-', linewidth=0.1, alpha=0.5, which='minor')
+    plot_cache_lines(plt)
+
+    plt.savefig(f'{base_path}_{func.__name__}.png', bbox_inches='tight')
 
 
 def extract_name(path):
@@ -116,19 +153,6 @@ def extract_name(path):
 
 def extract_date_host(path):
     return ''.join(os.path.basename(path).split('_')[1:3])
-
-
-def plot(frames, func, base_path, title):
-    plt.clf()
-    plt.title(title)
-    for name, df in frames:
-        func(df, name)
-    plt.legend()
-    plt.minorticks_on()
-    plt.grid(color='b', linestyle='-', linewidth=0.3, alpha=0.5, which='major')
-    plt.grid(color='b', linestyle='-', linewidth=0.1, alpha=0.5, which='minor')
-
-    plt.savefig(f'{base_path}_{func.__name__}.png', bbox_inches='tight')
 
 
 def main():
