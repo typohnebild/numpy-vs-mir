@@ -239,6 +239,12 @@ For this purpose, we implemented three different approaches:
 
 - **Hardware:**
   - Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz | CPU max MHz: 4700 | CPU min MHz: 800
+  - | CPU-Cache | Size |
+    |:---:|:---:|
+    | L1d cache | 32K |
+    | L1i cache | 32K |
+    | L2 cache | 256K |
+    | L3 cache | 12288K |
   - Kernel: Linux cip1e3 4.19.144-1-cip-amd64 x86_64 (gcc version 8.3.0 (Debian 8.3.0-6))
   - RAM: 64GB | Speed measured with [STREAM](https://github.com/jeffhammond/STREAM):
     ```
