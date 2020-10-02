@@ -310,23 +310,23 @@ that it can be used in the benchmarks.
 
 | Flop/s | Time |
 |:---:|:---:|
-|![](graphs/cip1e32109D_flops.png?raw=true)| ![](graphs/cip1e32109D_time.png?raw=true)|
+|![](graphs/cip1e32909D_flops.png?raw=true)| ![](graphs/cip1e32909D_time.png?raw=true)|
 
 ### Python Benchmark
 
 | Flop/s | Time |
 |:---:|:---:|
-|![](graphs/cip1e32109numba_flops.png?raw=true) | ![](graphs/cip1e32109numba_time.png?raw=true)|
-|![](graphs/cip1e32109nonumba_flops.png?raw=true) | ![](graphs/cip1e32109nonumba_time.png?raw=true)|
+|![](graphs/cip1e32909numba_flops.png?raw=true) | ![](graphs/cip1e32909numba_time.png?raw=true)|
+|![](graphs/cip1e32909nonumba_flops.png?raw=true) | ![](graphs/cip1e32909nonumba_time.png?raw=true)|
 
 ### Benchmarks combined
 
 | Flop/s | Time |
 |:---:|:---:|
-|![](graphs/cip1e32109_flops.png?raw=true) | ![](graphs/cip1e32109_time.png?raw=true)|
+|![](graphs/cip1e32909_flops.png?raw=true) | ![](graphs/cip1e32909_time.png?raw=true)|
 
-![](graphs/cip1e32109_FLOPS_subplots.png?raw=true)
-![](graphs/cip1e32109_time_subplots.png?raw=true)
+![](graphs/cip1e32909_FLOPS_subplots.png?raw=true)
+![](graphs/cip1e32909_time_subplots.png?raw=true)
 
 ## Summary
 ***<span style="color:red">TODO</span>***
