@@ -16,7 +16,7 @@ benchmark(){
     numba=$4
     # Loading the interpreter takes round about 500ms,
     #   so the delay is acutally delayed by additionally 500ms.
-    # We want to make sure that perf starts measuring when 
+    # We want to make sure that perf starts measuring when
     #   Python benchmark is in wait state.
     delay=1500
     delayPerf=1700
@@ -72,7 +72,7 @@ for problem in "$problempath/"*.npy; do
     N=$(echo "$problem" | awk -F'_' '{print $3}')
     N=${N%%\.npy}
 
-    echo $problem
+    echo "$problem"
 
     for threads in 1 8; do
         for numba in "-n" " "; do

@@ -109,7 +109,9 @@ def extract_name(path):
     parts = os.path.basename(path).split('_')
     if len(parts) == 4:
         return f'D with Mir ({parts[-1]})'
-    return ' '.join(parts[-3:])
+    if len(parts) == 5:
+        return f'D with Mir ({parts[-2]})'
+    return ' '.join(parts[-4:-1])
 
 
 def extract_date_host(path):
