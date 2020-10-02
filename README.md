@@ -228,6 +228,43 @@ For this purpose, we implemented three different approaches:
   - Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz | CPU max MHz: 4700 | CPU min MHz: 800
   - RAM: 64GB | Speed: ***<span style="color:red">???</span>*** MHz
   - Kernel: Linux cip1e3 4.19.144-1-cip-amd64 x86_64 (gcc version 8.3.0 (Debian 8.3.0-6))
+  - RAM: 64GB | Speed measured with [STREAM](https://github.com/jeffhammond/STREAM):
+    ```
+    -------------------------------------------------------------
+    STREAM version $Revision: 5.10 $
+    -------------------------------------------------------------
+    This system uses 8 bytes per array element.
+    -------------------------------------------------------------
+    Array size = 10000000 (elements), Offset = 0 (elements)
+    Memory per array = 76.3 MiB (= 0.1 GiB).
+    Total memory required = 228.9 MiB (= 0.2 GiB).
+    Each kernel will be executed 10 times.
+    The *best* time for each kernel (excluding the first iteration)
+    will be used to compute the reported bandwidth.
+    -------------------------------------------------------------
+    Number of Threads requested = 8
+    Number of Threads counted = 8
+    -------------------------------------------------------------
+    Your clock granularity/precision appears to be 1 microseconds.
+    Each test below will take on the order of 4697 microseconds.
+      (= 4697 clock ticks)
+    Increase the size of the arrays if this shows that
+    you are not getting at least 20 clock ticks per test.
+    -------------------------------------------------------------
+    WARNING -- The above is only a rough guideline.
+    For best results, please be sure you know the
+    precision of your system timer.
+    -------------------------------------------------------------
+    Function    Best Rate MB/s  Avg time     Min time     Max time
+    Copy:           22945.6     0.006989     0.006973     0.007011
+    Scale:          22490.3     0.007176     0.007114     0.007224
+    Add:            25086.2     0.009590     0.009567     0.009694
+    Triad:          25104.3     0.009577     0.009560     0.009598
+    -------------------------------------------------------------
+    Solution Validates: avg error less than 1.000000e-13 on all three arrays
+    -------------------------------------------------------------
+    ```
+
 - **Software:**
   - _Python_
     - Python 3.7.3
