@@ -17,6 +17,9 @@ generate_problems(){
 	done
 	if [ "$buildconf" = "multigrid" ]
 	then
+        ../Python/problemgenerator/generate.py "$problempath" 2 16 
+        ../Python/problemgenerator/generate.py "$problempath" 2 32 
+        ../Python/problemgenerator/generate.py "$problempath" 2 48 
 		N=1280
 		for i in $(seq 1 10)
 		do
