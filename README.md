@@ -224,9 +224,21 @@ For this purpose, we implemented three different approaches:
 
 ### Hardware/Software Setup
 
+- **Software:**
+  - _Python_
+    - Python 3.7.3
+    - NumPy 1.19.0
+    - Numba 0.50.1
+    - Intel Python Distribution 2020.2.902
+      - NumPy 1.18.5
+      - Numba 0.49.1
+  - _D_
+    - LDC 1.23 [pre-built package](https://github.com/ldc-developers/ldc/releases)
+    - mir-algorithm 3.9.6
+    - mir-random 2.2.14
+
 - **Hardware:**
   - Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz | CPU max MHz: 4700 | CPU min MHz: 800
-  - RAM: 64GB | Speed: ***<span style="color:red">???</span>*** MHz
   - Kernel: Linux cip1e3 4.19.144-1-cip-amd64 x86_64 (gcc version 8.3.0 (Debian 8.3.0-6))
   - RAM: 64GB | Speed measured with [STREAM](https://github.com/jeffhammond/STREAM):
     ```
@@ -264,19 +276,6 @@ For this purpose, we implemented three different approaches:
     Solution Validates: avg error less than 1.000000e-13 on all three arrays
     -------------------------------------------------------------
     ```
-
-- **Software:**
-  - _Python_
-    - Python 3.7.3
-    - NumPy 1.19.0
-    - Numba 0.50.1
-    - Intel Python Distribution 2020.2.902
-      - NumPy 1.18.5
-      - Numba 0.49.1
-  - _D_
-    - LDC 1.23 [pre-built package](https://github.com/ldc-developers/ldc/releases)
-    - mir-algorithm 3.9.6
-    - mir-random 2.2.14
 
 ### What was measured
 
