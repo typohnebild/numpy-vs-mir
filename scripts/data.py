@@ -83,8 +83,14 @@ def plot_cache_lines(fig):
 
 
 def plot_membandwidth(fig):
-    mem_band = 22945.6 * 1e6  # convert from MB/s to B/s
-    fig.axhline(mem_band / 8)
+    # calculation from there https://www.cs.virginia.edu/stream/ref.html
+    # take scale value and divide by 16 since it produces 1 flops per 24 byte
+    # writen
+    # mem_band = 22490.3 * 1e6  # convert from MB/s to B/s
+    # take triad value and divide by 16 since it produces 1 flops per 24 byte
+    # writen
+    mem_band = 25104.3 * 1e6  # convert from MB/s to B/s
+    fig.axhline(mem_band / 12, color='black', ls=':')
 
 
 def subplots(frames, base_path, column):
