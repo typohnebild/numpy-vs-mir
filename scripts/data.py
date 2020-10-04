@@ -69,6 +69,11 @@ def time(df, label):
     plt.ylabel('time in s')
 
 
+def cycles(df, label):
+    df.groupby('size').median().cycles.plot(label=label, marker='x')
+    plt.ylabel('Number of used MG-Cycels')
+
+
 def plot_cache_lines(fig):
     l1 = 32e3
     l2 = 256e3
@@ -89,7 +94,8 @@ def plot_membandwidth(fig):
     # mem_band = 22490.3 * 1e6  # convert from MB/s to B/s
     # take triad value and divide by 16 since it produces 1 flops per 24 byte
     # writen
-    mem_band = 25104.3 * 4 / 3 * 1e6  # convert Triad * 4/3 (write-allocate) from MB/s to B/s
+    # convert Triad * 4/3 (write-allocate) from MB/s to B/s
+    mem_band = 25104.3 * 4 / 3 * 1e6
     fig.axhline(mem_band / 12, color='black', ls=':')
 
 
@@ -196,6 +202,8 @@ def main():
     plot(frames, flops, base_name, 'Floating Point Operations per second')
 
     plot(frames, time, base_name, 'Time in Seconds')
+
+    # plot(frames, cycles, base_name, 'MG-Cycles till convergence')
 
     if options.groups:
         only_D = [x for x in frames if x[0].startswith("D")]
