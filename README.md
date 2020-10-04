@@ -39,7 +39,7 @@ other languages and if they perform similar or even better than the established
 Python + NumPy combination.
 
 In this sense we want to compare it with the D programming language and
-its library *MIR[^fn0]* and find out to which extend they are comparable and
+its library _MIR[^fn0]_ and find out to which extend they are comparable and
 how the differences in the performance are.
 
 To do so we choose a more complex application from HPC and implement a multigrid solver
@@ -50,7 +50,6 @@ The animation below shows the result of these calculations.
 ![Animation](graphs/heatmap.gif?raw=true)
 
 **<span style="color:red">It comes out that... tbd</span>**
-
 
 ## Related Work
 
@@ -93,7 +92,7 @@ For Ax = b the element wise formula is this:
 x<sup>(k+1)</sup><sub>i</sub> =
 <sup>1</sup>&frasl;<sub>(a<sub>i,i</sub>)</sub>
 (b<sub>i</sub> - &Sigma; <sub>i&lt;j</sub> a <sub>i,j</sub> x<sub>i,j</sub><sup>(k+1)</sup> - &Sigma;
- <sub>i&gt;j</sub> a <sub>i,j</sub> x<sub>i,j</sub><sup>(k)</sup>)
+<sub>i&gt;j</sub> a <sub>i,j</sub> x<sub>i,j</sub><sup>(k)</sup>)
 
 The naive implementation is not good to parallelize since the computation is forced to be sequential
 by construction. This issue is tackled by grouping the grid points into two independent groups.
@@ -114,6 +113,7 @@ During the backtracking, various cycle types can be defined by looping the corre
 Well known cycle types are _V-Cycle_ (&mu; = 1) and _W-Cycle_ (&mu; = 2).
 
 One multigrid cycle looks like the following:
+
 - Pre-Smoothing – reducing high frequency errors using a few iterations of the Gauss–Seidel method.
 - Residual Computation – computing residual error after the smoothing operation(s).
 - Restriction – downsampling the residual error to a coarser grid.
@@ -123,7 +123,6 @@ One multigrid cycle looks like the following:
 
 Performing multiple multigrid cycles will reduce the error of the solution
 approximation significantly. (see [^fn7])
-
 
 ## Implementation
 
@@ -163,6 +162,7 @@ logic of a multigrid cycle and how the correction shall be computed.
 
         return self._postsmooth(F=F, U=U, h=h)
 ```
+
 The class _PoissonCycle_ is a specialization of this abstract _Cycle_. Here, the class specific
 methods like pre- and post-smoothing are implemented. Both smoothing implementations and also
 the solver are based on Gauss-Seidel-Red-Black.
@@ -218,8 +218,11 @@ The efficiency differences of with and without Numba are considered in the
 
 In D we implemented three Gauss-Seidel-Red-Black sweep approaches.
 For this purpose, we implemented three different approaches:
+
 1. Slices: Python like. Uses D Slices and Strides for grouping (Red-Black).
-2. Naive: one for-loop for each dimension. Matrix-Access via multi-dimensional Array.
+2. Naive: one for-loop for each dimension.
+   It is a implementation as it can be found in a standard textbook.
+   Matrix-Access via multi-dimensional Array.
 3. Fields: one for-loop for each dimension. Matrix is flattened. Access via flattened index.
 
 ## Measurements
@@ -227,6 +230,7 @@ For this purpose, we implemented three different approaches:
 ### Hardware/Software Setup
 
 - **Software:**
+
   - _Python_
     - Python 3.7.3
     - NumPy 1.19.0
@@ -240,13 +244,14 @@ For this purpose, we implemented three different approaches:
     - mir-random 2.2.14
 
 - **Hardware:**
-  -   | Name                                    | CPU min | CPU max  |
-      | :--:                                    | :--:    | :--:     |
-      | Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz | 800 MHz | 4700 MHz |
 
-  -  | CPU-Cache | L1d cache | L1i cache | L2 cache | L3 cache |
-     | :--:      | :--:      | :--:      | :--:     | :--:     |
-     | Size      | 32K       | 32K       | 256K     | 12288K   |
+  - |                  Name                   | CPU min | CPU max  |
+    | :-------------------------------------: | :-----: | :------: |
+    | Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz | 800 MHz | 4700 MHz |
+
+  - | CPU-Cache | L1d cache | L1i cache | L2 cache | L3 cache |
+    | :-------: | :-------: | :-------: | :------: | :------: |
+    |   Size    |    32K    |    32K    |   256K   |  12288K  |
   - Kernel: Linux cip1e3 4.19.144-1-cip-amd64 x86_64 (gcc version 8.3.0 (Debian 8.3.0-6))
   - RAM: 64GB | Speed measured with [STREAM](https://github.com/jeffhammond/STREAM):
     ```
@@ -290,8 +295,8 @@ For this purpose, we implemented three different approaches:
 As performance measures we used the execution time and the number of
 floating-point operations (FLOP) per second (FLOP/s).
 
-As benchmarks we used problems in size of 16,32,48,64, 128, 192, .. 1216, 1280, 1408, 1536, ..., 2432,
-2560, 2816, ..., 3840, 4096.
+As benchmarks we used problems in size of
+16,32,48,64, 128, 192, .. 1216, 1280, 1408, 1536, ..., 2432, 2560, 2816, ..., 3840, 4096.
 And solved the with a Multigrid W-cycle with 2 pre- and postsmoothing steps and
 stopped when the problem was solved up to an epsilon of 1e-3.
 For each permutation of the setup option a run was done 3 times.
@@ -318,9 +323,10 @@ Linux tool [_perf_](https://perf.wiki.kernel.org/index.php/Main_Page), which is
 build into the Linux kernel and allows to gather a enormous variety of
 performance counters, if they are implemented by the CPU.
 The CPU we used offered the performance counters
-_scalar_single_, _scalar_double_, _128b_packed_double_, _128b_packed_single_,
-_256b_packed_double_, _256b_packed_single_ for different floating-point operations.
-_Perf_ offers the Metric Group *GFLOPS* for these which counts all this hardware
+_scalar_single_, _scalar_double_, _128b_packed_double_,
+_128b_packed_single_, _256b_packed_double_, _256b_packed_single_
+for different floating-point operations.
+_Perf_ offers the Metric Group _GFLOPS_ for these which counts all this hardware
 events.
 
 Before starting the actual benchmark, there is the need for a startup
@@ -348,33 +354,34 @@ measurement. But it would be necessary to provide a interface, especially for D,
 that it can be used in the benchmarks.
 
 ## Results
-***<span style="color:red">TODO: write some text for each sub-section</span>***
+
+**_<span style="color:red">TODO: write some text for each sub-section</span>_**
 
 ### D Benchmark
 
-| Flop/s | Time |
-|:---:|:---:|
-|![](graphs/cip1e60210D_flops.png?raw=true)| ![](graphs/cip1e60210D_time.png?raw=true)|
+|                   Flop/s                   |                   Time                    |
+| :----------------------------------------: | :---------------------------------------: |
+| ![](graphs/cip1e60210D_flops.png?raw=true) | ![](graphs/cip1e60210D_time.png?raw=true) |
 
 ### Python Benchmark
 
-| Flop/s | Time |
-|:---:|:---:|
-|![](graphs/cip1e60210numba_flops.png?raw=true) | ![](graphs/cip1e60210numba_time.png?raw=true)|
-|![](graphs/cip1e60210nonumba_flops.png?raw=true) | ![](graphs/cip1e60210nonumba_time.png?raw=true)|
+|                      Flop/s                      |                      Time                       |
+| :----------------------------------------------: | :---------------------------------------------: |
+|  ![](graphs/cip1e60210numba_flops.png?raw=true)  |  ![](graphs/cip1e60210numba_time.png?raw=true)  |
+| ![](graphs/cip1e60210nonumba_flops.png?raw=true) | ![](graphs/cip1e60210nonumba_time.png?raw=true) |
 
 ### Benchmarks combined
 
-| Flop/s | Time |
-|:---:|:---:|
-|![](graphs/cip1e60210_flops.png?raw=true) | ![](graphs/cip1e60210_time.png?raw=true)|
+|                  Flop/s                   |                   Time                   |
+| :---------------------------------------: | :--------------------------------------: |
+| ![](graphs/cip1e60210_flops.png?raw=true) | ![](graphs/cip1e60210_time.png?raw=true) |
 
 ![](graphs/cip1e60210_FLOPS_subplots.png?raw=true)
 ![](graphs/cip1e60210_time_subplots.png?raw=true)
 
 ### Table Multigrid-Cycles
 | Problem size|	16|	32|	48|	64|	128|	192|	256|	320|	384|	448|	512|	576|	640|	704|	768|	832|	896|	960|	1024|	1088|	1152|	1216|	1280|	1408|	1536|	1664|	1792|	1920|	2048|	2176|	2304|	2432|	2560|	2816|	3072|	3328|	3584|	3840|	4096|
-| -:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|
+| :-|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|	:-:|
 | Multigird cycles|	17|	19|	21|	22|	25|	26|	27|	28|	29|	30|	30|	31|	31|	32|	32|	32|	33|	33|	33|	33|	34|	34|	34|	34|	35|	35|	36|	36|	36|	36|	37|	37|	37|	37|	38|	38|	39|	39|	39|
 |	# levels |	4|	5|	5|	6|	7|	7|	8|	8|	8|	8|	9|	9|	9|	9|	9|	9|	9|	9|	10|	10|	10|	10|	10|	10|	10|	10|	10|	10|	11|	11|	11|	11|	11|	11|	11|	11|	11|	11|	12|
 
@@ -383,7 +390,8 @@ that it can be used in the benchmarks.
 ***<span style="color:red">TODO</span>***
 
 ## Summary
-***<span style="color:red">TODO</span>***
+
+**_<span style="color:red">TODO</span>_**
 
 Compiled languages are faster?
 
