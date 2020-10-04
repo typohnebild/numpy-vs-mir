@@ -89,7 +89,7 @@ def plot_membandwidth(fig):
     # mem_band = 22490.3 * 1e6  # convert from MB/s to B/s
     # take triad value and divide by 16 since it produces 1 flops per 24 byte
     # writen
-    mem_band = 25104.3 * 1e6  # convert from MB/s to B/s
+    mem_band = 25104.3 * 4 / 3 * 1e6  # convert Triad * 4/3 (write-allocate) from MB/s to B/s
     fig.axhline(mem_band / 12, color='black', ls=':')
 
 
