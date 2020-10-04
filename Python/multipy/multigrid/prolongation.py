@@ -118,24 +118,3 @@ def prolongation(e, fine_shape):
         raise ValueError("prolongation: invalid dimension")
     return w
 
-
-# TODO implement stuff
-def weighted_prolongation(e, fine_shape):
-    # indicator for Dimension
-    alpha = len(e.shape)
-    # initialize result with respect to the wanted shape
-    w = np.zeros(fine_shape)
-
-    # Case: Dimension 1
-    if alpha == 1:
-        raise ValueError("weighted_prolongation: dimension not implemented")
-    # Case: Dimension 2
-    elif alpha == 2:
-        raise ValueError("weighted_prolongation: dimension not implemented")
-    # Case: Dimension 3
-    elif alpha == 3:
-        raise ValueError("weighted_prolongation: dimension not implemented")
-    # Case: Error
-    else:
-        raise ValueError("weighted_prolongation: invalid dimension")
-    return w
