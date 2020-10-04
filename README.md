@@ -238,7 +238,10 @@ For this purpose, we implemented three different approaches:
     - mir-random 2.2.14
 
 - **Hardware:**
-  - Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz | CPU max MHz: 4700 | CPU min MHz: 800
+  -   | Name                                    | CPU min | CPU max  |
+      | :--:                                    | :--:    | :--:     |
+      | Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz | 800 MHz | 4700 MHz |
+
   -  | CPU-Cache | L1d cache | L1i cache | L2 cache | L3 cache |
      | :--:      | :--:      | :--:      | :--:     | :--:     |
      | Size      | 32K       | 32K       | 256K     | 12288K   |
