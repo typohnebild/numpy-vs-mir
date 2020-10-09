@@ -52,18 +52,15 @@ The animation below shows the result of these calculations.
 ## Related Work
 
 There are already some comparisons between D and other competitors, like
-[Kernel Martrix Calculations](https://dlang.org/blog/2020/06/03/a-look-at-chapel-d-and-julia-using-kernel-matrix-calculations/)
-and [MIR Benchmark](https://github.com/tastyminerals/mir_benchmarks) but they compare relatively simple instructions.
+[this](https://dlang.org/blog/2020/06/03/a-look-at-chapel-d-and-julia-using-kernel-matrix-calculations/)
+blog entry from Dr. Chibisi Chima-Okereke which deals with the comparison of D, Chapel and Julia.
+It aims kernel matrix operations like dot products, exponents, Cauchy, Gaussian, Power and some more.
 
 In [MIR Benchmark](https://github.com/tastyminerals/mir_benchmarks), D was compared to Python and
 Julia with respect to simple numerical operations like dot product, multiplication and sorting.
 Similar to our approach, MIR and NumPy was used in those implementations.
 
-[Kernel Martrix Calculations](https://dlang.org/blog/2020/06/03/a-look-at-chapel-d-and-julia-using-kernel-matrix-calculations/)
-deals with the comparison of D, Chapel and Julia. It aims kernel matrix operations
-like dot products, exponents, Cauchy, Gaussian, Power and some more.
-
-Based on the ideas both works, we compare a more complex application, and not
+Both works compare relatively simple instructions. We compare a more complex application, and not
 just individual functions, by implementing a multigrid solver in D and Python
 using MIR and NumPy.
 
