@@ -54,7 +54,7 @@ The animation below shows the result of these calculations.
 There are already some comparisons between D and other competitors, like
 [this](https://dlang.org/blog/2020/06/03/a-look-at-chapel-d-and-julia-using-kernel-matrix-calculations/)
 blog entry from Dr. Chibisi Chima-Okereke which deals with the comparison of D, Chapel and Julia.
-It aims kernel matrix operations like dot products, exponents, Cauchy, Gaussian, Power and some more.
+It aims at kernel matrix operations like dot products, exponents, Cauchy, Gaussian, Power and some more.
 
 In [MIR Benchmark](https://github.com/tastyminerals/mir_benchmarks), D was compared to Python and
 Julia with respect to simple numerical operations like dot product, multiplication and sorting.
