@@ -1,4 +1,4 @@
-# Python vs. D using multigrid
+# Numpy vs. Mir using multigrid
 
 
 ## Content
