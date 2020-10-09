@@ -82,21 +82,39 @@ def plot_cache_lines(fig):
     def cache2size(x):
         return np.sqrt(x / 8)
 
-    fig.axvline(cache2size(l1), color='black', ls='--')
-    fig.axvline(cache2size(l2), color='black', ls='--')
-    fig.axvline(cache2size(l3), color='black', ls='--')
+    fig.axvline(
+        cache2size(l1),
+        color='black',
+        ls='-',
+        label='L1 cache (32K) ',
+        alpha=0.7)
+    fig.axvline(
+        cache2size(l2),
+        color='black',
+        ls='--',
+        label='L2 cache (256K)',
+        alpha=0.7)
+    fig.axvline(
+        cache2size(l3),
+        color='black',
+        ls='-.',
+        label='L3 cache (12288K)',
+        alpha=0.7)
 
 
 def plot_membandwidth(fig):
-    # calculation from there https://www.cs.virginia.edu/stream/ref.html
-    # take scale value and divide by 16 since it produces 1 flops per 24 byte
-    # writen
-    # mem_band = 22490.3 * 1e6  # convert from MB/s to B/s
-    # take triad value and divide by 16 since it produces 1 flops per 24 byte
+    # calculation from there
+    # https://moodle.rrze.uni-erlangen.de/pluginfile.php/16786/mod_resource/content/1/09_06_04-2020-PTfS.pdf
+    # take triad value and divide by 16 since it produces 2 flops per 32 byte
     # writen
     # convert Triad * 4/3 (write-allocate) from MB/s to B/s
-    mem_band = 25104.3 * 4 / 3 * 1e6
-    fig.axhline(mem_band / 12, color='black', ls=':')
+    mem_band = 25104.3 * (4 / 3) * 1e6
+    fig.axhline(
+        mem_band / 16,
+        color='black',
+        ls=':',
+        label='memory bandwidth',
+        alpha=0.7)
 
 
 def subplots(frames, base_path, column):
@@ -145,11 +163,11 @@ def plot(frames, func, base_path, title):
     plt.title(title)
     for name, df in frames:
         func(df, name)
-    plt.legend()
     plt.minorticks_on()
     plt.grid(color='b', linestyle='-', linewidth=0.3, alpha=0.5, which='major')
     plt.grid(color='b', linestyle='-', linewidth=0.1, alpha=0.5, which='minor')
     plot_cache_lines(plt)
+    plt.legend()
 
     plt.savefig(f'{base_path}_{func.__name__}.png', bbox_inches='tight')
 
