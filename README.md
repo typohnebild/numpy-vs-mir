@@ -243,9 +243,9 @@ For this purpose, we implemented three different approaches:
 
 - **Hardware:**
 
-  | Model Name                              | CPU min | CPU max  | CPU-Cache | L1d cache | L1i cache | L2 cache | L3 cache |
-  | :-------------------------------------- | :------ | :------- | :-------- | :-------- | :-------- | :------- | :------- |
-  | Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz | 800 MHz | 4700 MHz | Size      | 32K       | 32K       | 256K     | 12288K   |
+  | Model Name                              | CPU min | CPU max  |  L1d cache | L1i cache | L2 cache | L3 cache |
+  | :-------------------------------------- | :------ | :------- |  :-------- | :-------- | :------- | :------- |
+  | Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz | 800 MHz | 4700 MHz | 32K       | 32K       | 256K     | 12288K   |
 
 - Kernel: Linux cip1e3 4.19.144-1-cip-amd64 x86_64 (gcc version 8.3.0 (Debian 8.3.0-6))
 - RAM: 64GB | Speed measured with [STREAM](https://github.com/jeffhammond/STREAM):
