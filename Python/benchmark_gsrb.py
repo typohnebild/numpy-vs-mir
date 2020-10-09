@@ -16,7 +16,7 @@ def measure(F, U, numba=True):
     GS_RB(
         F,
         U,
-        h=None,
+        h=1,
         max_iter=10_000_000,
         eps=1e-8,
         norm_iter=1000,
