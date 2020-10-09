@@ -402,7 +402,7 @@ tbd
 
 **_<span style="color:red">to be deleted</span>_**
 
-[^fn0]: Mir Software Library [link](https://www.libmir.org/)
+[^0]: Mir Software Library [link](https://www.libmir.org/)
 [^fn1]: Chima-Okereke C., A Look at Chapel, D, and Julia Using Kernel Matrix Calculations [link](https://dlang.org/blog/2020/06/03/a-look-at-chapel-d-and-julia-using-kernel-matrix-calculations/)
 [^fn2]: Mir Benchmark [link](https://github.com/tastyminerals/mir_benchmarks)
 [^fn3]: Optimierung des Red-Black-Gauss-Seidel-Verfahrens auf ausgewählten x86-Prozessoren [link](https://www10.cs.fau.de/publications/theses/2005/Stuermer_SA_2005.pdf)
