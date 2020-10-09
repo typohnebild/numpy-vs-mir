@@ -1,6 +1,7 @@
 # Numpy vs. MIR using multigrid
 
-*TLDR:* implemented a multigrid method in Python and in D and tried to compare them.
+**TLDR:** implemented a multigrid method in Python and in D and tried to compare them.
+
 If you have suggestions for improvements, fell free to open an issue.
 
 ## Content
