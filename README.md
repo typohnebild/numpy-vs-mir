@@ -46,8 +46,9 @@ in both languages. The measurement takes place by solving the Poisson equation i
 solvers.
 The animation below shows the result of these calculations.
 
-![Animation](graphs/heatmap.gif?raw=true)
-
+<p align="center">
+<img src="graphs/heatmap.gif?raw=true">
+</p>
 
 ## Related Work
 
