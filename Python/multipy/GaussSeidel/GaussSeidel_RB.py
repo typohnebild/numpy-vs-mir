@@ -51,8 +51,7 @@ def GS_RB(
     for it in range(1, max_iter + 1):
         # check sometimes if solutions converges
         if it % norm_iter == 0:
-            r = F - apply_poisson(U, h)
-            norm = np.linalg.norm(r)
+            norm = np.linalg.norm(F - apply_poisson(U, h))
             if norm <= eps:
                 logger.debug(
                     f"converged after {it} iterations with {norm:.4} error")
