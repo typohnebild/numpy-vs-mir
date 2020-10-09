@@ -8,6 +8,7 @@ import os.path
 
 import matplotlib.colors as mcolor
 from itertools import cycle
+from copy import copy
 
 plt.rcParams['figure.figsize'] = (16, 9)
 
@@ -27,6 +28,33 @@ NAMES = [
     '256b_packed_single',
     'empty',
 ]
+
+parser = optparse.OptionParser(usage="usage: %prog [options] files...")
+parser.add_option('-o',
+                  action='store',
+                  dest='outpath',
+                  default=DEFAULT_OUT,
+                  help='path to save pictures')
+parser.add_option('-s',
+                  action='store_true',
+                  dest='subs',
+                  default=False,
+                  help='also print a subplot for every single file')
+
+parser.add_option('-g',
+                  action='store_true',
+                  dest='groups',
+                  default=False,
+                  help='also print a plots for every group')
+
+parser.add_option(
+    '--nl',
+    action='store_false',
+    dest='lines',
+    default=True,
+    help='do NOT plot cache size and memory bandwidth in plots')
+
+options, args = parser.parse_args()
 
 
 def read_file(path):
@@ -75,6 +103,8 @@ def cycles(df, label):
 
 
 def plot_cache_lines(fig):
+    if not options.lines:
+        return
     l1 = 32e3
     l2 = 256e3
     l3 = 12288e3
@@ -103,6 +133,8 @@ def plot_cache_lines(fig):
 
 
 def plot_membandwidth(fig):
+    if not options.lines:
+        return
     # calculation from there
     # https://moodle.rrze.uni-erlangen.de/pluginfile.php/16786/mod_resource/content/1/09_06_04-2020-PTfS.pdf
     # take triad value and divide by 16 since it produces 2 flops per 32 byte
@@ -186,25 +218,7 @@ def extract_date_host(path):
 
 
 def main():
-    parser = optparse.OptionParser(usage="usage: %prog [options] files...")
-    parser.add_option('-o',
-                      action='store',
-                      dest='outpath',
-                      default=DEFAULT_OUT,
-                      help='path to save pictures')
-    parser.add_option('-s',
-                      action='store_true',
-                      dest='subs',
-                      default=False,
-                      help='also print a subplot for every single file')
 
-    parser.add_option('-g',
-                      action='store_true',
-                      dest='groups',
-                      default=False,
-                      help='also print a plots for every group')
-
-    options, args = parser.parse_args()
     if not args:
         parser.print_usage()
         exit(1)
