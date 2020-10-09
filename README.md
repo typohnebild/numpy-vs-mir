@@ -1,6 +1,5 @@
 # Python vs. D using multigrid
 
-**<span style="color:red">TODO Update TOC when finished</span>**
 
 ## Content
 
@@ -39,7 +38,7 @@ other languages and if they perform similar or even better than the established
 Python + NumPy combination.
 
 In this sense we want to compare it with the D programming language and
-its library _MIR[^fn0]_ and find out to which extend they are comparable and
+its library _[MIR](https://www.libmir.org/)_ and find out to which extend they are comparable and
 how the differences in the performance are.
 
 To do so we choose a more complex application from HPC and implement a multigrid solver
@@ -49,21 +48,19 @@ The animation below shows the result of these calculations.
 
 ![Animation](graphs/heatmap.gif?raw=true)
 
-**<span style="color:red">It comes out that... tbd</span>**
 
 ## Related Work
 
-There are already some comparisons between D and other competitors, like [^fn1] and [^fn2] but they
-compare relatively simple instructions.
+There are already some comparisons between D and other competitors, like
+[this](https://dlang.org/blog/2020/06/03/a-look-at-chapel-d-and-julia-using-kernel-matrix-calculations/)
+blog entry from Dr. Chibisi Chima-Okereke which deals with the comparison of D, Chapel and Julia.
+It aims at kernel matrix operations like dot products, exponents, Cauchy, Gaussian, Power and some more.
 
-In reference [^fn2], D was compared to Python and Julia with respect to simple numerical operations
-like dot product, multiplication and sorting. Similar to our approach, MIR and NumPy was used in
-those implementations.
+In [MIR Benchmark](https://github.com/tastyminerals/mir_benchmarks), D was compared to Python and
+Julia with respect to simple numerical operations like dot product, multiplication and sorting.
+Similar to our approach, MIR and NumPy was used in those implementations.
 
-Reference [^fn1] deals with the comparison of D, Chapel and Julia. It aims kernel matrix operations
-like dot products, exponents, Cauchy, Gaussian, Power and some more.
-
-Based on the ideas both works, we compare a more complex application, and not
+Both works compare relatively simple instructions. We compare a more complex application, and not
 just individual functions, by implementing a multigrid solver in D and Python
 using MIR and NumPy.
 
@@ -81,7 +78,7 @@ u<sub>i, j+1</sub> + u<sub>i, j-1</sub> - 4 \* u<sub>i, j</sub> ) = f<sub>i,j</s
 
 Where h is distance between the grid points.
 The boundaries are managed by the Dirichlet boundary condition, since no update is performed on the
-boundaries of the Matrices. (see [^fn4])
+boundaries of the Matrices. (see [here](https://www.math.uci.edu/~chenlong/226/FDM.pdf))
 
 ### Red-Black Gauss Seidel
 
@@ -100,7 +97,7 @@ The corresponding method is called **Gauss-Seidel-Red-Black**.
 Therefore, the inside of the grid is divided into so-called red and black dots like a
 chessboard. First calculate updates where the sum of indices is even (red), because they are
 independent. This step can be done in parallel. Afterwards the same is done
-for the cells where the sum of indices is odd (black). (see [^fn3])
+for the cells where the sum of indices is odd (black). (see [here](https://www10.cs.fau.de/publications/theses/2005/Stuermer_SA_2005.pdf))
 
 ### Multigrid
 
@@ -122,7 +119,7 @@ One multigrid cycle looks like the following:
 - Post-Smoothing – reducing further errors using a few iterations of the Gauss–Seidel method.
 
 Performing multiple multigrid cycles will reduce the error of the solution
-approximation significantly. (see [^fn7])
+approximation significantly. (see [here](https://www.math.ust.hk/~mawang/teaching/math532/mgtut.pdf))
 
 ## Implementation
 
@@ -211,9 +208,9 @@ The implementations of the multigrid only differ essentially in syntactical
 matters. The main difference is in the used solver and smoother. More precisely, the difference
 is the Gauss-Seidel method.
 
-In Python, we used _Numba_[^fn6] to speed up the sweep in Gauss-Seidel-Red-Black. The sweep basically
-performs the update step. The sweep implementation uses the _Numpy_ array slices.
-The efficiency differences of with and without Numba are considered in the
+In Python, we used _[Numba](https://numba.pydata.org/)_ to speed up the sweep in
+Gauss-Seidel-Red-Black. The sweep basically performs the update step. The sweep implementation uses
+the _Numpy_ array slices. The efficiency differences of with and without Numba are considered in the
 [Python-Benchmark](#python-benchmark).
 
 In D we implemented three Gauss-Seidel-Red-Black sweep approaches.
@@ -300,9 +297,10 @@ For each permutation of the setup option a run was done 3 times.
 
 In the [Python-Benchmark](#python-benchmark) we distinguish measurements between number of
 threads (1 or 8) and with or without Numba.
-We also experimented with the _Intel Python Distribution_[^fn5] to speed up our implementation. The
-_Intel Python Distribution_ is a combination of many Python-packages like _Numba_ or _Numpy_
-that is optimized for Intel CPUs.
+We also experimented with the
+_[Intel Python Distribution](https://software.intel.com/content/www/us/en/develop/tools/distribution-for-python.html)_
+to speed up our implementation. The _Intel Python Distribution_ is a combination of many
+Python-packages like _Numba_ or _Numpy_ that is optimized for Intel CPUs.
 
 In the [D-Benchmark](#d-benchmark) we differentiate the measurements between the sweep implementations
 _slice_, _naive_ and _field_.
@@ -399,7 +397,9 @@ tbd
 
 ## Footnotes
 
-[^fn0]: Mir Software Library [link](https://www.libmir.org/)
+**_<span style="color:red">to be deleted</span>_**
+
+[^0]: Mir Software Library [link](https://www.libmir.org/)
 [^fn1]: Chima-Okereke C., A Look at Chapel, D, and Julia Using Kernel Matrix Calculations [link](https://dlang.org/blog/2020/06/03/a-look-at-chapel-d-and-julia-using-kernel-matrix-calculations/)
 [^fn2]: Mir Benchmark [link](https://github.com/tastyminerals/mir_benchmarks)
 [^fn3]: Optimierung des Red-Black-Gauss-Seidel-Verfahrens auf ausgewählten x86-Prozessoren [link](https://www10.cs.fau.de/publications/theses/2005/Stuermer_SA_2005.pdf)
