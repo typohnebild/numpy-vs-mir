@@ -1,9 +1,9 @@
-# Python vs. D using multigrid
+# Numpy vs. MIR using multigrid
 
 
 ## Content
 
-- [Python vs. D using multigrid](#python-vs-d-using-multigrid)
+- [Numpy vs. MIR using multigrid](#numpy-vs-mir-using-multigrid)
   - [Content](#content)
   - [Motivation](#motivation)
   - [Related Work](#related-work)
@@ -27,7 +27,6 @@
     - [Table Multigrid-Cycles](#table-multigrid-cycles)
   - [Discussion](#discussion)
   - [Summary](#summary)
-  - [Footnotes](#footnotes)
 
 ## Motivation
 
@@ -351,8 +350,6 @@ that it can be used in the benchmarks.
 
 ## Results
 
-**_<span style="color:red">TODO: write some text for each sub-section</span>_**
-
 ### D Benchmark
 
 |                   Flop/s                   |                   Time                    |
@@ -395,16 +392,3 @@ Compiled languages are faster?
 Everything was fine :smiley:
 
 tbd
-
-## Footnotes
-
-**_<span style="color:red">to be deleted</span>_**
-
-[^0]: Mir Software Library [link](https://www.libmir.org/)
-[^fn1]: Chima-Okereke C., A Look at Chapel, D, and Julia Using Kernel Matrix Calculations [link](https://dlang.org/blog/2020/06/03/a-look-at-chapel-d-and-julia-using-kernel-matrix-calculations/)
-[^fn2]: Mir Benchmark [link](https://github.com/tastyminerals/mir_benchmarks)
-[^fn3]: Optimierung des Red-Black-Gauss-Seidel-Verfahrens auf ausgewählten x86-Prozessoren [link](https://www10.cs.fau.de/publications/theses/2005/Stuermer_SA_2005.pdf)
-[^fn4]: FINITE DIFFERENCE METHODS FOR POISSON EQUATION [link](https://www.math.uci.edu/~chenlong/226/FDM.pdf)
-[^fn5]: Intel distribution for Python [link](https://software.intel.com/content/www/us/en/develop/tools/distribution-for-python.html)
-[^fn6]: Numba [link](https://numba.pydata.org/)
-[^fn7]: Multigrid Tutorial [link](https://www.math.ust.hk/~mawang/teaching/math532/mgtut.pdf)
