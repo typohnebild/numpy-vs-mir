@@ -47,4 +47,4 @@ def wait(options):
     else:
         # if there is no time left over we can not be sure that the measurement
         # is not spoiled with startup so exit
-        exit(13)
+        raise Exception("Warumup took to long")

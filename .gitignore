@@ -16,7 +16,7 @@ venv
 intelpython3
 */multigrid
 */gsrb
-multid-test-multid
+multid-test-multigrid
 multid-test-library
 multid-static
 trace.*
