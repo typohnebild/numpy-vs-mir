@@ -31,7 +31,7 @@ def getopts():
                       help='path to a problem (npy file) that is loaded')
 
     parser.add_option(
-        '-s', action='store', dest='start_time',
+        '-t', action='store', dest='start_time',
         type='int',
         help='unix time stamp of the programm call')
 
