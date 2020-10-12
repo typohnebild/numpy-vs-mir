@@ -17,9 +17,9 @@ generate_problems(){
 	done
 	if [ "$buildconf" = "multigrid" ]
 	then
-        ../Python/problemgenerator/generate.py "$problempath" 2 16 
-        ../Python/problemgenerator/generate.py "$problempath" 2 32 
-        ../Python/problemgenerator/generate.py "$problempath" 2 48 
+        ../Python/problemgenerator/generate.py "$problempath" 2 16
+        ../Python/problemgenerator/generate.py "$problempath" 2 32
+        ../Python/problemgenerator/generate.py "$problempath" 2 48
 		N=1280
 		for i in $(seq 1 10)
 		do
@@ -58,7 +58,7 @@ generate_problems
 oldpwd=$(pwd)
 
 cd ../D || exit 1
-dub build --force --compiler=ldc2 --build=release-nobounds --config="$buildconf"
+dub build --force --compiler=ldc --build=release-nobounds --config="$buildconf"
 for x in "field" "naive" "slice"
 do
 	run_d "./$buildconf -s $x"
