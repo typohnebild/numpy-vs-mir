@@ -213,8 +213,9 @@ def extract_name(path):
     return ' '.join(parts[-4:-1])
 
 
-def extract_date_host(path):
-    return ''.join(os.path.basename(path).split('_')[1:3])
+def extract_picture_name(path):
+    splits = os.path.basename(path).split('_')
+    return splits[-1]
 
 
 def main():
@@ -224,7 +225,7 @@ def main():
         exit(1)
 
     frames = []
-    name = extract_date_host(args[0])
+    name = extract_picture_name(args[0])
     base_name = f'{options.outpath}/{name}'
 
     for arg in args:

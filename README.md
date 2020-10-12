@@ -360,23 +360,23 @@ that it can be used in the benchmarks.
 
 |                   Flop/s                   |                   Time                    |
 | :----------------------------------------: | :---------------------------------------: |
-| ![](graphs/cip1e60210D_flops.png?raw=true) | ![](graphs/cip1e60210D_time.png?raw=true) |
+| ![](graphs/multigridD_flops.png?raw=true) | ![](graphs/multigridD_time.png?raw=true) |
 
 ### Python Benchmark
 
 |                      Flop/s                      |                      Time                       |
 | :----------------------------------------------: | :---------------------------------------------: |
-|  ![](graphs/cip1e60210numba_flops.png?raw=true)  |  ![](graphs/cip1e60210numba_time.png?raw=true)  |
-| ![](graphs/cip1e60210nonumba_flops.png?raw=true) | ![](graphs/cip1e60210nonumba_time.png?raw=true) |
+|  ![](graphs/multigridnumba_flops.png?raw=true)  |  ![](graphs/multigridnumba_time.png?raw=true)  |
+| ![](graphs/multigridnonumba_flops.png?raw=true) | ![](graphs/multigridnonumba_time.png?raw=true) |
 
 ### Benchmarks combined
 
 |                  Flop/s                   |                   Time                   |
 | :---------------------------------------: | :--------------------------------------: |
-| ![](graphs/cip1e60210_flops.png?raw=true) | ![](graphs/cip1e60210_time.png?raw=true) |
+| ![](graphs/multigrid_flops.png?raw=true) | ![](graphs/multigrid_time.png?raw=true) |
 
-![](graphs/cip1e60210_FLOPS_subplots.png?raw=true)
-![](graphs/cip1e60210_time_subplots.png?raw=true)
+![](graphs/multigrid_FLOPS_subplots.png?raw=true)
+![](graphs/multigrid_time_subplots.png?raw=true)
 
 ### Table Multigrid-Cycles
 
