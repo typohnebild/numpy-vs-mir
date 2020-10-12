@@ -32,7 +32,7 @@ benchmark(){
         cmd="perf stat -M GFLOPS -D $delay $cmd"
     fi
 
-    x=$($cmd 2>&1)  || exit 1
+    x=$($cmd -s "$(date +%s)" 2>&1)  || exit 1
     out=$(echo "$x" | head -n 2 | tr '\n' ':' | tr ' ' ':' | awk -F':' '{print $12 ":" $5 ":" $8 ":"}')
 
 

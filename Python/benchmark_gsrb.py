@@ -3,7 +3,7 @@
 import time
 import logging
 
-from startup import DEFAULT_PROBLEM, getopts
+from startup import DEFAULT_PROBLEM, getopts, wait
 
 from multipy.GaussSeidel.GaussSeidel_RB import GS_RB
 from multipy.tools.util import load_problem, timer
@@ -24,14 +24,13 @@ def measure(F, U, numba=True):
 
 
 def main():
-    start = time.perf_counter()
     options = getopts()
 
     U, F = load_problem(options.path)
     # warm up with the smaller problem so it doesnt take to long for big
     # problems
     U1, F1 = load_problem(DEFAULT_PROBLEM)
-    measure(F1, U1, options.numba)
+    GS_RB(F, U, h=1, max_iter=2, eps=1e-8, norm_iter=10, numba=options.numba)
 
     if options.verbose:
         logging.getLogger('multipy.GaussSeidel.GaussSeidel_RB').setLevel(
@@ -40,9 +39,7 @@ def main():
         logging.getLogger('multipy.GaussSeidel.GaussSeidel_RB').setLevel(
             level=logging.INFO)
 
-    rest = options.delay / 1000 - (time.perf_counter() - start)
-    if 0 < rest:
-        time.sleep(rest)
+    wait(options)
 
     start = time.perf_counter()
     measure(F, U, options.numba)

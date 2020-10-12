@@ -3,7 +3,7 @@
 import time
 import logging
 
-from startup import DEFAULT_PROBLEM, getopts
+from startup import DEFAULT_PROBLEM, getopts, wait
 
 from multipy.multigrid import poisson_multigrid
 from multipy.tools.util import load_problem, timer
@@ -17,7 +17,6 @@ def measure(F, U, numba=True):
 
 
 def main():
-    start = time.perf_counter()
     options = getopts()
 
     U, F = load_problem(options.path)
@@ -31,9 +30,7 @@ def main():
     else:
         logging.getLogger('multipy.multigrid').setLevel(level=logging.INFO)
 
-    rest = options.delay / 1000 - (time.perf_counter() - start)
-    if 0 < rest:
-        time.sleep(rest)
+    wait(options)
 
     start = time.perf_counter()
     measure(F, U, options.numba)
