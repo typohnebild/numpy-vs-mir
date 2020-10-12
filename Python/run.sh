@@ -18,7 +18,8 @@ benchmark(){
     #   so the delay is acutally delayed by additionally 500ms.
     # We want to make sure that perf starts measuring when
     #   Python benchmark is in wait state.
-    delay=2000
+    delay=2500
+    delayPerf=2400
 
     export OPENBLAS_NUM_THREADS=$threads
     export MKL_NUM_THREADS=$threads
@@ -29,10 +30,10 @@ benchmark(){
     cmd="./benchmark_${TYPE}.py $([ "$TYPE" = "gsrb" ] && echo "-v" ) -p $problem -d $delay $numba"
     if [ "$perf" = true ]
     then
-        cmd="perf stat -M GFLOPS -D $delay $cmd"
+        cmd="perf stat -M GFLOPS -D $delayPerf $cmd"
     fi
 
-    x=$($cmd -t "$(date +%s)" 2>&1)  || exit 1
+    x=$($cmd -t "$(date +%s%N)" 2>&1)  || exit 1
     out=$(echo "$x" | head -n 2 | tr '\n' ':' | tr ' ' ':' | awk -F':' '{print $12 ":" $5 ":" $8 ":"}')
 
 
