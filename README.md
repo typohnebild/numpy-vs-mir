@@ -223,10 +223,18 @@ In D we implemented three Gauss-Seidel-Red-Black sweep approaches.
 For this purpose, we implemented three different approaches:
 
 1. Slices: Python like. Uses D Slices and Strides for grouping (Red-Black).
-2. Naive: one for-loop for each dimension.
-   It is a implementation as it can be found in a standard textbook.
-   Matrix-Access via multi-dimensional Array.
+2. Naive: one for-loop for each dimension. Matrix-Access via multi-dimensional Array.
 3. Fields: one for-loop for each dimension. Matrix is flattened. Access via flattened index.
+
+The [first one](D/source/multid/gaussseidel/sweep.d#98) is the approach to implement the Gauss-Seidel in a way, that it "looks" syntactical
+like the Python implementation. But since the MIR slices handel striding somehow different as it is
+done in Numpy, it was not that easy.
+
+The [second](D/source/multid/gaussseidel/sweep.d#176), the "naive" version is an implementation as it can be found in an textbook.
+
+And the [third](D/source/multid/gaussseidel/sweep.d#16) one is the most optimized version with accessing the underling D-array of the MIR
+slice directly.
+
 
 ## Measurements
 
