@@ -236,14 +236,6 @@ The [second](D/source/multid/gaussseidel/sweep.d#176), the "naive" version is an
 And the [third](D/source/multid/gaussseidel/sweep.d#16) one is the most optimized version with accessing the underling D-array of the MIR
 slice directly.
 
-We also compared the performance of the solvers in the different version, since the multigrid
-algorithm uses the solver only on relative small problems, we also used problems up to a size of
-100x100.
-
-|                   Flop/s                   |                   Time                    |
-| :----------------------------------------: | :---------------------------------------: |
-| ![](graphs/gsrb_flops.png?raw=true) | ![](graphs/gsrb_time.png?raw=true) |
-
 
 ## Measurements
 
@@ -372,6 +364,22 @@ measurement. But it would be necessary to provide a interface, especially for D,
 that it can be used in the benchmarks.
 
 ## Results
+
+### Solver Benchmark
+
+
+We also compared the performance of the solvers in the different version. Since the multigrid
+algorithm uses the solver only on relative small problems, we also used problems up to a size of
+100x100.
+
+|                   Flop/s                   |                   Time                    |
+| :----------------------------------------: | :---------------------------------------: |
+| ![](graphs/gsrb_flops.png?raw=true) | ![](graphs/gsrb_time.png?raw=true) |
+
+Here is already apparent that the D version with using the fields is the fastest one. While the
+Python implementation using the Intel Distribution without Numba is the slowest one. Furthermore,
+there is no difference in the single- and the multithreaded runs visible. This might be an effect of
+the relative small array size.
 
 ### D Benchmark
 
