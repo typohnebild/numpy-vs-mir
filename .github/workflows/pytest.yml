@@ -14,7 +14,6 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install Python 3
         uses: actions/setup-python@v1
-        working-directory: ./Python
         with:
           python-version: 3.7
       - name: Install dependencies
