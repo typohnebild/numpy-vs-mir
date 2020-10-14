@@ -223,10 +223,19 @@ In D we implemented three Gauss-Seidel-Red-Black sweep approaches.
 For this purpose, we implemented three different approaches:
 
 1. Slices: Python like. Uses D Slices and Strides for grouping (Red-Black).
-2. Naive: one for-loop for each dimension.
-   It is a implementation as it can be found in a standard textbook.
-   Matrix-Access via multi-dimensional Array.
+2. Naive: one for-loop for each dimension. Matrix-Access via multi-dimensional Array.
 3. Fields: one for-loop for each dimension. Matrix is flattened. Access via flattened index.
+
+The [first one](D/source/multid/gaussseidel/sweep.d#L98) is the approach to implement the Gauss-Seidel in a way, that it "looks" syntactical
+like the [Python](Python/multipy/GaussSeidel/GaussSeidel_RB.py#L85) implementation.
+But since the MIR slices handel striding somehow different as it is
+done in Numpy, it was not that easy.
+
+The [second](D/source/multid/gaussseidel/sweep.d#L176), the "naive" version is an implementation as it can be found in an textbook.
+
+And the [third](D/source/multid/gaussseidel/sweep.d#L16) one is the most optimized version with accessing the underling D-array of the MIR
+slice directly.
+
 
 ## Measurements
 
@@ -355,6 +364,22 @@ measurement. But it would be necessary to provide a interface, especially for D,
 that it can be used in the benchmarks.
 
 ## Results
+
+### Solver Benchmark
+
+
+We also compared the performance of the solvers in the different version. Since the multigrid
+algorithm uses the solver only on relative small problems, we also used problems up to a size of
+100x100.
+
+|                   Flop/s                   |                   Time                    |
+| :----------------------------------------: | :---------------------------------------: |
+| ![](graphs/gsrb_flops.png?raw=true) | ![](graphs/gsrb_time.png?raw=true) |
+
+Here is already apparent that the D version with using the fields is the fastest one. While the
+Python implementation using the Intel Distribution without Numba is the slowest one. Furthermore,
+there is no difference in the single- and the multithreaded runs visible. This might be an effect of
+the relative small array size.
 
 ### D Benchmark
 
