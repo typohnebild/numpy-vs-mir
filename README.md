@@ -417,7 +417,7 @@ Stream benchmark is not aware of the write allocated
 (see [here](https://moodle.rrze.uni-erlangen.de/pluginfile.php/16786/mod_resource/content/1/09_06_04-2020-PTfS.pdf) on slide 20)
 and needs to be corrected.
 To to get the FLOP/s this value is then divided by 16, since for every 32 MB that is written
-there are 2 Floting Point operations.
+there are 2 floating point operations.
 
 |                      Flop/s                       |                       Time                       |
 | :-----------------------------------------------: | :----------------------------------------------: |

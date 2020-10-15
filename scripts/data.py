@@ -145,8 +145,8 @@ def plot_cache_lines(fig):
 
 
 def plot_membandwidth(fig):
-    if not options.lines:
-        return
+    # if not options.lines:
+    #     return
     # calculation from there
     # https://moodle.rrze.uni-erlangen.de/pluginfile.php/16786/mod_resource/content/1/09_06_04-2020-PTfS.pdf
     # take triad value and divide by 16 since it produces 2 flops per 32 byte
