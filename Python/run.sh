@@ -33,7 +33,8 @@ benchmark() {
 	fi
 
 	# if it does not work on the first time try it asecond time but then leave
-	x=$($cmd -t "$(date +%s%N)" 2>&1) || x=$($cmd -t "$(date +%s%N)" 2>&1) || exit 1
+	x=$($cmd -t "$(date +%s%N)" 2>&1) || x=$($cmd -t "$(date +%s%N)" 2>&1) || { echo "$x" >>"./error.log" && exit 1; }
+
 	out=$(echo "$x" | head -n 2 | tr '\n' ':' | tr ' ' ':' | awk -F':' '{print $12 ":" $5 ":" $8 ":"}')
 
 	if [ "$perf" = true ]; then
@@ -70,10 +71,9 @@ for problem in "$problempath/"*.npy; do
 
 	for threads in 1 8; do
 		for numba in "-n" " "; do
-
 			for _ in $(seq $reps); do
 				EXTENSION=$([ "$numba" = " " ] && echo "nonumba" || echo "numba")
-				x=$(benchmark $perf $threads "$problem" "$numba") || echo "$x" >>"./error.log" && continue
+				x=$(benchmark $perf $threads "$problem" "$numba") || continue
 				printf "%b:%b:%b\n" "$N" "$dim" "$x" >>"${OUTFILE}_${threads}_${EXTENSION}_${TYPE}"
 			done
 		done
