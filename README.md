@@ -408,12 +408,11 @@ and needs to be corrected.
 To to get the FLOP/s this value is then divided by 16, since for every 32 MB that is written
 there are 2 Floting Point operations.
 
-|                  Flop/s                   |                   Time                   |
-| :---------------------------------------: | :--------------------------------------: |
-| ![](graphs/multigrid_flops.png?raw=true) | ![](graphs/multigrid_time.png?raw=true) |
+| Flop/s                                            | Time                                             |
+| :---------------------------------------:         | :--------------------------------------:         |
+| ![](graphs/multigrid_flops.png?raw=true)          | ![](graphs/multigrid_time.png?raw=true)          |
+| ![](graphs/multigrid_FLOPS_subplots.png?raw=true) | ![](graphs/multigrid_time_subplots.png?raw=true) |
 
-![](graphs/multigrid_FLOPS_subplots.png?raw=true)
-![](graphs/multigrid_time_subplots.png?raw=true)
 
 ### Table Multigrid-Cycles
 
