@@ -375,6 +375,14 @@ The vertical doted lines in the follwing pictures indicate the size of the L1, L
 The place of the vertical line is calculated with &#8730;(Cachesize/8) since we are calculating
 with 64-bit values and the arrays are N &times; N big.
 
+The memory-bandwidth in the figures below is calculated with the value of the Triad-Strem benchmark
+as is was mentioned [here](#hardwaresoftware-setup).
+This value was multiplied by 4/3, since the Stream benchmark is not aware of the write allocated
+(see [here](https://moodle.rrze.uni-erlangen.de/pluginfile.php/16786/mod_resource/content/1/09_06_04-2020-PTfS.pdf) on slide 20)
+and needs to be corrected.
+To to get the FLOP/s this value is then divided by 16, since for every 32 MB that is written
+there are 2 floating point operations.
+
 ### Solver Benchmark
 
 We also compared the performance of the solvers in the different version. Since the multigrid
@@ -411,13 +419,6 @@ by numerical peculiarities of the problem.
 
 ### Benchmarks combined
 
-The memory-bandwidth in the figure below is calculated with the value of the Triad-Strem benchmark
-as is was mentioned [here](#hardwaresoftware-setup). This value was multiplied by 4/3, since the
-Stream benchmark is not aware of the write allocated
-(see [here](https://moodle.rrze.uni-erlangen.de/pluginfile.php/16786/mod_resource/content/1/09_06_04-2020-PTfS.pdf) on slide 20)
-and needs to be corrected.
-To to get the FLOP/s this value is then divided by 16, since for every 32 MB that is written
-there are 2 floating point operations.
 
 |                      Flop/s                       |                       Time                       |
 | :-----------------------------------------------: | :----------------------------------------------: |
