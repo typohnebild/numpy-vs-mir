@@ -232,11 +232,9 @@ is the approach to implement the Gauss-Seidel in a way, that it "looks" syntacti
 like the [Python](Python/multipy/GaussSeidel/GaussSeidel_RB.py#L85) implementation.
 But since the indexing operator of the MIR slices did not support striding,
 it was needed to do with a extra function call.
-
 The [second](D/source/multid/gaussseidel/sweep.d#L176),
 the "naive" version is an implementation as it can be found in an textbook.
-
-And the [third](D/source/multid/gaussseidel/sweep.d#L16) one is the most
+The [third](D/source/multid/gaussseidel/sweep.d#L16) one is the most
 optimized version with accessing the underling D-array of the MIR slice directly.
 In the end it looked like a C/C++ implementation would look like.
 
