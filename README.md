@@ -227,15 +227,18 @@ For this purpose, we implemented three different approaches:
 2. Naive: one for-loop for each dimension. Matrix-Access via multi-dimensional Array.
 3. Fields: one for-loop for each dimension. Matrix is flattened. Access via flattened index.
 
-The [first one](D/source/multid/gaussseidel/sweep.d#L98) is the approach to implement the Gauss-Seidel in a way, that it "looks" syntactical
+The [first one](D/source/multid/gaussseidel/sweep.d#L98)
+is the approach to implement the Gauss-Seidel in a way, that it "looks" syntactical
 like the [Python](Python/multipy/GaussSeidel/GaussSeidel_RB.py#L85) implementation.
-But since the MIR slices handel striding somehow different as it is
-done in NumPy, it was not that easy.
+But since the indexing operator of the MIR slices did not support striding,
+it was needed to do with a extra function call.
 
-The [second](D/source/multid/gaussseidel/sweep.d#L176), the "naive" version is an implementation as it can be found in an textbook.
+The [second](D/source/multid/gaussseidel/sweep.d#L176),
+the "naive" version is an implementation as it can be found in an textbook.
 
-And the [third](D/source/multid/gaussseidel/sweep.d#L16) one is the most optimized version with accessing the underling D-array of the MIR
-slice directly.
+And the [third](D/source/multid/gaussseidel/sweep.d#L16) one is the most
+optimized version with accessing the underling D-array of the MIR slice directly.
+In the end it looked like a C/C++ implementation would look like.
 
 ## Measurements
 
