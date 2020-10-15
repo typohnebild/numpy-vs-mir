@@ -1,13 +1,14 @@
-# Numpy vs. MIR using multigrid
+# NumPy vs. MIR using multigrid
 
-**TLDR:** Implemented a multigrid method in Python and in D and tried to compare them.
+**TLDR:**
+Implemented a multigrid method in Python and in D and tried to compare them.
 Pictures are [here](#results).
 
 If you have suggestions for improvements, fell free to open an issue.
 
 ## Content
 
-- [Numpy vs. MIR using multigrid](#numpy-vs-mir-using-multigrid)
+- [NumPy vs. MIR using multigrid](#numpy-vs-mir-using-multigrid)
   - [Content](#content)
   - [Motivation](#motivation)
   - [Related Work](#related-work)
@@ -50,9 +51,9 @@ solvers.
 The animation below shows the result of these calculations.
 
 <div align="cemter">
-<p align="center">
-<img src="graphs/heatmap.gif?raw=true">
-</p>
+    <p align="center">
+        <img src="graphs/heatmap.gif?raw=true">
+    </p>
 </div>
 
 ## Related Work
@@ -216,7 +217,7 @@ is the Gauss-Seidel method.
 
 In Python, we used _[Numba](https://numba.pydata.org/)_ to speed up the sweep in
 Gauss-Seidel-Red-Black. The sweep basically performs the update step. The sweep implementation uses
-the _Numpy_ array slices. The efficiency differences of with and without Numba are considered in the
+the _NumPy_ array slices. The efficiency differences of with and without Numba are considered in the
 [Python-Benchmark](#python-benchmark).
 
 In D we implemented three Gauss-Seidel-Red-Black sweep approaches.
@@ -229,13 +230,12 @@ For this purpose, we implemented three different approaches:
 The [first one](D/source/multid/gaussseidel/sweep.d#L98) is the approach to implement the Gauss-Seidel in a way, that it "looks" syntactical
 like the [Python](Python/multipy/GaussSeidel/GaussSeidel_RB.py#L85) implementation.
 But since the MIR slices handel striding somehow different as it is
-done in Numpy, it was not that easy.
+done in NumPy, it was not that easy.
 
 The [second](D/source/multid/gaussseidel/sweep.d#L176), the "naive" version is an implementation as it can be found in an textbook.
 
 And the [third](D/source/multid/gaussseidel/sweep.d#L16) one is the most optimized version with accessing the underling D-array of the MIR
 slice directly.
-
 
 ## Measurements
 
@@ -257,12 +257,13 @@ slice directly.
 
 - **Hardware:**
 
-  | Model Name                              | CPU min | CPU max  |  L1d cache | L1i cache | L2 cache | L3 cache |
-  | :-------------------------------------- | :------ | :------- |  :-------- | :-------- | :------- | :------- |
+  | Model Name                              | CPU min | CPU max  | L1d cache | L1i cache | L2 cache | L3 cache |
+  | :-------------------------------------- | :------ | :------- | :-------- | :-------- | :------- | :------- |
   | Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz | 800 MHz | 4700 MHz | 32K       | 32K       | 256K     | 12288K   |
 
 - Kernel: Linux cip1e3 4.19.144-1-cip-amd64 x86_64 (gcc version 8.3.0 (Debian 8.3.0-6))
 - RAM: 64GB | Speed measured with [STREAM](https://github.com/jeffhammond/STREAM):
+
   ```
   -------------------------------------------------------------
   STREAM version $Revision: 5.10 $
@@ -305,20 +306,22 @@ As performance measures we used the execution time and the number of
 floating-point operations (FLOP) per second (FLOP/s).
 
 As benchmarks we used problems in size of
-16, 32, 48, 64, 128, 192, .. 1216, 1280, 1408, 1536, ..., 2432, 2560, 2816, ..., 3840, 4096.
+16, 32, 48, 64, 128, 192, .. 1216, 1280, 1408, 1536, ...,
+2432, 2560, 2816, ..., 3840, 4096.
 And solved the with a Multigrid W-cycle with 2 pre- and postsmoothing steps and
 stopped when the problem was solved up to an epsilon of 1e-3.
 For each permutation of the setup option a run was done 3 times.
 
-In the [Python-Benchmark](#python-benchmark) we distinguish measurements between number of
-threads (1 or 8) and with or without Numba.
+In the [Python-Benchmark](#python-benchmark) we distinguish measurements between
+number of threads (1 or 8) and with or without Numba.
 We also experimented with the
 _[Intel Python Distribution](https://software.intel.com/content/www/us/en/develop/tools/distribution-for-python.html)_
-to speed up our implementation. The _Intel Python Distribution_ is a combination of many
-Python-packages like _Numba_ or _Numpy_ that is optimized for Intel CPUs.
+to speed up our implementation. The _Intel Python Distribution_ is a
+combination of many Python-packages like _Numba_ or _NumPy_ that is
+optimized for Intel CPUs.
 
-In the [D-Benchmark](#d-benchmark) we differentiate the measurements between the sweep implementations
-_slice_, _naive_ and _field_.
+In the [D-Benchmark](#d-benchmark) we differentiate the measurements between
+the sweep implementations _slice_, _naive_ and _field_.
 
 ### How was measured
 
@@ -334,9 +337,9 @@ build into the Linux kernel and allows to gather a enormous variety of
 performance counters, if they are implemented by the CPU.
 The CPU we used offered the performance counters
 _scalar\_single_, _scalar\_double_, _128b\_packed\_double_,
-_128b\_packed\_single\_, _256b\_packed\_double\_, _256b\_packed\_single_
+_128b_packed_single\_,_256b_packed_double\_, \_256b_packed_single_
 for different floating-point operations.
-_Perf_ offers the Metric Group _GFLOPS_ for these which counts all this hardware
+_Perf_offers the Metric Group_GFLOPS_ for these which counts all this hardware
 events.
 
 Before starting the actual benchmark, there is the need for a startup
@@ -357,10 +360,12 @@ This should be no problem, because while waiting there should be no floating-poi
 operation that would spoil our results. The time is measured separately
 on program side.
 
-This is suitable for our kind and complexity of project, but for more advanced projects it
-might be suitable to use tools like [PAPI](http://icl.cs.utk.edu/papi/) or
-[likwid](https://github.com/RRZE-HPC/likwid), which allow a more fine grain
-measurement. But it would be necessary to provide a interface, especially for D,
+This is suitable for our kind and complexity of project, but for more advanced
+projects it might be suitable to use tools like
+[PAPI](http://icl.cs.utk.edu/papi/) or
+[likwid](https://github.com/RRZE-HPC/likwid),
+which allow a more fine grain measurement.
+But it would be necessary to provide a interface, especially for D,
 that it can be used in the benchmarks.
 
 ## Results
@@ -371,30 +376,35 @@ with 64-bit values and the arrays are N &times; N big.
 
 ### Solver Benchmark
 
-
 We also compared the performance of the solvers in the different version. Since the multigrid
 algorithm uses the solver only on relative small problems, we also used problems up to a size of
 100x100.
 
-|                   Flop/s                   |                   Time                    |
-| :----------------------------------------: | :---------------------------------------: |
+|               Flop/s                |                Time                |
+| :---------------------------------: | :--------------------------------: |
 | ![](graphs/gsrb_flops.png?raw=true) | ![](graphs/gsrb_time.png?raw=true) |
 
 Here is already apparent that the D version with using the fields is the fastest one. While the
-Python implementation using the Intel Distribution without Numba is the slowest one. Furthermore,
-there is no difference in the single- and the multithreaded runs visible. This might be an effect of
-the relative small array size.
+Python implementation using the Intel Distribution without Numba is the slowest one.
+Furthermore, there is no difference in the single- and the multithreaded runs visible.
+This might be an effect of the relative small array size.
+The steps downwards that are especially visible in the time plots
+are caused by number of iterations that are need to reach the stop criteria.
+For example, to solve the 60 &times; 60 problem to needed 5000 Gauss-Seidel iterations,
+while 65 &times; 65 problem only need 4000 iterations.
+This effect occurs in all the recorded samples, so it is plausible that it is caused
+by numerical peculiarities of the problem.
 
 ### D Benchmark
 
-|                   Flop/s                   |                   Time                    |
-| :----------------------------------------: | :---------------------------------------: |
+|                  Flop/s                   |                   Time                   |
+| :---------------------------------------: | :--------------------------------------: |
 | ![](graphs/multigridD_flops.png?raw=true) | ![](graphs/multigridD_time.png?raw=true) |
 
 ### Python Benchmark
 
-|                      Flop/s                      |                      Time                       |
-| :----------------------------------------------: | :---------------------------------------------: |
+|                     Flop/s                      |                      Time                      |
+| :---------------------------------------------: | :--------------------------------------------: |
 |  ![](graphs/multigridnumba_flops.png?raw=true)  |  ![](graphs/multigridnumba_time.png?raw=true)  |
 | ![](graphs/multigridnonumba_flops.png?raw=true) | ![](graphs/multigridnonumba_time.png?raw=true) |
 
@@ -408,11 +418,10 @@ and needs to be corrected.
 To to get the FLOP/s this value is then divided by 16, since for every 32 MB that is written
 there are 2 Floting Point operations.
 
-| Flop/s                                            | Time                                             |
-| :---------------------------------------:         | :--------------------------------------:         |
-| ![](graphs/multigrid_flops.png?raw=true)          | ![](graphs/multigrid_time.png?raw=true)          |
+|                      Flop/s                       |                       Time                       |
+| :-----------------------------------------------: | :----------------------------------------------: |
+|     ![](graphs/multigrid_flops.png?raw=true)      |     ![](graphs/multigrid_time.png?raw=true)      |
 | ![](graphs/multigrid_FLOPS_subplots.png?raw=true) | ![](graphs/multigrid_time_subplots.png?raw=true) |
-
 
 ### Table Multigrid-Cycles
 
@@ -434,3 +443,4 @@ Compiled languages are faster?
 Everything was fine :smiley:
 
 tbd
+
