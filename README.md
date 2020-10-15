@@ -333,8 +333,8 @@ Linux tool [_perf_](https://perf.wiki.kernel.org/index.php/Main_Page), which is
 build into the Linux kernel and allows to gather a enormous variety of
 performance counters, if they are implemented by the CPU.
 The CPU we used offered the performance counters
-_scalar_single_, _scalar_double_, _128b_packed_double_,
-_128b_packed_single_, _256b_packed_double_, _256b_packed_single_
+_scalar\_single_, _scalar\_double_, _128b\_packed\_double_,
+_128b\_packed\_single\_, _256b\_packed\_double\_, _256b\_packed\_single_
 for different floating-point operations.
 _Perf_ offers the Metric Group _GFLOPS_ for these which counts all this hardware
 events.
@@ -364,6 +364,10 @@ measurement. But it would be necessary to provide a interface, especially for D,
 that it can be used in the benchmarks.
 
 ## Results
+
+The vertical doted lines in the follwing pictures indicate the size of the L1, L2 and L3 cache.
+The place of the vertical line is calculated with &#8730;(Cachesize/8) since we are calculating
+with 64-bit values and the arrays are N &times; N big.
 
 ### Solver Benchmark
 
@@ -395,6 +399,14 @@ the relative small array size.
 | ![](graphs/multigridnonumba_flops.png?raw=true) | ![](graphs/multigridnonumba_time.png?raw=true) |
 
 ### Benchmarks combined
+
+The memory-bandwidth in the figure below is calculated with the value of the Triad-Strem benchmark
+as is was mentioned [here](#hardwaresoftware-setup). This value was multiplied by 4/3, since the
+Stream benchmark is not aware of the write allocated
+(see [here](https://moodle.rrze.uni-erlangen.de/pluginfile.php/16786/mod_resource/content/1/09_06_04-2020-PTfS.pdf) on slide 20)
+and needs to be corrected.
+To to get the FLOP/s this value is then divided by 16, since for every 32 MB that is written
+there are 2 Floting Point operations.
 
 |                  Flop/s                   |                   Time                   |
 | :---------------------------------------: | :--------------------------------------: |
