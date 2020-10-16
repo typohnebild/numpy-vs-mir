@@ -435,12 +435,11 @@ Intel MKL and the "plain" Python version accelerated with Openblas.
 In the runs where Numba was not used, the Intel version is outperformed by the Openblas version.
 One aspect that possibly plays into it is the relative old NumPy version that is used in the
 Intel Python distribution.
-The steps that are visiable in right figures with some bigger jumps in the used time occure at this
+The steps that are visible in right figures with some bigger jumps in the used time occurs at this
 sizes more cycles are need to reach the stop criteria (see [table](#table-multigrid-cycles) below).
 This bigger jumps in the need time are also visible in the ups and downs in the FLOP/s figures.
 
 ### Benchmarks combined
-
 
 |                      Flop/s                       |                       Time                       |
 | :-----------------------------------------------: | :----------------------------------------------: |
