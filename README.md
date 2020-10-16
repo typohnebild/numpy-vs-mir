@@ -458,9 +458,28 @@ This bigger jumps in the need time are also visible in the ups and downs in the 
 
 **_<span style="color:red">TODO</span>_**
 
+From a performance perspective the MIR implementations are superior to the NumPy implementation.
+The big difference is especially visible in [this figures](#benchmarks-combined).
+For the biggest problem the fastes D version takes around 20 seconds,
+while the Intel version without takes almost 1300 secondes.
+Propably this is mainly caused by the overhead of the Python interpreter
+and might be reduced by more optimization efforts.
+
+From a programming perspective it was a bit easier to use NumPy then MIR.
+This is partially caused that we are somehow biased with the experience we already had in
+the use with Python and NumPy.
+In contrast, we only got to know D and MIR during this project.
+Furthermore, the resources, especially the available documentation, for NumPy is a more exhaustive
+and helpful then the for MIR.
+
 ## Summary
 
 **_<span style="color:red">TODO</span>_**
+
+NumPy is cool.
+MIR is also very cool.
+D is faster.
+
 
 Compiled languages are faster?
 
