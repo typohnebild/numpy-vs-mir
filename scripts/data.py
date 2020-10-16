@@ -1,14 +1,25 @@
 #!/bin/env python
+"""
+A not to well writen script to produces the figures.
 
-import numpy as np
-import pandas as pd
+It uses pandas to read the outfiles
+arguments: outfiles
+options:
+    -o : sets the path were the figures are stored
+    -s : produces the plots for each outfile
+    -g : produces the plots for every group (D, numba, nonumba)
+    --nl : disables the printing of the lines for caches/bandwidth
+"""
+
 import optparse
-import matplotlib.pyplot as plt
 import os.path
+from copy import copy
+from itertools import cycle
 
 import matplotlib.colors as mcolor
-from itertools import cycle
-from copy import copy
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 plt.rcParams['figure.figsize'] = (16, 9)
 
@@ -35,6 +46,7 @@ parser.add_option('-o',
                   dest='outpath',
                   default=DEFAULT_OUT,
                   help='path to save pictures')
+
 parser.add_option('-s',
                   action='store_true',
                   dest='subs',
@@ -83,22 +95,22 @@ def read_file(path):
 
 
 def flops(df, label):
-    df.groupby('size').median().FLOPS.plot(label=label)
+    df.FLOPS.plot(label=label)
     plt.ylabel('FLOP/s')
 
 
 def flop(df, label):
-    df.groupby('size').median().FLOP.plot(label=label)
+    df.FLOP.plot(label=label)
     plt.ylabel('Flop')
 
 
 def time(df, label):
-    df.groupby('size').median().time.plot(label=label)
+    df.time.plot(label=label)
     plt.ylabel('time in s')
 
 
 def cycles(df, label):
-    df.groupby('size').median().cycles.plot(label=label, marker='x')
+    df.cycles.plot(label=label, marker='x')
     plt.ylabel('Number of used MG-Cycels')
 
 
@@ -133,8 +145,8 @@ def plot_cache_lines(fig):
 
 
 def plot_membandwidth(fig):
-    if not options.lines:
-        return
+    # if not options.lines:
+    #     return
     # calculation from there
     # https://moodle.rrze.uni-erlangen.de/pluginfile.php/16786/mod_resource/content/1/09_06_04-2020-PTfS.pdf
     # take triad value and divide by 16 since it produces 2 flops per 32 byte
@@ -164,7 +176,7 @@ def subplots(frames, base_path, column):
     for i, frame in enumerate(frames):
         name, df = frame
         axe = overflow and axes.flat[i] if i < 3 else axes.flat[i + 1]
-        g = df.groupby('size').median()[column]
+        g = df[column]
         g.plot(label=name, ax=axe, marker='o', color=next(color))
         axe.grid(
             color='b',
@@ -230,7 +242,7 @@ def main():
 
     for arg in args:
         _, df = read_file(arg)
-        frames.append((extract_name(arg), df))
+        frames.append((extract_name(arg), df.groupby('size').median()))
 
     plot(frames, flops, base_name, 'Floating Point Operations per second')
 
