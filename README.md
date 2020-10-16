@@ -338,9 +338,9 @@ build into the Linux kernel and allows to gather a enormous variety of
 performance counters, if they are implemented by the CPU.
 The CPU we used offered the performance counters
 _scalar\_single_, _scalar\_double_, _128b\_packed\_double_,
-_128b_packed_single\_,_256b_packed_double\_, \_256b_packed_single_
+_128b\_packed\_single_, _256b\_packed\_double\_, _256b\_packed\_single_
 for different floating-point operations.
-_Perf_offers the Metric Group_GFLOPS_ for these which counts all this hardware
+_Perf_ offers the Metric Group _GFLOPS_ for these which counts all this hardware
 events.
 
 Before starting the actual benchmark, there is the need for a startup
@@ -410,12 +410,31 @@ by numerical peculiarities of the problem.
 | :---------------------------------------: | :--------------------------------------: |
 | ![](graphs/multigridD_flops.png?raw=true) | ![](graphs/multigridD_time.png?raw=true) |
 
+In the right figure we see the FLOP/s achieved during the benchmarks with the different
+D implementations.
+The _field_ version performs best, then follows close the _naive_ version.
+The _slice_ version achieves the lowest FLOP/s, because it is the slowest version, as it can be
+seen in the right figure.
+
+
 ### Python Benchmark
 
 |                     Flop/s                      |                      Time                      |
 | :---------------------------------------------: | :--------------------------------------------: |
 |  ![](graphs/multigridnumba_flops.png?raw=true)  |  ![](graphs/multigridnumba_time.png?raw=true)  |
 | ![](graphs/multigridnonumba_flops.png?raw=true) | ![](graphs/multigridnonumba_time.png?raw=true) |
+
+We split up the figures in different groups, the upper to pictures show the curves for the
+benchmarks that are accelerated with Numba, the lower ones are the that do not use Numba.
+What in all benchmarks stands out, is that there is no big difference visible between
+single and multithreaded version. This might be an effect of the relative small array sizes, but
+we did not actively parallelized the code and only set the allowed threads through the
+environment variables.
+When Numba is used there is no big difference between the Intel Python distribution, that used the
+Intel MKL and the "plain" Python version accelerated with Openblas.
+In the runs where Numba was not used, the Intel version is outperformed by the Openblas version.
+One aspect that possibly plays into it is the relative old NumPy version that is used in the
+Intel Python distribution.
 
 ### Benchmarks combined
 
