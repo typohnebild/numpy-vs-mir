@@ -338,7 +338,7 @@ build into the Linux kernel and allows to gather a enormous variety of
 performance counters, if they are implemented by the CPU.
 The CPU we used offered the performance counters
 _scalar\_single_, _scalar\_double_, _128b\_packed\_double_,
-_128b\_packed\_single_, _256b\_packed\_double\_, _256b\_packed\_single_
+_128b\_packed\_single_, _256b\_packed\_double_, _256b\_packed\_single_
 for different floating-point operations.
 _Perf_ offers the Metric Group _GFLOPS_ for these which counts all this hardware
 events.
@@ -435,6 +435,9 @@ Intel MKL and the "plain" Python version accelerated with Openblas.
 In the runs where Numba was not used, the Intel version is outperformed by the Openblas version.
 One aspect that possibly plays into it is the relative old NumPy version that is used in the
 Intel Python distribution.
+The steps that are visiable in right figures with some bigger jumps in the used time occure at this
+sizes more cycles are need to reach the stop criteria (see [table](#table-multigrid-cycles) below).
+This bigger jumps in the need time are also visible in the ups and downs in the FLOP/s figures.
 
 ### Benchmarks combined
 
