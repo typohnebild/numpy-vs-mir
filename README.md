@@ -4,7 +4,7 @@
 Implemented a multigrid method in Python and in D and tried to compare them.
 Pictures are [here](#results-and-discussion).
 
-If you have suggestions for improvements, fell free to open an issue.
+If you have suggestions for improvements, fell free to open an issue or a pull request.
 
 ## Content
 
@@ -17,14 +17,13 @@ If you have suggestions for improvements, fell free to open an issue.
     - [Red-Black Gauss Seidel](#red-black-gauss-seidel)
     - [Multigrid](#multigrid)
   - [Implementation](#implementation)
-    - [Multigrid](#multigrid-1)
-      - [Python](#python)
-      - [D](#d)
+    - [Python Multigrid](#python-multigrid)
+    - [D Multigrid](#d-multigrid)
     - [Differences in Gauss–Seidel-Red-Black](#differences-in-gaussseidel-red-black)
   - [Measurements](#measurements)
     - [Hardware/Software Setup](#hardwaresoftware-setup)
-    - [What was measured](#what-was-measured)
-    - [How was measured](#how-was-measured)
+    - [What was measured?](#what-was-measured)
+    - [How was measured?](#how-was-measured)
   - [Results and Discussion](#results-and-discussion)
     - [Solver Benchmark](#solver-benchmark)
     - [D Benchmark](#d-benchmark)
@@ -130,9 +129,7 @@ approximation significantly. (see [here](https://www.math.ust.hk/~mawang/teachin
 
 ## Implementation
 
-### Multigrid
-
-#### Python
+### Python Multigrid
 
 The Python multigrid implementation is based on an abstract class _Cycle_. It contains the basic
 logic of a multigrid cycle and how the correction shall be computed.
@@ -171,7 +168,7 @@ The class _PoissonCycle_ is a specialization of this abstract _Cycle_. Here, the
 methods like pre- and post-smoothing are implemented. Both smoothing implementations and also
 the solver are based on Gauss-Seidel-Red-Black.
 
-#### D
+### D Multigrid
 
 In D we did basically the same things as in Python.
 
@@ -301,7 +298,7 @@ In the end it looked like a C/C++ implementation would look like.
   -------------------------------------------------------------
   ```
 
-### What was measured
+### What was measured?
 
 As performance measures we used the execution time and the number of
 floating-point operations (FLOP) per second (FLOP/s).
@@ -309,8 +306,8 @@ floating-point operations (FLOP) per second (FLOP/s).
 As benchmarks we used problems in size of
 16, 32, 48, 64, 128, 192, .. 1216, 1280, 1408, 1536, ...,
 2432, 2560, 2816, ..., 3840, 4096.
-And solved the with a Multigrid W-cycle with 2 pre- and postsmoothing steps and
-stopped when the problem was solved up to an epsilon of 1e-3.
+Each problem was solved with a Multigrid W-cycle with 2 pre- and postsmoothing steps.
+As stop criteria we used an epsilon of 1e-3.
 For each permutation of the setup option a run was done 3 times.
 
 In the [Python-Benchmark](#python-benchmark) we distinguish measurements between
@@ -324,7 +321,7 @@ optimized for Intel CPUs.
 In the [D-Benchmark](#d-benchmark) we differentiate the measurements between
 the sweep implementations _slice_, _naive_ and _field_.
 
-### How was measured
+### How was measured?
 
 To measure the execution time we used the `perf_counter()` from the
 [Python time package](https://docs.python.org/3/library/time.html#time.perf_counter)
@@ -334,7 +331,7 @@ was used.
 
 To count the floating-point operations that occur while execution we used the
 Linux tool [_perf_](https://perf.wiki.kernel.org/index.php/Main_Page), which is
-build into the Linux kernel and allows to gather a enormous variety of
+build into the Linux kernel. It allows to gather a enormous variety of
 performance counters, if they are implemented by the CPU.
 The CPU we used offered the performance counters
 _scalar\_single_, _scalar\_double_, _128b\_packed\_double_,
@@ -353,6 +350,7 @@ To achieve this we used the delay option for _perf_, which delays the start of
 the measurement and also implemented a delay in our programs.
 The delay for the program is meant to be a bit longer than the actual startup
 phase. So the program needs to sleep after the warm-up until the delay is over.
+---REVIEW STOPPED HERE---
 This is especially needed in the Python implementation because the two delays are
 not synchronized since it takes some time till the Python interpreter is
 loaded and starts to run the program. So it is meant that _perf_ starts to
@@ -453,19 +451,28 @@ outperforms the Python implementations. Even the slowest D version (_slice_) is 
 the fastest Python version. This may be due to the optimization level of the D compiler, but also to
 the fact that compiled programs are faster than interpreted ones.
 
-It is also noticeable that the D implementation has no step-like jumps in time like the Python
-implementation. Moreover, its FLOP/s converges with greater problem sizes.
-This leads to the conclusion, that the D implementation is more memory bound than the
-Python implementation which is strongly influenced by the computation time. Another indicator for
-this is the distance of the memory bandwidth to our Python implementations and the D implementations,
-as one can see in the upper left chart.
+Furthermore, we can observe sharp increases in execution time at specific problem size transitions
+for Python implementations like from 448 to 512 or from 1920 to 2048.
+At these transitions, the D implementations remains largely the same.
+This is correlated to the increasing multigrid level as we can see in the
+[table](#table-multigrid-cycles) below.
+This effect can be explained by the problem size on the lowest multigrid level, which is solved by
+the solver.
+For example the problem size of 1920 &times; 1920 has a multigrid level of 11 which results in a
+low-level problem size of 5 &times; 5 while the next greater problem size of 2048 &times; 2048 with
+multigrid level 12 has a low-level problem size of just 3 &times; 3.
+This speeds up the computation of the solve step.
+As one can see, the execution time of the D implementations remain largely the same, which means
+that the speed up compensates for the additional multigrid level overhead.
+In contrast, the speed up is not sufficient to compensate for the overhead in our Python
+implementations, resulting in a considerably growth of execution time.
 
-However, both implementation methods are affected from increasing multigrid levels due to increasing
-problem sizes. This effect can be seen best in the Python Benchmarks without Numba and the _slice_
-version from D.
-While the Python implementations have seen strong increases in execution time, the execution time
-in the D implementations remains largely the same. This effect can also be answered with the
-computation and memory bounds of the corresponding implementations.
+Moreover, the FLOP/s of our D implementations converge with greater problem sizes.
+This leads to the conclusion, that the D implementation is memory bound.
+However, this is not apparent for our Python implementations that have a continuously rising
+serrated pattern.
+These downward peaks can be explained with the above mentioned jumps in the execution time.
+
 
 ### Table Multigrid-Cycles
 
@@ -476,6 +483,9 @@ for the according problem sizes:
 | :--------------- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
 | Multigird cycles | 17  | 19  | 21  | 22  | 25  | 26  | 27  | 28  | 29  | 30  | 30  | 31  | 31  | 32  | 32  | 32  | 33  | 33  |  33  |  33  |  34  |  34  |  34  |  34  |  35  |  35  |  36  |  36  |  36  |  36  |  37  |  37  |  37  |  37  |  38  |  38  |  39  |  39  |  39  |
 | # levels         |  4  |  5  |  5  |  6  |  7  |  7  |  8  |  8  |  8  |  8  |  9  |  9  |  9  |  9  |  9  |  9  |  9  |  9  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  12  |
+
+This table is representative for all benchmarks.
+The number of multigrid cycles and levels are all the same for our multigrid implementations.
 
 ## Summary
 
