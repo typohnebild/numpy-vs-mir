@@ -448,7 +448,21 @@ accordingly.
 |     ![](graphs/multigrid_flops.png?raw=true)      |     ![](graphs/multigrid_time.png?raw=true)      |
 | ![](graphs/multigrid_FLOPS_subplots.png?raw=true) | ![](graphs/multigrid_time_subplots.png?raw=true) |
 
-**_<span style="color:red">TODO</span>_**
+As already seen in the [Solver Benchmark](#solver-benchmark), the multigrid implementation in D
+outperforms the Python implementations. Even the slowest D version (_slice_) is by far faster than then
+the fastest Python version. This may be due to the optimization level of the D compiler, but also to
+the fact that compiled programs are faster than interpreted ones.
+
+It is also noticeable that the D implementation has no step-like jumps like the Python
+implementation. Moreover, its FLOP/s converges with greater problem sizes.
+This leads to the conclusion, that the D implementation is more memory bound than the
+Python implementation which is strongly influenced by the computation time. Another indicator for
+this is the distance of the memory bandwidth to our Python implementations and the D implementations,
+as one can see in the upper left chart.
+
+However, both implementation methods suffer from increasing multigrid levels due to increasing
+problem sizes. This effect can be seen best in the Python Benchmarks without Numba and the _slice_
+version from D.
 
 ### Table Multigrid-Cycles
 
