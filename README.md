@@ -438,7 +438,8 @@ One aspect that possibly plays into is the relatively old NumPy version that is 
 Intel Python distribution.
 The stepwise time curve is caused by more cycles needed to reach the stop criteria for the
 corresponding problem size (see [table](#table-multigrid-cycles) below).
-This bigger jumps in the needed time are also visible in the ups and downs in the FLOP/s figures.
+These larger jumps in the required time also influence the up and down of the FLOP/s values
+accordingly.
 
 ### Benchmarks combined
 
