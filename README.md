@@ -25,7 +25,7 @@ If you have suggestions for improvements, fell free to open an issue.
     - [Hardware/Software Setup](#hardwaresoftware-setup)
     - [What was measured](#what-was-measured)
     - [How was measured](#how-was-measured)
-  - [Results & Discussion](#results--discussion)
+  - [Results and Discussion](#results-and-discussion)
     - [Solver Benchmark](#solver-benchmark)
     - [D Benchmark](#d-benchmark)
     - [Python Benchmark](#python-benchmark)
@@ -369,7 +369,7 @@ which allow a more fine grain measurement.
 But it would be necessary to provide a interface, especially for D,
 that it can be used in the benchmarks.
 
-## Results & Discussion
+## Results and Discussion
 
 The vertical doted lines in the follwing pictures indicate the size of the L1, L2 and L3 cache.
 The place of the vertical line is calculated with &#8730;(Cachesize/8) since we are calculating
@@ -400,7 +400,7 @@ Furthermore, there is no difference in the single- and the multithreaded runs vi
 This might be an effect of the relative small array size.
 The steps downwards that are especially visible in the time plots
 are caused by the number of iterations that are needed to reach the stop criteria.
-For example, to solve the 60 &times; 60 problem needed 5000 Gauss-Seidel iterations,
+For example, solving the 60 &times; 60 problem performs 5000 Gauss-Seidel iterations,
 while 65 &times; 65 problem only needs 4000 iterations.
 This effect occurs in all the recorded samples, so it is plausible that it is caused
 by numerical peculiarities of the problem.
