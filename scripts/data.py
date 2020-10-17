@@ -125,20 +125,26 @@ def plot_cache_lines(fig):
     def cache2size(x):
         return np.sqrt(x / 8)
 
-    fig.axvline(
-        cache2size(l1),
+    l1s = cache2size(l1)
+    l2s = cache2size(l2)
+    l3s = cache2size(l3)
+
+    l1_line = fig.axvline(
+        l1s,
         color='black',
         ls='-',
         label='L1 cache (32K) ',
         alpha=0.7)
+
     fig.axvline(
-        cache2size(l2),
+        l2s,
         color='black',
         ls='--',
         label='L2 cache (256K)',
         alpha=0.7)
+
     fig.axvline(
-        cache2size(l3),
+        l3s,
         color='black',
         ls='-.',
         label='L3 cache (12288K)',
@@ -147,7 +153,9 @@ def plot_cache_lines(fig):
 
 def plot_membandwidth(fig):
     """
-    calculation from there
+    Plot Memory Bandwidth line.
+
+    Calculation from there
     https://moodle.rrze.uni-erlangen.de/pluginfile.php/16786/mod_resource/content/1/09_06_04-2020-PTfS.pdf
     take triad value and divide by 16 since it produces 2 flops per 32 byte
     writen
@@ -161,12 +169,13 @@ def plot_membandwidth(fig):
         alpha=0.7)
     fig.annotate(
         'Memory Bandwidth',
-        xy=(0, mem_band),
+        xy=(10, mem_band),
         xycoords='data',
-        xytext=(0, mem_band + 0.1 * mem_band),
+        xytext=(10, mem_band + 0.15 * mem_band),
         textcoords='data',
-        arrowprops=dict(facecolor='black', shrink=0.5),
-        horizontalalignment='right', verticalalignment='top'
+        arrowprops=dict(facecolor='black', shrink=0.15),
+        horizontalalignment='right',
+        verticalalignment='center'
     )
 
 
