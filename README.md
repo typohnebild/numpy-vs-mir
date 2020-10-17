@@ -2,7 +2,7 @@
 
 **TLDR:**
 Implemented a multigrid method in Python and in D and tried to compare them.
-Pictures are [here](#results).
+Pictures are [here](#results-and-discussion).
 
 If you have suggestions for improvements, fell free to open an issue.
 
@@ -453,16 +453,19 @@ outperforms the Python implementations. Even the slowest D version (_slice_) is 
 the fastest Python version. This may be due to the optimization level of the D compiler, but also to
 the fact that compiled programs are faster than interpreted ones.
 
-It is also noticeable that the D implementation has no step-like jumps like the Python
+It is also noticeable that the D implementation has no step-like jumps in time like the Python
 implementation. Moreover, its FLOP/s converges with greater problem sizes.
 This leads to the conclusion, that the D implementation is more memory bound than the
 Python implementation which is strongly influenced by the computation time. Another indicator for
 this is the distance of the memory bandwidth to our Python implementations and the D implementations,
 as one can see in the upper left chart.
 
-However, both implementation methods suffer from increasing multigrid levels due to increasing
+However, both implementation methods are affected from increasing multigrid levels due to increasing
 problem sizes. This effect can be seen best in the Python Benchmarks without Numba and the _slice_
 version from D.
+While the Python implementations have seen strong increases in execution time, the execution time
+in the D implementations remains largely the same. This effect can also be answered with the
+computation and memory bounds of the corresponding implementations.
 
 ### Table Multigrid-Cycles
 
