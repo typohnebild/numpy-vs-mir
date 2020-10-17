@@ -25,12 +25,12 @@ If you have suggestions for improvements, fell free to open an issue.
     - [Hardware/Software Setup](#hardwaresoftware-setup)
     - [What was measured](#what-was-measured)
     - [How was measured](#how-was-measured)
-  - [Results](#results)
+  - [Results & Discussion](#results--discussion)
+    - [Solver Benchmark](#solver-benchmark)
     - [D Benchmark](#d-benchmark)
     - [Python Benchmark](#python-benchmark)
     - [Benchmarks combined](#benchmarks-combined)
     - [Table Multigrid-Cycles](#table-multigrid-cycles)
-  - [Discussion](#discussion)
   - [Summary](#summary)
 
 ## Motivation
@@ -50,7 +50,7 @@ in both languages. The measurement takes place by solving the Poisson equation i
 solvers.
 The animation below shows the result of these calculations.
 
-<div align="cemter">
+<div align="center">
     <p align="center">
         <img src="graphs/heatmap.gif?raw=true">
     </p>
@@ -369,23 +369,24 @@ which allow a more fine grain measurement.
 But it would be necessary to provide a interface, especially for D,
 that it can be used in the benchmarks.
 
-## Results
+## Results & Discussion
 
 The vertical doted lines in the follwing pictures indicate the size of the L1, L2 and L3 cache.
 The place of the vertical line is calculated with &#8730;(Cachesize/8) since we are calculating
 with 64-bit values and the arrays are N &times; N big.
 
-The memory-bandwidth in the figures below is calculated with the value of the Triad-Strem benchmark
-as is was mentioned [here](#hardwaresoftware-setup).
+The memory-bandwidth (horizontal dotted line) in the figures below is calculated with the value of the
+Triad-Strem benchmark as is was mentioned [here](#hardwaresoftware-setup).
 This value was multiplied by 4/3, since the Stream benchmark is not aware of the write allocated
 (see [here](https://moodle.rrze.uni-erlangen.de/pluginfile.php/16786/mod_resource/content/1/09_06_04-2020-PTfS.pdf) on slide 20)
 and needs to be corrected.
 To to get the FLOP/s this value is then divided by 16, since for every 32 MB that is written
 there are 2 floating point operations.
+(see [here](https://moodle.rrze.uni-erlangen.de/pluginfile.php/16786/mod_resource/content/1/09_06_04-2020-PTfS.pdf) on slide 21)
 
 ### Solver Benchmark
 
-We also compared the performance of the solvers in the different version. Since the multigrid
+We also compared the performance of the solvers in the different versions. Since the multigrid
 algorithm uses the solver only on relative small problems, we also used problems up to a size of
 100x100.
 
@@ -398,9 +399,9 @@ Python implementation using the Intel Distribution without Numba is the slowest 
 Furthermore, there is no difference in the single- and the multithreaded runs visible.
 This might be an effect of the relative small array size.
 The steps downwards that are especially visible in the time plots
-are caused by number of iterations that are need to reach the stop criteria.
-For example, to solve the 60 &times; 60 problem to needed 5000 Gauss-Seidel iterations,
-while 65 &times; 65 problem only need 4000 iterations.
+are caused by the number of iterations that are needed to reach the stop criteria.
+For example, to solve the 60 &times; 60 problem needed 5000 Gauss-Seidel iterations,
+while 65 &times; 65 problem only needs 4000 iterations.
 This effect occurs in all the recorded samples, so it is plausible that it is caused
 by numerical peculiarities of the problem.
 
@@ -413,8 +414,8 @@ by numerical peculiarities of the problem.
 In the right figure we see the FLOP/s achieved during the benchmarks with the different
 D implementations.
 The _field_ version performs best, then follows close the _naive_ version.
-The _slice_ version achieves the lowest FLOP/s, because it is the slowest version, as it can be
-seen in the right figure.
+The _slice_ version achieves the lowest FLOP/s, since it is the most time consuming version,
+as it can be seen in the right figure.
 
 
 ### Python Benchmark
@@ -424,20 +425,20 @@ seen in the right figure.
 |  ![](graphs/multigridnumba_flops.png?raw=true)  |  ![](graphs/multigridnumba_time.png?raw=true)  |
 | ![](graphs/multigridnonumba_flops.png?raw=true) | ![](graphs/multigridnonumba_time.png?raw=true) |
 
-We split up the figures in different groups, the upper to pictures show the curves for the
-benchmarks that are accelerated with Numba, the lower ones are the that do not use Numba.
-What in all benchmarks stands out, is that there is no big difference visible between
-single and multithreaded version. This might be an effect of the relative small array sizes, but
-we did not actively parallelized the code and only set the allowed threads through the
+We split up the figures in different groups, the upper two pictures show the curves for the
+benchmarks that are accelerated with Numba, the lower ones are without Numba.
+What stands out in all benchmarks, is that there is no big difference visible between
+single and multithreaded versions. This might be an effect of the relative small array sizes.
+We did not actively parallelized the code and only set the allowed threads through the
 environment variables.
-When Numba is used there is no big difference between the Intel Python distribution, that used the
+When Numba is used, there is no big difference between the Intel Python distribution, that uses the
 Intel MKL and the "plain" Python version accelerated with Openblas.
 In the runs where Numba was not used, the Intel version is outperformed by the Openblas version.
-One aspect that possibly plays into it is the relative old NumPy version that is used in the
+One aspect that possibly plays into is the relatively old NumPy version that is used in the
 Intel Python distribution.
-The steps that are visible in right figures with some bigger jumps in the used time occurs at this
-sizes more cycles are need to reach the stop criteria (see [table](#table-multigrid-cycles) below).
-This bigger jumps in the need time are also visible in the ups and downs in the FLOP/s figures.
+The stepwise time curve is caused by more cycles needed to reach the stop criteria for the
+corresponding problem size (see [table](#table-multigrid-cycles) below).
+This bigger jumps in the needed time are also visible in the ups and downs in the FLOP/s figures.
 
 ### Benchmarks combined
 
@@ -446,16 +447,19 @@ This bigger jumps in the need time are also visible in the ups and downs in the 
 |     ![](graphs/multigrid_flops.png?raw=true)      |     ![](graphs/multigrid_time.png?raw=true)      |
 | ![](graphs/multigrid_FLOPS_subplots.png?raw=true) | ![](graphs/multigrid_time_subplots.png?raw=true) |
 
+**_<span style="color:red">TODO</span>_**
+
 ### Table Multigrid-Cycles
+
+The following table contains some details about how many multigrid cycles and levels were performed
+for the according problem sizes:
 
 | Problem size     | 16  | 32  | 48  | 64  | 128 | 192 | 256 | 320 | 384 | 448 | 512 | 576 | 640 | 704 | 768 | 832 | 896 | 960 | 1024 | 1088 | 1152 | 1216 | 1280 | 1408 | 1536 | 1664 | 1792 | 1920 | 2048 | 2176 | 2304 | 2432 | 2560 | 2816 | 3072 | 3328 | 3584 | 3840 | 4096 |
 | :--------------- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
 | Multigird cycles | 17  | 19  | 21  | 22  | 25  | 26  | 27  | 28  | 29  | 30  | 30  | 31  | 31  | 32  | 32  | 32  | 33  | 33  |  33  |  33  |  34  |  34  |  34  |  34  |  35  |  35  |  36  |  36  |  36  |  36  |  37  |  37  |  37  |  37  |  38  |  38  |  39  |  39  |  39  |
 | # levels         |  4  |  5  |  5  |  6  |  7  |  7  |  8  |  8  |  8  |  8  |  9  |  9  |  9  |  9  |  9  |  9  |  9  |  9  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  12  |
 
-## Discussion
-
-**_<span style="color:red">TODO</span>_**
+## Summary
 
 From a performance perspective the MIR implementations are superior to the NumPy implementation.
 The big difference is especially visible in [this figures](#benchmarks-combined).
@@ -469,20 +473,4 @@ This is partially caused that we are somehow biased with the experience we alrea
 the use with Python and NumPy.
 In contrast, we only got to know D and MIR during this project.
 Furthermore, the resources, especially the available documentation, for NumPy is a more exhaustive
-and helpful then the for MIR.
-
-## Summary
-
-**_<span style="color:red">TODO</span>_**
-
-NumPy is cool.
-MIR is also very cool.
-D is faster.
-
-
-Compiled languages are faster?
-
-Everything was fine :smiley:
-
-tbd
-
+and helpful then the one for MIR.
