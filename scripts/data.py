@@ -70,6 +70,7 @@ options, args = parser.parse_args()
 
 
 def read_file(path):
+    """ reads the outfiles and extracts the data and infos """
     infos = ''
     with open(path, 'r') as file_des:
         line = file_des.readline()  # read frist line
@@ -145,20 +146,28 @@ def plot_cache_lines(fig):
 
 
 def plot_membandwidth(fig):
-    # if not options.lines:
-    #     return
-    # calculation from there
-    # https://moodle.rrze.uni-erlangen.de/pluginfile.php/16786/mod_resource/content/1/09_06_04-2020-PTfS.pdf
-    # take triad value and divide by 16 since it produces 2 flops per 32 byte
-    # writen
-    # convert Triad * 4/3 (write-allocate) from MB/s to B/s
-    mem_band = 25104.3 * (4 / 3) * 1e6
+    """
+    calculation from there
+    https://moodle.rrze.uni-erlangen.de/pluginfile.php/16786/mod_resource/content/1/09_06_04-2020-PTfS.pdf
+    take triad value and divide by 16 since it produces 2 flops per 32 byte
+    writen
+    convert Triad * 4/3 (write-allocate) from MB/s to B/s
+    """
+    mem_band = (25104.3 * (4 / 3) * 1e6) / 16
     fig.axhline(
-        mem_band / 16,
+        mem_band,
         color='black',
         ls=':',
-        label='memory bandwidth',
         alpha=0.7)
+    fig.annotate(
+        'Memory Bandwidth',
+        xy=(0, mem_band),
+        xycoords='data',
+        xytext=(0, mem_band + 0.1 * mem_band),
+        textcoords='data',
+        arrowprops=dict(facecolor='black', shrink=0.5),
+        horizontalalignment='right', verticalalignment='top'
+    )
 
 
 def subplots(frames, base_path, column):
