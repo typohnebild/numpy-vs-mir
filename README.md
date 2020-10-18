@@ -75,8 +75,8 @@ using MIR and NumPy.
 ### Poisson Equation
 
 The Poisson Equation is -&Delta;u = f and has used in various fields to describe processes like
-fluid dynamics or heatmaps. To solve it numerically, the finte-difference method is usually used for discretization.
-The discrete version on rectangular 2D-Grid looks like this:
+fluid dynamics or heatmaps. To solve it numerically, the finte-difference method is usually used for
+discretization. The discrete version on rectangular 2D-Grid looks like this:
 
 (&nabla;<sup>2</sup>u)<sub>i,j</sub> = <sup>1</sup>&frasl;<sub>(h<sup>2</sup>)</sub>
 (u<sub>i+1,j</sub> + u<sub>i - 1, j</sub> +
@@ -101,19 +101,27 @@ The naive implementation is not good to parallelize since the computation is for
 by construction. This issue is tackled by grouping the grid points into two independent groups.
 The corresponding method is called **Gauss-Seidel-Red-Black**.
 Therefore, the inside of the grid is divided into so-called red and black dots like a
-chessboard. First calculate updates where the sum of indices is even (red), because they are
+chessboard. It first calculates updates where the sum of indices is even (red), because these are
 independent. This step can be done in parallel. Afterwards the same is done
-for the cells where the sum of indices is odd (black). (see [here](https://www10.cs.fau.de/publications/theses/2005/Stuermer_SA_2005.pdf))
+for the cells where the sum of indices is odd (black).
+(see [here](https://www10.cs.fau.de/publications/theses/2005/Stuermer_SA_2005.pdf))
 
 ### Multigrid
 
-The main idea of multigrid is to accelerate the convergence of a fine grid solution approximation
-by recursively accelerating the convergence of a coarser grid solution approximation based on the
-finer grid. This recursion is done until the costs for solving the grid is negligible.
-Since the coarser grid is a representation of the finer grid, the error can be tracked back by
-computing the prolongated residual in each recursion level.
-During the backtracking, various cycle types can be defined by looping the correction &mu; times.
-Well known cycle types are _V-Cycle_ (&mu; = 1) and _W-Cycle_ (&mu; = 2).
+Multigrid is an iterative solver for systems of equations like `Ax = b`.
+The main idea of multigrid is to solve a relaxed version of the problem with less variables instead
+of solving the problem directly.
+The solution for `Ax = b` is approximated by using the residual `r = b - Ax`.
+This residual discribes the distance of the current `x` to the targeted solution and is used to
+calculate the error `e`.
+The error `e` is the solution to the system of equations `Ae = r`.
+It is solved in a restricted version which means that the problem has been transformed to a
+lower resolution.
+The current approximation `x` is then corrected by adding the correction error `e`.
+Since `e` has a lower resolution, it has to be interpolated to a higher resolution first.
+The solving of `Ae = r` can be done recursively until the costs for solving
+are negligible and can be done directly due to the smaller problem size.
+
 
 One multigrid cycle looks like the following:
 
@@ -124,6 +132,8 @@ One multigrid cycle looks like the following:
 - Correction – Adding prolongated coarser grid solution onto the finer grid.
 - Post-Smoothing – reducing further errors using a few iterations of the Gauss–Seidel method.
 
+Various cycle types can be defined by looping the computation of the correction error &mu; times.
+Well known cycle types are _V-Cycle_ (&mu; = 1) and _W-Cycle_ (&mu; = 2).
 Performing multiple multigrid cycles will reduce the error of the solution
 approximation significantly. (see [here](https://www.math.ust.hk/~mawang/teaching/math532/mgtut.pdf))
 
@@ -170,7 +180,7 @@ the solver are based on Gauss-Seidel-Red-Black.
 
 ### D Multigrid
 
-In D we did basically the same things as in Python.
+In D we basically followed the same approach as we did in the Python implementations.
 
 ```D
     Slice!(T*, Dim) compute_correction(Slice!(T*, Dim) r, uint l, T current_h)
@@ -212,13 +222,13 @@ The implementations of the multigrid only differ essentially in syntactical
 matters. The main difference is in the used solver and smoother. More precisely, the difference
 is the Gauss-Seidel method.
 
-In Python, we used _[Numba](https://numba.pydata.org/)_ to speed up the sweep in
-Gauss-Seidel-Red-Black. The sweep basically performs the update step. The sweep implementation uses
-the _NumPy_ array slices. The efficiency differences of with and without Numba are considered in the
+In Python, we used _[Numba](https://numba.pydata.org/)_ to speed up the sweep method in the
+Gauss-Seidel-Red-Black algorithm. It basically performs the update step by using
+the _NumPy_ array slices. The efficiency differences in using Numba or not are considered in the
 [Python-Benchmark](#python-benchmark).
 
-In D we implemented three Gauss-Seidel-Red-Black sweep approaches.
-For this purpose, we implemented three different approaches:
+In order to estimate the fastest approach in D, we implemented three variations of the
+Gauss-Seidel-Red-Black sweep:
 
 1. Slices: Python like. Uses D Slices and Strides for grouping (Red-Black).
 2. Naive: one for-loop for each dimension. Matrix-Access via multi-dimensional Array.
@@ -234,6 +244,9 @@ the "naive" version is an implementation as it can be found in an textbook.
 The [third](D/source/multid/gaussseidel/sweep.d#L16) one is the most
 optimized version with accessing the underling D-array of the MIR slice directly.
 In the end it looked like a C/C++ implementation would look like.
+
+We did not compare these different variations in Python, because this would mean to use high level
+Python for-loops which are not competitive for this application.
 
 ## Measurements
 
@@ -350,22 +363,19 @@ To achieve this we used the delay option for _perf_, which delays the start of
 the measurement and also implemented a delay in our programs.
 The delay for the program is meant to be a bit longer than the actual startup
 phase. So the program needs to sleep after the warm-up until the delay is over.
----REVIEW STOPPED HERE---
-This is especially needed in the Python implementation because the two delays are
-not synchronized since it takes some time till the Python interpreter is
-loaded and starts to run the program. So it is meant that _perf_ starts to
-measure while the benchmark program is waiting till its delay is over.
+It is meant that _perf_ starts to measure while the benchmark program is waiting till its delay
+is over.
 This should be no problem, because while waiting there should be no floating-point
-operation that would spoil our results. The time is measured separately
+operation that would spoil our results. The real execution time is measured separately
 on program side.
 
-This is suitable for our kind and complexity of project, but for more advanced
-projects it might be suitable to use tools like
+This procedure is sufficient for our kind and complexity of project, but for more advanced
+projects it might be more suitable to use tools like
 [PAPI](http://icl.cs.utk.edu/papi/) or
 [likwid](https://github.com/RRZE-HPC/likwid),
 which allow a more fine grain measurement.
-But it would be necessary to provide a interface, especially for D,
-that it can be used in the benchmarks.
+But it would be necessary to provide an interface, especially for D,
+so that it can be used in the benchmarks.
 
 ## Results and Discussion
 
@@ -436,7 +446,7 @@ One aspect that possibly plays into is the relatively old NumPy version that is 
 Intel Python distribution.
 The stepwise time curve is caused by more cycles needed to reach the stop criteria for the
 corresponding problem size (see [table](#table-multigrid-cycles) below).
-These larger jumps in the required time also influence the up and down of the FLOP/s values
+These larger jumps in the required time also influence the ups and downs of the FLOP/s values
 accordingly.
 
 ### Benchmarks combined
@@ -447,13 +457,13 @@ accordingly.
 | ![](graphs/multigrid_FLOPS_subplots.png?raw=true) | ![](graphs/multigrid_time_subplots.png?raw=true) |
 
 As already seen in the [Solver Benchmark](#solver-benchmark), the multigrid implementation in D
-outperforms the Python implementations. Even the slowest D version (_slice_) is by far faster than then
+outperforms the Python implementations. Even the slowest D version (_slice_) is by far faster than
 the fastest Python version. This may be due to the optimization level of the D compiler, but also to
-the fact that compiled programs are faster than interpreted ones.
+the fact that compiled programs tend to be faster than interpreted ones.
 
 Furthermore, we can observe sharp increases in execution time at specific problem size transitions
 for Python implementations like from 448 to 512 or from 1920 to 2048.
-At these transitions, the D implementations remains largely the same.
+At these transitions, the execution time in the D implementations remain largely the same.
 This is correlated to the increasing multigrid level as we can see in the
 [table](#table-multigrid-cycles) below.
 This effect can be explained by the problem size on the lowest multigrid level, which is solved by
@@ -496,9 +506,13 @@ while the Intel version without takes almost 1300 secondes.
 Propably this is mainly caused by the overhead of the Python interpreter
 and might be reduced by more optimization efforts.
 
-From a programming perspective it was a bit easier to use NumPy then MIR.
+From a programming perspective it was a bit easier to use NumPy than MIR.
 This is partially caused that we are somehow biased with the experience we already had in
 the use with Python and NumPy.
 In contrast, we only got to know D and MIR during this project.
 Furthermore, the resources, especially the available documentation, for NumPy is a more exhaustive
 and helpful then the one for MIR.
+However, the D-community in the [D-Forum](https://forum.dlang.org/) were very helpful.
+
+Fazit: who is not affraid of static typed programming languages and is willing to learn a great new
+language is welcome to use D.
