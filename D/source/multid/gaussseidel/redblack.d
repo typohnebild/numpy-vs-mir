@@ -50,15 +50,16 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000, size_t norm_i
     mixin("alias sweep = sweep_" ~ sweeptype ~ ";");
 
     const T h2 = h * h;
+    T norm;
+    size_t it = 1;
 
-    foreach (it; 1 .. max_iter + 1)
+    for (; it <= max_iter; ++it)
     {
         if (it % norm_iter == 0)
         {
-            const auto norm = compute_residual!(T, Dim)(F, U, h).nrmL2;
+            norm = compute_residual!(T, Dim)(F, U, h).nrmL2;
             if (norm <= eps)
             {
-                logf("GS_RB converged after %d iterations with %e error", it, norm);
                 break;
             }
 
@@ -68,6 +69,7 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000, size_t norm_i
         // schwarze Halbiteration
         sweep!(T, Dim, Color.black)(F, U, h2);
     }
+    logf("GS_RB converged after %d iterations with %e error", it - 1, norm);
     return U;
 }
 

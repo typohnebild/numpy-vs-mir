@@ -20,14 +20,13 @@ def GS_RB(
     norm_iter=1000,
     numba=True,
 ):
-    """Implementation of Gauss Seidl Red Black iterations
-    should solve AU = F
+    """
+    Solve AU = F!
     A poisson equation
     @param F n vector
     @param h is distance between grid points | default is 1/N
     @return U n vector
     """
-
     if U is None:
         U = np.zeros_like(F)
     if h is None:
@@ -47,20 +46,23 @@ def GS_RB(
     else:
         raise ValueError("Wrong Shape!!!")
 
+    norm = 0
+    it = 0
     # Anzahl an Gauss-Seidel-Iterationen ausfuehren
-    for it in range(1, max_iter + 1):
+    while it <= max_iter:
         # check sometimes if solutions converges
         if it % norm_iter == 0:
             norm = np.linalg.norm(F - apply_poisson(U, h))
             if norm <= eps:
-                logger.debug(
-                    f"converged after {it} iterations with {norm:.4} error")
                 break
 
         # rote Halbiteration
         sweep(1, F, U, h2)
         # schwarze Halbiteration
         sweep(0, F, U, h2)
+        it += 1
+
+    logger.debug(f"converged after {it-1} iterations with {norm:.4} error")
 
     return U
 
@@ -69,7 +71,7 @@ def GS_RB(
 @jit(nopython=True, fastmath=True)
 def sweep_1D(color, F, U, h2):
     """
-    Does the sweeps
+    Does the sweeps.
     @param color 1 = red 0 for black
     @param h2 is distance between grid points squared
     """
