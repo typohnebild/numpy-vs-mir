@@ -46,8 +46,8 @@ def GS_RB(
     else:
         raise ValueError("Wrong Shape!!!")
 
-    norm = 0
-    it = 0
+    norm = 0.0
+    it = 1
     # Anzahl an Gauss-Seidel-Iterationen ausfuehren
     while it <= max_iter:
         # check sometimes if solutions converges

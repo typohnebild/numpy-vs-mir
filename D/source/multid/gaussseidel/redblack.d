@@ -50,7 +50,7 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000, size_t norm_i
     mixin("alias sweep = sweep_" ~ sweeptype ~ ";");
 
     const T h2 = h * h;
-    T norm;
+    T norm = 0;
     size_t it = 1;
 
     for (; it <= max_iter; ++it)
