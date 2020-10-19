@@ -25,11 +25,11 @@ If you have suggestions for improvements, fell free to open an issue or a pull r
     - [What was measured?](#what-was-measured)
     - [How was measured?](#how-was-measured)
   - [Results and Discussion](#results-and-discussion)
+    - [Table Multigrid-Cycles](#table-multigrid-cycles)
     - [Solver Benchmark](#solver-benchmark)
     - [D Benchmark](#d-benchmark)
     - [Python Benchmark](#python-benchmark)
     - [Benchmarks combined](#benchmarks-combined)
-    - [Table Multigrid-Cycles](#table-multigrid-cycles)
   - [Summary](#summary)
 
 ## Motivation
@@ -392,6 +392,19 @@ To get the FLOP/s this value is then divided by 16, since for every 32 MB that i
 there are 2 floating point operations.
 (see [here](https://moodle.rrze.uni-erlangen.de/pluginfile.php/16786/mod_resource/content/1/09_06_04-2020-PTfS.pdf) on slide 21)
 
+### Table Multigrid-Cycles
+
+The following table contains some details about how many multigrid cycles and levels were performed
+for the according problem sizes:
+
+| Problem size     | 16  | 32  | 48  | 64  | 128 | 192 | 256 | 320 | 384 | 448 | 512 | 576 | 640 | 704 | 768 | 832 | 896 | 960 | 1024 | 1088 | 1152 | 1216 | 1280 | 1408 | 1536 | 1664 | 1792 | 1920 | 2048 | 2176 | 2304 | 2432 | 2560 | 2816 | 3072 | 3328 | 3584 | 3840 | 4096 |
+| :--------------- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+| Multigird cycles | 17  | 19  | 21  | 22  | 25  | 26  | 27  | 28  | 29  | 30  | 30  | 31  | 31  | 32  | 32  | 32  | 33  | 33  |  33  |  33  |  34  |  34  |  34  |  34  |  35  |  35  |  36  |  36  |  36  |  36  |  37  |  37  |  37  |  37  |  38  |  38  |  39  |  39  |  39  |
+| # levels         |  4  |  5  |  5  |  6  |  7  |  7  |  8  |  8  |  8  |  8  |  9  |  9  |  9  |  9  |  9  |  9  |  9  |  9  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  12  |
+
+This table is representative for all benchmarks.
+The number of multigrid cycles and levels are all the same for our multigrid implementations.
+
 ### Solver Benchmark
 
 We also compared the performance of the solvers in the different versions. Since the multigrid
@@ -445,7 +458,7 @@ In the runs where Numba was not used, the Intel version is outperformed by the O
 One aspect that possibly plays into is the relatively old NumPy version that is used in the
 Intel Python distribution.
 The stepwise time curve is caused by more cycles needed to reach the stop criteria for the
-corresponding problem size (see [table](#table-multigrid-cycles) below).
+corresponding problem size (see [table](#table-multigrid-cycles)).
 These larger jumps in the required time also influence the ups and downs of the FLOP/s values
 accordingly.
 
@@ -465,7 +478,7 @@ Furthermore, we can observe sharp increases in execution time at specific proble
 for Python implementations like from 448 to 512 or from 1920 to 2048.
 At these transitions, the execution time in the D implementations remain largely the same.
 This is correlated to the increasing multigrid level as we can see in the
-[table](#table-multigrid-cycles) below.
+[table](#table-multigrid-cycles).
 This effect can be explained by the problem size on the lowest multigrid level, which is solved by
 the solver.
 For example the problem size of 1920 &times; 1920 has a multigrid level of 11 which results in a
@@ -483,19 +496,6 @@ However, this is not apparent for our Python implementations that have a continu
 serrated pattern.
 These downward peaks can be explained with the above mentioned jumps in the execution time.
 
-
-### Table Multigrid-Cycles
-
-The following table contains some details about how many multigrid cycles and levels were performed
-for the according problem sizes:
-
-| Problem size     | 16  | 32  | 48  | 64  | 128 | 192 | 256 | 320 | 384 | 448 | 512 | 576 | 640 | 704 | 768 | 832 | 896 | 960 | 1024 | 1088 | 1152 | 1216 | 1280 | 1408 | 1536 | 1664 | 1792 | 1920 | 2048 | 2176 | 2304 | 2432 | 2560 | 2816 | 3072 | 3328 | 3584 | 3840 | 4096 |
-| :--------------- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
-| Multigird cycles | 17  | 19  | 21  | 22  | 25  | 26  | 27  | 28  | 29  | 30  | 30  | 31  | 31  | 32  | 32  | 32  | 33  | 33  |  33  |  33  |  34  |  34  |  34  |  34  |  35  |  35  |  36  |  36  |  36  |  36  |  37  |  37  |  37  |  37  |  38  |  38  |  39  |  39  |  39  |
-| # levels         |  4  |  5  |  5  |  6  |  7  |  7  |  8  |  8  |  8  |  8  |  9  |  9  |  9  |  9  |  9  |  9  |  9  |  9  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  12  |
-
-This table is representative for all benchmarks.
-The number of multigrid cycles and levels are all the same for our multigrid implementations.
 
 ## Summary
 
