@@ -161,6 +161,8 @@ def plot_membandwidth(fig):
     writen
     convert Triad * 4/3 (write-allocate) from MB/s to B/s
     """
+    if not options.lines:
+        return
     mem_band = (25104.3 * (4 / 3) * 1e6) / 16
     fig.axhline(
         mem_band,
