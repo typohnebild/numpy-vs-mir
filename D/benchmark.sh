@@ -21,7 +21,7 @@ benchmark(){
         cmd="perf stat -M GFLOPS -D $delayPerf $cmd"
     fi
 
-    x=$($cmd 2>&1 -t "$(date +%s)") || exit 1
+    x=$($cmd 2>&1) || exit 1
     out=$(echo "$x" | head -n 2 | tr '\n' ':' | tr ' ' ':' | awk -F':' '{print $23 ":" $11 ":" $14 ":"}')
     if [ "$perf" = true ]
     then
