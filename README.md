@@ -514,5 +514,16 @@ Furthermore, the resources, especially the available documentation, for NumPy is
 and helpful then the one for MIR.
 However, the D-community in the [D-Forum](https://forum.dlang.org/) were very helpful.
 
-Fazit: who is not affraid of static typed programming languages and is willing to learn a great new
-language is welcome to use D.
+At the current point in time NumPy provides much more functionalities and utilities than MIR,
+mainly due to its longer existence and big community.
+But during our project, we did not miss essential features in MIR,
+since the main data structure of MIR, the slices, provide functionalities as the numpy arrays.
+The main difference, from a programmers point of view, lies in the indexing operator
+and how striding is handled.
+
+For convenience there is also the library [_numir_](https://github.com/libmir/numir),
+which provides some NumPy-like helper functions.
+This allows a similar use of MIR compared to NumPy.
+
+For those who are not afraid of statically typed programming languages and want to leave a lot of
+optimization to a compiler, D in combination with MIR seems to be good choice for HPC applications.
