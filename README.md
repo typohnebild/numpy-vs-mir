@@ -512,12 +512,14 @@ the use with Python and NumPy.
 In contrast, we only got to know D and MIR during this project.
 Furthermore, the resources, especially the available documentation, for NumPy is a more exhaustive
 and helpful then the one for MIR.
-However, the D-community in the [D-Forum](https://forum.dlang.org/) were very helpful.
+However, the D-community in the [D-Forum](https://forum.dlang.org/) is very helpful and we got
+quick replies to our questions.
 
 At the current point in time NumPy provides much more functionalities and utilities than MIR,
 mainly due to its longer existence and big community.
 But during our project, we did not miss essential features in MIR,
-since the main data structure of MIR, the slices, provide functionalities as the numpy arrays.
+since the main data structure of MIR, the slices,
+provides similar functionalities as the numpy arrays.
 The main difference, from a programmers point of view, lies in the indexing operator
 and how striding is handled.
 
