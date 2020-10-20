@@ -30,7 +30,7 @@ def main():
     # warm up with the smaller problem so it doesnt take to long for big
     # problems
     U1, F1 = load_problem(DEFAULT_PROBLEM)
-    GS_RB(F, U, h=1, max_iter=2, eps=1e-8, norm_iter=10, numba=options.numba)
+    GS_RB(F1, U1, h=1, max_iter=2, eps=1e-8, norm_iter=10, numba=options.numba)
 
     if options.verbose:
         logging.getLogger('multipy.GaussSeidel.GaussSeidel_RB').setLevel(

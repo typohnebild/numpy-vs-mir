@@ -21,8 +21,8 @@ def GS_RB(
     numba=True,
 ):
     """
-    Solve AU = F!
-    A poisson equation
+    Solve AU = F, the poisson equation.
+
     @param F n vector
     @param h is distance between grid points | default is 1/N
     @return U n vector
@@ -46,8 +46,12 @@ def GS_RB(
     else:
         raise ValueError("Wrong Shape!!!")
 
-    norm = 0.0
-    it = 1
+    # a dirty hack that improves the speed,
+    # maybe it is related that this memory is later reused in the sweeps
+    # for the allocation of the lhs
+    np.zeros_like(U)
+    norm = 2 * eps  # declarate norm so we can output later
+    it = 1  # start with 1 so we do not check norm before first iteration
     # Anzahl an Gauss-Seidel-Iterationen ausfuehren
     while it <= max_iter:
         # check sometimes if solutions converges
@@ -71,14 +75,14 @@ def GS_RB(
 @jit(nopython=True, fastmath=True)
 def sweep_1D(color, F, U, h2):
     """
-    Does the sweeps.
+    Do the sweeps.
+
     @param color 1 = red 0 for black
     @param h2 is distance between grid points squared
     """
     n = F.shape[0]
     U[2 - color:n - 1:2] = (U[1 - color:n - 2:2] + U[3 - color::2] -
                             F[2 - color:n - 1:2] * h2) / (2.0)
-
 
 # ----------------
 
@@ -87,11 +91,11 @@ def sweep_1D(color, F, U, h2):
 @jit(nopython=True, fastmath=True)
 def sweep_2D(color, F, U, h2):
     """
-    Does the sweeps
+    Do the sweeps.
+
     @param color 1 = red 0 for black
     @param h2 is distance between grid points squared
     """
-
     m, n = F.shape
 
     U[1:m - 1:2, 1 + color:n - 1:2] = (
@@ -114,11 +118,11 @@ def sweep_2D(color, F, U, h2):
 @jit(nopython=True, fastmath=True)
 def sweep_3D(color, F, U, h2):
     """
-    Does the sweeps
+    Do the sweeps.
+
     @param color 1 = red 0 for black
     @param h is distance between grid points
     """
-
     m, n, o = F.shape
 
     U[2:m - 1:2, 1:n - 1:2, 1 + color:o - 1:2] = (

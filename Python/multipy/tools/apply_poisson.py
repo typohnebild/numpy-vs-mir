@@ -2,9 +2,9 @@ import numpy as np
 
 
 def apply_poisson(U, h=None):
-    """ applies the 2D poisson operator to U """
+    """Apply the 2D poisson operator to U."""
     alpha = len(U.shape)
-    x = np.zeros_like(U)
+    x = np.empty_like(U)
 
     if h is None:
         h = 1 / U.shape[0]
