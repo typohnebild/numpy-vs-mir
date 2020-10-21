@@ -116,7 +116,7 @@ class PoissonCycle(AbstractCycle):
             h=h,
             max_iter=100_000,
             eps=self.eps,
-            norm_iter=1_000,
+            norm_iter=5,
             numba=self.numba)
 
     def norm(self, U):

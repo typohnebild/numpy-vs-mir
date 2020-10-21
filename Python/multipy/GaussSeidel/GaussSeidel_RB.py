@@ -50,10 +50,11 @@ def GS_RB(
     # maybe it is related that this memory is later reused in the sweeps
     # for the allocation of the lhs
     np.zeros_like(U)
-    norm = 2 * eps  # declarate norm so we can output later
-    it = 1  # start with 1 so we do not check norm before first iteration
+    norm = 0.0  # declarate norm so we can output later
+    it = 0
     # Anzahl an Gauss-Seidel-Iterationen ausfuehren
-    while it <= max_iter:
+    while it < max_iter:
+        it += 1
         # check sometimes if solutions converges
         if it % norm_iter == 0:
             norm = np.linalg.norm(F - apply_poisson(U, h))
@@ -64,9 +65,8 @@ def GS_RB(
         sweep(1, F, U, h2)
         # schwarze Halbiteration
         sweep(0, F, U, h2)
-        it += 1
 
-    logger.debug(f"converged after {it-1} iterations with {norm:.4} error")
+    logger.debug(f"converged after {it} iterations with {norm:.4} error")
 
     return U
 
