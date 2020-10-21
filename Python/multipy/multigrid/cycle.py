@@ -84,9 +84,9 @@ class AbstractCycle:
 
 
 class PoissonCycle(AbstractCycle):
-    def __init__(self, F, v1, v2, mu, l, numba):
+    def __init__(self, F, v1, v2, mu, l, numba, eps=1e-8):
         self.numba = numba
-        super().__init__(F, v1, v2, mu, l)
+        super().__init__(F, v1, v2, mu, l, eps)
 
     def _presmooth(self, F, U, h=None):
         return GS_RB(
