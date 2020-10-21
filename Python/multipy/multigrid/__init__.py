@@ -21,8 +21,8 @@ def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle, numba=True):
        @param mu iterations for recursive call
        @return x n vector
     """
-    cycle = PoissonCycle(F, v1, v2, mu, l, numba)
     eps = 1e-3
+    cycle = PoissonCycle(F, v1, v2, mu, l, numba, eps)
     return multigrid(cycle, U, eps, iter_cycle)
 
 
@@ -49,7 +49,6 @@ def general_multigrid(A, F, U, l, v1, v2, mu, iter_cycle):
        @param mu iterations for recursive call
        @return x n vector
     """
-
-    cycle = GeneralCycle(A, F, v1, v2, mu, l)
     eps = 1e-3
+    cycle = GeneralCycle(A, F, v1, v2, mu, l, eps)
     return multigrid(cycle, U, eps, iter_cycle)
