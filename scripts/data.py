@@ -22,6 +22,7 @@ import numpy as np
 import pandas as pd
 
 plt.rcParams['figure.figsize'] = (16, 9)
+plt.style.use('ggplot')
 
 DEFAULT_FILE = '../Python/results/outfile_cip1e3_1609_intel_1_numba'
 DEFAULT_OUT = '../graphs'
@@ -116,8 +117,9 @@ def cycles(df, label):
 
 
 def plot_cache_lines(fig):
-    if not options.lines:
-        return
+    # if not options.lines:
+    #     return
+
     l1 = 32e3
     l2 = 256e3
     l3 = 12288e3
@@ -132,7 +134,7 @@ def plot_cache_lines(fig):
     l1_line = fig.axvline(
         l1s,
         color='black',
-        ls='-',
+        ls=':',
         label='L1 cache (32K) ',
         alpha=0.7)
 
@@ -197,18 +199,17 @@ def subplots(frames, base_path, column):
         name, df = frame
         axe = overflow and axes.flat[i] if i < 3 else axes.flat[i + 1]
         g = df[column]
-        g.plot(label=name, ax=axe, marker='o', color=next(color))
+        g.plot(label=name, ax=axe, marker='x', color=next(color))
+        # axe.grid(
+        #     color='w',
+        #     linestyle='-',
+        #     linewidth=0.3,
+        #     alpha=0.5,
+        #     which='major')
         axe.grid(
-            color='b',
+            color='w',
             linestyle='-',
-            linewidth=0.3,
-            alpha=0.5,
-            which='major')
-        axe.grid(
-            color='b',
-            linestyle='-',
-            linewidth=0.1,
-            alpha=0.5,
+            linewidth=0.4,
             which='minor')
 
         axe.set(ylabel=column)
@@ -228,10 +229,10 @@ def plot(frames, func, base_path, title):
     for name, df in frames:
         func(df, name)
     plt.minorticks_on()
-    plt.grid(color='b', linestyle='-', linewidth=0.3, alpha=0.5, which='major')
-    plt.grid(color='b', linestyle='-', linewidth=0.1, alpha=0.5, which='minor')
+    # plt.grid(color='w', linestyle='-', linewidth=0.3, alpha=0.5, which='major')
+    plt.grid(color='w', linestyle='-', linewidth=0.4, which='minor')
     plot_cache_lines(plt)
-    plt.legend()
+    plt.legend(ncol=2)
 
     plt.savefig(f'{base_path}_{func.__name__}.png', bbox_inches='tight')
 
