@@ -96,23 +96,23 @@ def read_file(path):
         return infos, df
 
 
-def flops(df, label):
-    df.FLOPS.plot(label=label)
+def flops(df, label, color=None):
+    df.FLOPS.plot(label=label, marker='x', color=color)
     plt.ylabel('FLOP/s')
 
 
-def flop(df, label):
-    df.FLOP.plot(label=label)
+def flop(df, label, color):
+    df.FLOP.plot(label=label, color=color)
     plt.ylabel('Flop')
 
 
-def time(df, label):
-    df.time.plot(label=label)
+def time(df, label, color):
+    df.time.plot(label=label, color=color)
     plt.ylabel('time in s')
 
 
-def cycles(df, label):
-    df.cycles.plot(label=label, marker='x')
+def cycles(df, label, color):
+    df.cycles.plot(label=label, marker='x', color=color)
     plt.ylabel('Number of used MG-Cycels')
 
 
@@ -223,11 +223,12 @@ def subplots(frames, base_path, column):
 
 def plot(frames, func, base_path, title):
     plt.clf()
+    color = cycle(mcolor.TABLEAU_COLORS.keys())
     if func.__name__ == 'flops' and len(frames) == 11:
         plot_membandwidth(plt)
     plt.title(title)
     for name, df in frames:
-        func(df, name)
+        func(df, name, next(color))
     plt.minorticks_on()
     # plt.grid(color='w', linestyle='-', linewidth=0.3, alpha=0.5, which='major')
     plt.grid(color='w', linestyle='-', linewidth=0.4, which='minor')
