@@ -17,7 +17,7 @@ generate_problems() {
 
 	if [ "$buildconf" = "gsrb" ]; then
 		for i in $(seq 1 15); do
-			../Python/problemgenerator/generate.py "$problempath" 2 $(320 + (i * 64))
+            ../Python/problemgenerator/generate.py "$problempath" 2 $((320 + (i * 64)))
 		done
 	fi
 
