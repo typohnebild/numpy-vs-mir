@@ -330,6 +330,8 @@ _[Intel Python Distribution](https://software.intel.com/content/www/us/en/develo
 to speed up our implementation. The _Intel Python Distribution_ is a
 combination of many Python-packages like _Numba_ or _NumPy_ that is
 optimized for Intel CPUs.
+We did not actively parallelized the code and only set the allowed threads through the
+environment variables (see [here](https://gitlab.cs.fau.de/bu49mebu/hpc-project/-/blob/master/Python/run.sh#L24)).
 
 In the [D-Benchmark](#d-benchmark) we differentiate the measurements between
 the sweep implementations _slice_, _naive_ and _field_.
@@ -409,7 +411,12 @@ The number of multigrid cycles and levels are all the same for our multigrid imp
 
 We also compared the performance of the solvers in the different versions. Since the multigrid
 algorithm uses the solver only on relative small problems, we also used problems up to a size of
-100x100.
+1280&times;1280.
+We generated 20 problems from size 5&times;5 to 100&times;100  by increasing the problem size by 5
+in each step.
+From problem size 128&times;128 to 1280&times;1280 we increased the step size to 128.
+The number of iterations was fixed to 5000 for each problem size.
+
 
 |               Flop/s                |                Time                |
 | :---------------------------------: | :--------------------------------: |
@@ -418,13 +425,9 @@ algorithm uses the solver only on relative small problems, we also used problems
 Here is already apparent that the D version with using the fields is the fastest one. While the
 Python implementation using the Intel Distribution without Numba is the slowest one.
 Furthermore, there is no difference in the single- and the multithreaded runs visible.
-This might be an effect of the relative small array size.
-The steps downwards that are especially visible in the time plots
-are caused by the number of iterations that are needed to reach the stop criteria.
-For example, solving the 60 &times; 60 problem performs 5000 Gauss-Seidel iterations,
-while 65 &times; 65 problem only needs 4000 iterations.
-This effect occurs in all the recorded samples, so it is plausible that it is caused
-by numerical peculiarities of the problem.
+This could be an effect of the relatively small array size, so multithreading would not be worthwhile.
+
+<!-- (**TODO: check cache lines**) -->
 
 ### D Benchmark
 
@@ -438,6 +441,14 @@ The _field_ version performs best, then follows close the _naive_ version.
 The _slice_ version achieves the lowest FLOP/s, since it is the most time consuming version,
 as it can be seen in the right figure.
 
+The execution time of the _slice_ implementation has a higher slope for greater problems than
+the _field_ and _naive_ implementations that remain closely. This results in a greater gap of FLOP/s
+for greater problem sizes between the _slice_ the other two implementations.
+
+Furthermore, the execution times for small problem sizes are in the range of several milliseconds.
+As a result, even small changes in the execution time have a great impact to the
+corresponding FLOP/s value.
+
 
 ### Python Benchmark
 
@@ -448,19 +459,20 @@ as it can be seen in the right figure.
 
 We split up the figures in different groups, the upper two pictures show the curves for the
 benchmarks that are accelerated with Numba, the lower ones are without Numba.
-What stands out in all benchmarks, is that there is no big difference visible between
-single and multithreaded versions. This might be an effect of the relative small array sizes.
-We did not actively parallelized the code and only set the allowed threads through the
-environment variables.
+What stands out in all benchmarks just like in the [Solver Benchmark](#solver-benchmark), is that
+there is no big difference visible between single and multithreaded versions.
+This might be an effect of the small problem sizes in the lowest multigrid-level provided to the solver.
 When Numba is used, there is no big difference between the Intel Python distribution, that uses the
 Intel MKL and the "plain" Python version accelerated with Openblas.
-In the runs where Numba was not used, the Intel version is outperformed by the Openblas version.
+In the runs where Numba was not used, the Intel version is slower than the Openblas version,
+but runs more FLOP/s for problem sizes above 1500.
 One aspect that possibly plays into is the relatively old NumPy version that is used in the
 Intel Python distribution.
-The stepwise time curve is caused by more cycles needed to reach the stop criteria for the
+The stepwise time curve is caused by the increased multigrid-level for the
 corresponding problem size (see [table](#table-multigrid-cycles)).
 These larger jumps in the required time also influence the ups and downs of the FLOP/s values
-accordingly.
+accordingly and result in a serrated pattern.
+
 
 ### Benchmarks combined
 
@@ -477,7 +489,7 @@ the fact that compiled programs tend to be faster than interpreted ones.
 Furthermore, we can observe sharp increases in execution time at specific problem size transitions
 for Python implementations like from 448 to 512 or from 1920 to 2048.
 At these transitions, the execution time in the D implementations remain largely the same.
-This is correlated to the increasing multigrid level as we can see in the
+This is correlated to the increasing multigrid level as we can see in this
 [table](#table-multigrid-cycles).
 This effect can be explained by the problem size on the lowest multigrid level, which is solved by
 the solver.
@@ -490,19 +502,17 @@ that the speed up compensates for the additional multigrid level overhead.
 In contrast, the speed up is not sufficient to compensate for the overhead in our Python
 implementations, resulting in a considerably growth of execution time.
 
-Moreover, the FLOP/s of our D implementations converge with greater problem sizes.
-This leads to the conclusion, that the D implementation is memory bound.
-However, this is not apparent for our Python implementations that have a continuously rising
-serrated pattern.
-These downward peaks can be explained with the above mentioned jumps in the execution time.
+Moreover, the FLOP/s of our D implementations increase faster and peak at smaller problem sizes
+than our Python implementations.
+After reaching the peak, the FLOP/s drop slightly and then remain stable.
 
 
 ## Summary
 
 From a performance perspective the MIR implementations are superior to the NumPy implementation.
 The big difference is especially visible in [this figures](#benchmarks-combined).
-For the biggest problem the fastes D version takes around 20 seconds,
-while the Intel version without takes almost 1300 secondes.
+For the biggest problem, the D versions take around 16-44 seconds,
+while the Python versions take from 68 to 110 seconds.
 Propably this is mainly caused by the overhead of the Python interpreter
 and might be reduced by more optimization efforts.
 
@@ -510,7 +520,7 @@ From a programming perspective it was a bit easier to use NumPy than MIR.
 This is partially caused that we are somehow biased with the experience we already had in
 the use with Python and NumPy.
 In contrast, we only got to know D and MIR during this project.
-Furthermore, the resources, especially the available documentation, for NumPy is a more exhaustive
+Furthermore, the resources, especially the available documentation, for NumPy is more exhaustive
 and helpful then the one for MIR.
 However, the D-community in the [D-Forum](https://forum.dlang.org/) is very helpful and we got
 quick replies to our questions.
@@ -523,7 +533,7 @@ provides similar functionalities as the numpy arrays.
 The main difference, from a programmers point of view, lies in the indexing operator
 and how striding is handled.
 
-For convenience there is also the library [_numir_](https://github.com/libmir/numir),
+For convenience, there is also the library [_numir_](https://github.com/libmir/numir),
 which provides some NumPy-like helper functions.
 This allows a similar use of MIR compared to NumPy.
 
