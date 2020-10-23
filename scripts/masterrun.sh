@@ -9,15 +9,15 @@ generate_problems() {
 	[ -e "$problempath" ] || mkdir -p "$problempath"
 	# delete existing problems
 	rm -f "$problempath/"*.npy
-	STEP=$([ "$buildconf" = "multigrid" ] && echo "64" || echo "5")
+	STEP=$([ "$buildconf" = "multigrid" ] && echo "64" || echo "16")
 	# generate new problems
 	for i in $(seq 1 20); do
 		../Python/problemgenerator/generate.py "$problempath" 2 $((i * STEP))
 	done
 
 	if [ "$buildconf" = "gsrb" ]; then
-		for i in $(seq 1 10); do
-			../Python/problemgenerator/generate.py "$problempath" 2 $((i * 128))
+		for i in $(seq 1 15); do
+            ../Python/problemgenerator/generate.py "$problempath" 2 $((320 + (i * 64)))
 		done
 	fi
 
