@@ -22,6 +22,10 @@ import numpy as np
 import pandas as pd
 
 plt.rcParams['figure.figsize'] = (16, 9)
+plt.rcParams['ytick.labelright'] = True
+plt.rcParams['ytick.right'] = True
+plt.rcParams['axes.grid'] = True
+plt.rcParams['axes.grid.which'] = 'both'
 plt.style.use('ggplot')
 
 DEFAULT_FILE = '../Python/results/outfile_cip1e3_1609_intel_1_numba'
@@ -40,6 +44,7 @@ NAMES = [
     '256b_packed_single',
     'empty',
 ]
+
 
 parser = optparse.OptionParser(usage="usage: %prog [options] files...")
 parser.add_option('-o',
@@ -69,6 +74,16 @@ parser.add_option(
 
 options, args = parser.parse_args()
 
+COLORS = cycle([*mcolor.TABLEAU_COLORS.keys(), 'darkcyan'])
+COLOR_TABLE = {}
+
+
+def name_2_color(name):
+    if name not in COLOR_TABLE:
+        COLOR_TABLE[name] = next(COLORS)
+
+    return COLOR_TABLE[name]
+
 
 def read_file(path):
     """ reads the outfiles and extracts the data and infos """
@@ -96,23 +111,41 @@ def read_file(path):
         return infos, df
 
 
-def flops(df, label, color=None):
-    df.FLOPS.plot(label=label, marker='x', color=color)
+def name_2_linestyle(name):
+    if '1' in name:
+        return (0, (1, 1))  # densly dotted
+    if '8' in name:
+        return (0, (5, 10))  # loosley dashed
+    return '-'
+
+
+def flops(df, label=None):
+    df.FLOPS.plot(
+        label=label,
+        marker='x',
+        color=name_2_color(label),
+        ls=name_2_linestyle(label))
     plt.ylabel('FLOP/s')
 
 
-def flop(df, label, color):
-    df.FLOP.plot(label=label, color=color)
+def flop(df, label):
+    df.FLOP.plot(
+        label=label,
+        color=name_2_color(label),
+        ls=name_2_linestyle(label))
     plt.ylabel('Flop')
 
 
-def time(df, label, color):
-    df.time.plot(label=label, color=color)
+def time(df, label):
+    df.time.plot(
+        label=label,
+        color=name_2_color(label),
+        ls=name_2_linestyle(label))
     plt.ylabel('time in s')
 
 
-def cycles(df, label, color):
-    df.cycles.plot(label=label, marker='x', color=color)
+def cycles(df, label):
+    df.cycles.plot(label=label, marker='x', color=name_2_color(label))
     plt.ylabel('Number of used MG-Cycels')
 
 
@@ -184,7 +217,6 @@ def plot_membandwidth(fig):
 
 
 def subplots(frames, base_path, column):
-    color = cycle(mcolor.TABLEAU_COLORS.keys())
     plt.clf()
 
     fig, axes = plt.subplots((len(frames) + 1) // 2,
@@ -199,18 +231,12 @@ def subplots(frames, base_path, column):
         name, df = frame
         axe = overflow and axes.flat[i] if i < 3 else axes.flat[i + 1]
         g = df[column]
-        g.plot(label=name, ax=axe, marker='x', color=next(color))
-        # axe.grid(
-        #     color='w',
-        #     linestyle='-',
-        #     linewidth=0.3,
-        #     alpha=0.5,
-        #     which='major')
-        axe.grid(
-            color='w',
-            linestyle='-',
-            linewidth=0.4,
-            which='minor')
+        g.plot(
+            label=name,
+            ax=axe,
+            marker='x',
+            color=name_2_color(name),
+            ls=name_2_linestyle(name))
 
         axe.set(ylabel=column)
         axe.minorticks_on()
@@ -223,15 +249,12 @@ def subplots(frames, base_path, column):
 
 def plot(frames, func, base_path, title):
     plt.clf()
-    color = cycle(mcolor.TABLEAU_COLORS.keys())
     if func.__name__ == 'flops' and len(frames) == 11:
         plot_membandwidth(plt)
     plt.title(title)
     for name, df in frames:
-        func(df, name, next(color))
+        func(df, name)
     plt.minorticks_on()
-    # plt.grid(color='w', linestyle='-', linewidth=0.3, alpha=0.5, which='major')
-    plt.grid(color='w', linestyle='-', linewidth=0.4, which='minor')
     plot_cache_lines(plt)
     plt.legend(ncol=2)
 
