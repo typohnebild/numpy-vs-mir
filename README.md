@@ -434,6 +434,12 @@ The L2 and L3 cache limit has no relevant impact.
 In contrast, the Python implementations without Numba show no response to all cache limits.
 This may be a result of the missing optimization without Numba.
 
+Between problem size 320 and 384 with the Python implementations without Numba, the FLOP/s of the
+Intel environment overtake the Openblas environment.
+This seems to be due to the optimizations in the Intel environment, which are only
+effective above this limit.
+However, both measurements without Numba perform very poorly.
+
 
 ### D Benchmark
 
