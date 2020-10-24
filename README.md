@@ -411,10 +411,10 @@ The number of multigrid cycles and levels are all the same for our multigrid imp
 
 We also compared the performance of the solvers in the different versions. Since the multigrid
 algorithm uses the solver only on relative small problems, we also used problems up to a size of
-1280&times;1280.
-We generated 20 problems from size 5&times;5 to 100&times;100  by increasing the problem size by 5
-in each step.
-From problem size 128&times;128 to 1280&times;1280 we increased the step size to 128.
+1280 &times; 1280.
+We generated 20 problems from size 16 &times; 16 to 320 &times; 320 by increasing the problem size
+by 16 in each step.
+From problem size 384 &times; 384 to 1280 &times; 1280 we increased the step size to 64.
 The number of iterations was fixed to 5000 for each problem size.
 
 
@@ -427,7 +427,13 @@ Python implementation using the Intel Distribution without Numba is the slowest 
 Furthermore, there is no difference in the single- and the multithreaded runs visible.
 This could be an effect of the relatively small array size, so multithreading would not be worthwhile.
 
-<!-- (**TODO: check cache lines**) -->
+It is noticeable here that in the D implementations as well as in the Python implementations with
+Numba from the L1 cache limit on, the FLOP/s gradient flattens strongly and sometimes even becomes
+negative.
+The L2 and L3 cache limit has no relevant impact.
+In contrast, the Python implementations without Numba show no response to all cache limits.
+This may be a result of the missing optimization without Numba.
+
 
 ### D Benchmark
 
