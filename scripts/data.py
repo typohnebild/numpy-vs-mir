@@ -158,7 +158,7 @@ def plot_cache_lines(fig):
     l3 = 12288e3
 
     def cache2size(x):
-        return np.sqrt(x / 8)
+        return np.sqrt((x/1) / 8)
 
     l1s = cache2size(l1)
     l2s = cache2size(l2)
