@@ -74,7 +74,7 @@ using MIR and NumPy.
 
 ### Poisson Equation
 
-The Poisson Equation is `-&Delta;u = f` and is used in various fields to describe processes like
+The Poisson Equation is -&Delta;u = f and is used in various fields to describe processes like
 fluid dynamics or heatmaps. To solve it numerically, the finte-difference method is usually applied
 for discretization. The discrete version on rectangular 2D-Grid looks like this:
 
