@@ -431,18 +431,22 @@ Python implementation using the Intel Distribution without Numba is the slowest 
 Furthermore, there is no difference in the single- and the multithreaded runs visible.
 This could be an effect of the relatively small array size, so multithreading would not be worthwhile.
 
-It is noticeable here that in the D implementations as well as in the Python implementations with
-Numba from the L1 cache limit on, the FLOP/s gradient flattens strongly and sometimes even becomes
-negative.
-The L2 and L3 cache limit has no relevant impact.
-In contrast, the Python implementations without Numba show no response to all cache limits.
-This may be a result of the missing optimization without Numba.
+Here it is noticeable that for all implementations - except Python without Numba - the FLOP/s increase
+sharply before the L1 cache limit.
+Between the L1 and L2 cache lines the graphs stop rising that much.
+Up to the L3 cache line and beyond, the graphs start to decrease slightly and level out.
+In contrast, Python implementations without Numba show no response to all cache limits.
+This may be a consequence of the missing optimization without Numba.
 
-Between problem size 320 and 384 with the Python implementations without Numba, the FLOP/s of the
-Intel environment overtake the Openblas environment.
-This seems to be due to the optimizations in the Intel environment, which are only
-effective above this limit.
-However, both measurements without Numba perform very poorly.
+All setups that are using Numba take almost the same time for the corresponding problem sizes.
+So the FLOP/s graphs for these setups look verry similar and close.
+Without Numba, the runs using the Intel environment are below the OpenBlas environment FLOP/s on
+smaller problem sizes but they soar and overtake OpenBlas between problem size 320 and 384.
+Until problem size 576, the distance of Intel and OpenBlas is remarkably, then it shrinks.
+Therefore, using the Intel environment without Numba is not appropriate especially for small problem
+sizes.
+However, both runs without Numba perform very poorly.
+For big problems, the Python runs can be grouped by applying and not applying the Numba `jit`.
 
 
 ### D Benchmark
