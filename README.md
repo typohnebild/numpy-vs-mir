@@ -1,10 +1,10 @@
 # NumPy vs. MIR using multigrid
 
 **TLDR:**
-Implemented a multigrid method in Python and in D and tried to compare them.
+Comparison of the implementations of a multigrid method in Python and in D.
 Pictures are [here](#results-and-discussion).
 
-If you have suggestions for improvements, fell free to open an issue or a pull request.
+If you have suggestions for improvements, feel free to open an issue or a pull request.
 
 ## Content
 
@@ -62,9 +62,9 @@ There are already some comparisons between D and other competitors, like
 blog entry from Dr. Chibisi Chima-Okereke which deals with the comparison of D, Chapel and Julia.
 It aims at kernel matrix operations like dot products, exponents, Cauchy, Gaussian, Power and some more.
 
-In [MIR Benchmark](https://github.com/tastyminerals/mir_benchmarks), D was compared to Python and
+In [MIR Benchmark](https://github.com/tastyminerals/mir_benchmarks), D is compared to Python and
 Julia with respect to simple numerical operations like dot product, multiplication and sorting.
-Similar to our approach, MIR and NumPy was used in those implementations.
+Similar to our approach, MIR and NumPy is used in those implementations.
 
 Both works compare relatively simple instructions. We compare a more complex application, and not
 just individual functions, by implementing a multigrid solver in D and Python
@@ -74,23 +74,23 @@ using MIR and NumPy.
 
 ### Poisson Equation
 
-The Poisson Equation is -&Delta;u = f and has used in various fields to describe processes like
-fluid dynamics or heatmaps. To solve it numerically, the finte-difference method is usually used for
-discretization. The discrete version on rectangular 2D-Grid looks like this:
+The Poisson Equation is `-&Delta;u = f` and is used in various fields to describe processes like
+fluid dynamics or heatmaps. To solve it numerically, the finte-difference method is usually applied
+for discretization. The discrete version on rectangular 2D-Grid looks like this:
 
 (&nabla;<sup>2</sup>u)<sub>i,j</sub> = <sup>1</sup>&frasl;<sub>(h<sup>2</sup>)</sub>
 (u<sub>i+1,j</sub> + u<sub>i - 1, j</sub> +
 u<sub>i, j+1</sub> + u<sub>i, j-1</sub> - 4 \* u<sub>i, j</sub> ) = f<sub>i,j</sub>
 
-Where h is distance between the grid points.
-The boundaries are managed by the Dirichlet boundary condition, since no update is performed on the
-boundaries of the Matrices. (see [here](https://www.math.uci.edu/~chenlong/226/FDM.pdf))
+Where `h` is the distance between the grid points.
+The boundaries are managed by the Dirichlet boundary condition, that means the boundaries of the
+Matrices are not updated. (see [here](https://www.math.uci.edu/~chenlong/226/FDM.pdf))
 
 ### Red-Black Gauss Seidel
 
 The Gauss-Seidel method is a common iterative technique to solve systems of linear equations.
 
-For Ax = b the element wise formula is this:
+For `Ax = b` the element wise formula is this:
 
 x<sup>(k+1)</sup><sub>i</sub> =
 <sup>1</sup>&frasl;<sub>(a<sub>i,i</sub>)</sub>
@@ -135,7 +135,7 @@ One multigrid cycle looks like the following:
 Various cycle types can be defined by looping the computation of the correction error &mu; times.
 Well known cycle types are _V-Cycle_ (&mu; = 1) and _W-Cycle_ (&mu; = 2).
 Performing multiple multigrid cycles will reduce the error of the solution
-approximation significantly. (see [here](https://www.math.ust.hk/~mawang/teaching/math532/mgtut.pdf))
+approximation. (see [here](https://www.math.ust.hk/~mawang/teaching/math532/mgtut.pdf))
 
 ## Implementation
 
@@ -176,11 +176,12 @@ logic of a multigrid cycle and how the correction shall be computed.
 
 The class _PoissonCycle_ is a specialization of this abstract _Cycle_. Here, the class specific
 methods like pre- and post-smoothing are implemented. Both smoothing implementations and also
-the solver are based on Gauss-Seidel-Red-Black.
+the solver are based on the Gauss-Seidel-Red-Black algorithm.
 
 ### D Multigrid
 
-In D we basically followed the same approach as we did in the Python implementations.
+The implementation in D is very similar to the implementation in Python. It is simply a translated
+version from Python to D.
 
 ```D
     Slice!(T*, Dim) compute_correction(Slice!(T*, Dim) r, uint l, T current_h)
@@ -222,12 +223,12 @@ The implementations of the multigrid only differ essentially in syntactical
 matters. The main difference is in the used solver and smoother. More precisely, the difference
 is the Gauss-Seidel method.
 
-In Python, we used _[Numba](https://numba.pydata.org/)_ to speed up the sweep method in the
+In Python, we use _[Numba](https://numba.pydata.org/)_ to speed up the sweep method in the
 Gauss-Seidel-Red-Black algorithm. It basically performs the update step by using
 the _NumPy_ array slices. The efficiency differences in using Numba or not are considered in the
 [Python-Benchmark](#python-benchmark).
 
-In order to estimate the fastest approach in D, we implemented three variations of the
+In order to estimate the fastest approach in D, we consider three variations of the
 Gauss-Seidel-Red-Black sweep:
 
 1. Slices: Python like. Uses D Slices and Strides for grouping (Red-Black).
@@ -237,15 +238,15 @@ Gauss-Seidel-Red-Black sweep:
 The [first one](D/source/multid/gaussseidel/sweep.d#L98)
 is the approach to implement the Gauss-Seidel in a way, that it "looks" syntactical
 like the [Python](Python/multipy/GaussSeidel/GaussSeidel_RB.py#L85) implementation.
-But since the indexing operator of the MIR slices did not support striding,
-it was needed to do with a extra function call.
+But since the indexing operator of the MIR slices does not support striding,
+it is needed to do with a extra function call.
 The [second](D/source/multid/gaussseidel/sweep.d#L176),
 the "naive" version is an implementation as it can be found in an textbook.
 The [third](D/source/multid/gaussseidel/sweep.d#L16) one is the most
 optimized version with accessing the underling D-array of the MIR slice directly.
-In the end it looked like a C/C++ implementation would look like.
+In the end it looks like a C/C++ implementation would look like.
 
-We did not compare these different variations in Python, because this would mean to use high level
+We do not compare these different variations in Python, because this would mean to use high level
 Python for-loops which are not competitive for this application.
 
 ## Measurements
@@ -313,42 +314,54 @@ Python for-loops which are not competitive for this application.
 
 ### What was measured?
 
-As performance measures we used the execution time and the number of
+As performance measures we use the execution time and the number of
 floating-point operations (FLOP) per second (FLOP/s).
 
-As benchmarks we used problems in size of
+As multigrid benchmarks ([D Benchmark](#d-benchmark), [Python Benchmark](#python-benchmark),
+[Benchmarks Combined](#benchmarks-combined)) we solve problems in size of
 16, 32, 48, 64, 128, 192, .. 1216, 1280, 1408, 1536, ...,
 2432, 2560, 2816, ..., 3840, 4096.
-Each problem was solved with a Multigrid W-cycle with 2 pre- and postsmoothing steps.
-As stop criteria we used an epsilon of 1e-3.
-For each permutation of the setup option a run was done 3 times.
+Each problem is solved with a Multigrid W-cycle with 2 pre- and postsmoothing steps.
+As stop criteria we use an epsilon of 1e-3.
+For each permutation of the setup option a run is done 3 times.
 
-In the [Python-Benchmark](#python-benchmark) we distinguish measurements between
-number of threads (1 or 8) and with or without Numba.
-We also experimented with the
+We also compare the performance of the solvers in the different versions
+in a [Solver Benchmark](#solver-benchmark).
+Since the multigrid algorithm uses the solver only on relative small problems, we also use
+problems up to a size of 1280 &times; 1280.
+We generate 20 problems from size 16 &times; 16 to 320 &times; 320 by increasing the problem size
+by 16 in each step.
+From problem size 384 &times; 384 to 1280 &times; 1280 we increase the step size to 64.
+The number of Gauss-Seidel iterations is fixed to 5000 for each problem size.
+
+To see if parallelization causes some differences in performance, we measure the Python code with
+1 and with 8 threads.
+We do not actively parallelize the code and only set the number of allowed threads through the
+environment variables (see [here](https://gitlab.cs.fau.de/bu49mebu/hpc-project/-/blob/master/Python/run.sh#L24)).
+In addition, we also distinguish measurements between with or without optimizations using Numba.
+We also experiment with the
 _[Intel Python Distribution](https://software.intel.com/content/www/us/en/develop/tools/distribution-for-python.html)_
 to speed up our implementation. The _Intel Python Distribution_ is a
 combination of many Python-packages like _Numba_ or _NumPy_ that is
 optimized for Intel CPUs.
-We did not actively parallelized the code and only set the allowed threads through the
-environment variables (see [here](https://gitlab.cs.fau.de/bu49mebu/hpc-project/-/blob/master/Python/run.sh#L24)).
 
 In the [D-Benchmark](#d-benchmark) we differentiate the measurements between
 the sweep implementations _slice_, _naive_ and _field_.
 
+
 ### How was measured?
 
-To measure the execution time we used the `perf_counter()` from the
+To measure the execution time we use the `perf_counter()` from the
 [Python time package](https://docs.python.org/3/library/time.html#time.perf_counter)
 and in the D implementation the `Stopwatch` from the
 [D standard library](https://dlang.org/phobos/std_datetime_stopwatch.html#.StopWatch)
-was used.
+is used.
 
-To count the floating-point operations that occur while execution we used the
+To count the floating-point operations that occur while execution we use the
 Linux tool [_perf_](https://perf.wiki.kernel.org/index.php/Main_Page), which is
 build into the Linux kernel. It allows to gather a enormous variety of
 performance counters, if they are implemented by the CPU.
-The CPU we used offered the performance counters
+The CPU we use offers the performance counters
 _scalar\_single_, _scalar\_double_, _128b\_packed\_double_,
 _128b\_packed\_single_, _256b\_packed\_double_, _256b\_packed\_single_
 for different floating-point operations.
@@ -361,8 +374,8 @@ This is especially crucial for the Python implementation when it is accelerated
 with numba, since in this initialization phase the JIT-Compiler of numba is doing
 his work.
 So we want to avoid that _perf_ counts the FLOP/s that occur while this phase.
-To achieve this we used the delay option for _perf_, which delays the start of
-the measurement and also implemented a delay in our programs.
+To achieve this we use the delay option for _perf_, which delays the start of
+the measurement, and also delay our programs accordingly.
 The delay for the program is meant to be a bit longer than the actual startup
 phase. So the program needs to sleep after the warm-up until the delay is over.
 It is meant that _perf_ starts to measure while the benchmark program is waiting till its delay
@@ -386,8 +399,8 @@ The place of the vertical line is calculated with &#8730;(Cachesize/8) since we 
 with 64-bit values and the arrays are N &times; N big.
 
 The memory-bandwidth (horizontal dotted line) in the figures below is calculated with the value of the
-Triad-Strem benchmark as is was mentioned [here](#hardwaresoftware-setup).
-This value was multiplied by 4/3, since the Stream benchmark is not aware of the write allocated
+Triad-Strem benchmark as it is mentioned [here](#hardwaresoftware-setup).
+This value is multiplied by 4/3, since the Stream benchmark is not aware of the write allocated
 (see [here](https://moodle.rrze.uni-erlangen.de/pluginfile.php/16786/mod_resource/content/1/09_06_04-2020-PTfS.pdf) on slide 20)
 and needs to be corrected.
 To get the FLOP/s this value is then divided by 16, since for every 32 MB that is written
@@ -396,7 +409,7 @@ there are 2 floating point operations.
 
 ### Table Multigrid-Cycles
 
-The following table contains some details about how many multigrid cycles and levels were performed
+The following table contains some details about how many multigrid cycles and levels are performed
 for the according problem sizes:
 
 | Problem size     | 16  | 32  | 48  | 64  | 128 | 192 | 256 | 320 | 384 | 448 | 512 | 576 | 640 | 704 | 768 | 832 | 896 | 960 | 1024 | 1088 | 1152 | 1216 | 1280 | 1408 | 1536 | 1664 | 1792 | 1920 | 2048 | 2176 | 2304 | 2432 | 2560 | 2816 | 3072 | 3328 | 3584 | 3840 | 4096 |
@@ -405,18 +418,9 @@ for the according problem sizes:
 | # levels         |  4  |  5  |  5  |  6  |  7  |  7  |  8  |  8  |  8  |  8  |  9  |  9  |  9  |  9  |  9  |  9  |  9  |  9  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  12  |
 
 This table is representative for all benchmarks.
-The number of multigrid cycles and levels are all the same for our multigrid implementations.
+The number of multigrid cycles and levels are valid for all multigrid implementations.
 
 ### Solver Benchmark
-
-We also compared the performance of the solvers in the different versions. Since the multigrid
-algorithm uses the solver only on relative small problems, we also used problems up to a size of
-1280 &times; 1280.
-We generated 20 problems from size 16 &times; 16 to 320 &times; 320 by increasing the problem size
-by 16 in each step.
-From problem size 384 &times; 384 to 1280 &times; 1280 we increased the step size to 64.
-The number of iterations was fixed to 5000 for each problem size.
-
 
 |               Flop/s                |                Time                |
 | :---------------------------------: | :--------------------------------: |
@@ -476,7 +480,7 @@ there is no big difference visible between single and multithreaded versions.
 This might be an effect of the small problem sizes in the lowest multigrid-level provided to the solver.
 When Numba is used, there is no big difference between the Intel Python distribution, that uses the
 Intel MKL and the "plain" Python version accelerated with Openblas.
-In the runs where Numba was not used, the Intel version is slower than the Openblas version,
+In the runs where Numba is not used, the Intel version is slower than the Openblas version,
 but runs more FLOP/s for problem sizes above 1500.
 One aspect that possibly plays into is the relatively old NumPy version that is used in the
 Intel Python distribution.
@@ -541,7 +545,7 @@ At the current point in time NumPy provides much more functionalities and utilit
 mainly due to its longer existence and big community.
 But during our project, we did not miss essential features in MIR,
 since the main data structure of MIR, the slices,
-provides similar functionalities as the numpy arrays.
+provides similar functionalities as the NumPy arrays.
 The main difference, from a programmers point of view, lies in the indexing operator
 and how striding is handled.
 
