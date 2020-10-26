@@ -439,12 +439,16 @@ In contrast, Python implementations without Numba show no response to all cache 
 This may be a consequence of the missing optimization without Numba.
 
 All setups that are using Numba take almost the same time for the corresponding problem sizes.
-So the FLOP/s graphs for these setups look verry similar and close.
+So the FLOP/s graphs for these setups look verry similar and close
+(see detailed view of [FLOP/s](graphs/gsrbnumba_flops.png) and [Time](graphs/gsrbnumba_time.png)).
 Without Numba, the runs using the Intel environment are below the OpenBlas environment FLOP/s on
-smaller problem sizes but they soar and overtake OpenBlas between problem size 320 and 384.
-Until problem size 576, the distance of Intel and OpenBlas is remarkably, then it shrinks.
-Therefore, using the Intel environment without Numba is not appropriate especially for small problem
-sizes.
+smaller problem sizes.
+They soar and overtake OpenBlas between problem size 320 and 384, although the Intel's execution
+time is even longer at this point.
+This effect can only be caused by an abrupt increase of the FLOP by Intel.
+Until problem size 576, the distance of Intel and OpenBlas is remarkably, then it shrinks
+(see detailed view of [FLOP/s](graphs/gsrbnonumba_flops.png) and [Time](graphs/gsrbnonumba_time.png)).
+Therefore, using the Intel environment without Numba is not appropriate.
 However, both runs without Numba perform very poorly.
 For big problems, the Python runs can be grouped by applying and not applying the Numba `jit`.
 
