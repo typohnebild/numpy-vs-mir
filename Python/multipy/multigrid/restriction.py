@@ -1,4 +1,5 @@
 import numpy as np
+from numba import jit
 
 
 def restriction(A):
@@ -17,38 +18,53 @@ def restriction(A):
 
     # Case: Dimension 1
     if alpha == 1:
-        # get every second element in A
-        ret[:end:] = A[::2]
-        # set the last index correctly
-        ret[-1] = A[-1]
+        restriction_1D(A, ret, end)
     # Case: Dimension 2
     elif alpha == 2:
-        # get every second element in A
-        ret[:end:, :end:] = A[::2, ::2]
-        # special case: borders
-        ret[:end, -1] = A[::2, -1]
-        ret[-1, :end] = A[-1, ::2]
-        # special case: outer corner
-        ret[-1, -1] = A[-1, -1]
+        restriction_2D(A, ret, end)
     # Case: Dimension 3
     elif alpha == 3:
-        # get every second element in A
-        ret[:end:, :end:, :end:] = A[::2, ::2, ::2]
-        # special case: inner borders
-        ret[:end, :end, -1] = A[::2, ::2, -1]
-        ret[-1, :end, :end] = A[-1, ::2, ::2]
-        ret[:end, -1, :end] = A[::2, -1, ::2]
-        # special case: outer borders
-        ret[:end, -1, -1] = A[::2, -1, -1]
-        ret[-1, :end, -1] = A[-1, ::2, -1]
-        ret[-1, -1, :end] = A[-1, -1, ::2]
-        # special case: outer corner
-        ret[-1, -1, -1] = A[-1, -1, -1]
+        restriction_3D(A, ret, end)
     # Case: Error
     else:
         raise ValueError('restriction: invalid dimension')
 
     return ret
+
+
+@jit(nopython=True, fastmath=True)
+def restriction_1D(A, ret, end):
+    # get every second element in A
+    ret[:end:] = A[::2]
+    # set the last index correctly
+    ret[-1] = A[-1]
+
+
+@jit(nopython=True, fastmath=True)
+def restriction_2D(A, ret, end):
+    # get every second element in A
+    ret[:end:, :end:] = A[::2, ::2]
+    # special case: borders
+    ret[:end, -1] = A[::2, -1]
+    ret[-1, :end] = A[-1, ::2]
+    # special case: outer corner
+    ret[-1, -1] = A[-1, -1]
+
+
+@jit(nopython=True, fastmath=True)
+def restriction_3D(A, ret, end):
+    # get every second element in A
+    ret[:end:, :end:, :end:] = A[::2, ::2, ::2]
+    # special case: inner borders
+    ret[:end, :end, -1] = A[::2, ::2, -1]
+    ret[-1, :end, :end] = A[-1, ::2, ::2]
+    ret[:end, -1, :end] = A[::2, -1, ::2]
+    # special case: outer borders
+    ret[:end, -1, -1] = A[::2, -1, -1]
+    ret[-1, :end, -1] = A[-1, ::2, -1]
+    ret[-1, -1, :end] = A[-1, -1, ::2]
+    # special case: outer corner
+    ret[-1, -1, -1] = A[-1, -1, -1]
 
 
 def weighted_restriction(A):
@@ -61,44 +77,59 @@ def weighted_restriction(A):
     assert(A.shape[0] >= 3)
 
     if alpha == 1:
-        # core
-        ret[1:-1] /= 2
-        # corner
-        ret[1:-1] += (A[1:-2:2] + A[3::2]) / 4
+        weighted_restriction_1D(A, ret)
     elif alpha == 2:
-        # core
-        ret[1:-1, 1:-1] /= 4
-        # edges
-        ret[1:-1, 1:-1] += (A[2:-1:2, 1:-2:2] + A[1:-2:2, 2:-1:2] +
-                            A[2:-1:2, 3::2] + A[3::2, 2:-1:2]) / 8
-        # corners
-        ret[1:-1, 1:-1] += (A[1:-2:2, 1:-2:2] + A[1:-2:2, 3::2] +
-                            A[3::2, 1:-2:2] + A[3::2, 3::2]) / 16
+        weighted_restriction_2D(A, ret)
     elif alpha == 3:
-        # core
-        ret[1:-1, 1:-1, 1:-1] *= 8
-        # edges
-        ret[1:-1, 1:-1, 1:-1] += (
-            A[2:-1:2, 2:-1:2, 1:-2:2] + A[2:-1:2, 2:-1:2, 3::2] +
-            A[2:-1:2, 1:-2:2, 2:-1:2] + A[2:-1:2, 3::2, 2:-1:2] +
-            A[1:-2:2, 2:-1:2, 2:-1:2] + A[3::2, 2:-1:2, 2:-1:2]) * 4
-        # more edges
-        ret[1:-1, 1:-1, 1:-1] += (
-            A[2:-1:2, 1:-2:2, 3::2] + A[2:-1:2, 3::2, 1:-2:2] +
-            A[2:-1:2, 1:-2:2, 1:-2:2] + A[2:-1:2, 3::2, 3::2] +
-            A[1:-2:2, 2:-1:2, 3::2] + A[3::2, 2:-1:2, 1:-2:2] +
-            A[1:-2:2, 2:-1:2, 1:-2:2] + A[3::2, 2:-1:2, 3::2] +
-            A[1:-2:2, 3::2, 2:-1:2] + A[3::2, 1:-2:2, 2:-1:2] +
-            A[1:-2:2, 1:-2:2, 2:-1:2] + A[3::2, 3::2, 2:-1:2]) * 2
-        # corners
-        ret[1:-1, 1:-1, 1:-1] += (
-            A[3::2, 1:-2:2, 1:-2:2] + A[3::2, 3::2, 1:-2:2] +
-            A[3::2, 3::2, 3::2] + A[3::2, 1:-2:2, 3::2] +
-            A[1:-2:2, 1:-2:2, 1:-2:2] + A[1:-2:2, 1:-2:2, 3::2] +
-            A[1:-2:2, 3::2, 3::2] + A[1:-2:2, 3::2, 1:-2:2])
-
-        ret[1:-1, 1:-1, 1:-1] /= 64
+        weighted_restriction_3D(A, ret)
     else:
         raise ValueError('weighted restriction: invalid dimension')
 
     return ret
+
+
+@jit(nopython=True, fastmath=True)
+def weighted_restriction_1D(A, ret):
+    # core
+    ret[1:-1] /= 2
+    # corner
+    ret[1:-1] += (A[1:-2:2] + A[3::2]) / 4
+
+
+@jit(nopython=True, fastmath=True)
+def weighted_restriction_2D(A, ret):
+    # core
+    ret[1:-1, 1:-1] /= 4
+    # edges
+    ret[1:-1, 1:-1] += (A[2:-1:2, 1:-2:2] + A[1:-2:2, 2:-1:2] +
+                        A[2:-1:2, 3::2] + A[3::2, 2:-1:2]) / 8
+    # corners
+    ret[1:-1, 1:-1] += (A[1:-2:2, 1:-2:2] + A[1:-2:2, 3::2] +
+                        A[3::2, 1:-2:2] + A[3::2, 3::2]) / 16
+
+
+@jit(nopython=True, fastmath=True)
+def weighted_restriction_3D(A, ret):
+    # core
+    ret[1:-1, 1:-1, 1:-1] *= 8
+    # edges
+    ret[1:-1, 1:-1, 1:-1] += (
+        A[2:-1:2, 2:-1:2, 1:-2:2] + A[2:-1:2, 2:-1:2, 3::2] +
+        A[2:-1:2, 1:-2:2, 2:-1:2] + A[2:-1:2, 3::2, 2:-1:2] +
+        A[1:-2:2, 2:-1:2, 2:-1:2] + A[3::2, 2:-1:2, 2:-1:2]) * 4
+    # more edges
+    ret[1:-1, 1:-1, 1:-1] += (
+        A[2:-1:2, 1:-2:2, 3::2] + A[2:-1:2, 3::2, 1:-2:2] +
+        A[2:-1:2, 1:-2:2, 1:-2:2] + A[2:-1:2, 3::2, 3::2] +
+        A[1:-2:2, 2:-1:2, 3::2] + A[3::2, 2:-1:2, 1:-2:2] +
+        A[1:-2:2, 2:-1:2, 1:-2:2] + A[3::2, 2:-1:2, 3::2] +
+        A[1:-2:2, 3::2, 2:-1:2] + A[3::2, 1:-2:2, 2:-1:2] +
+        A[1:-2:2, 1:-2:2, 2:-1:2] + A[3::2, 3::2, 2:-1:2]) * 2
+    # corners
+    ret[1:-1, 1:-1, 1:-1] += (
+        A[3::2, 1:-2:2, 1:-2:2] + A[3::2, 3::2, 1:-2:2] +
+        A[3::2, 3::2, 3::2] + A[3::2, 1:-2:2, 3::2] +
+        A[1:-2:2, 1:-2:2, 1:-2:2] + A[1:-2:2, 1:-2:2, 3::2] +
+        A[1:-2:2, 3::2, 3::2] + A[1:-2:2, 3::2, 1:-2:2])
+
+    ret[1:-1, 1:-1, 1:-1] /= 64
