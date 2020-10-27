@@ -3,7 +3,6 @@ module multid.gaussseidel.sweep;
 import mir.ndslice : slice, sliced, Slice, strided;
 import multid.gaussseidel.redblack : Color;
 
-
 /++
 This is a sweep implementation for 1D
     it calculates U[i] = (U[i-1] + U[i+1])/2
@@ -13,7 +12,8 @@ Params:
     U  = slice of dimension Dim
     h2 = the squared distance between the grid points
 +/
-void sweep_field(T, size_t Dim : 1, Color color)(in Slice!(T*, 1) F, Slice!(T*, 1) U, in T h2)
+@nogc
+void sweep_field(T, size_t Dim : 1, Color color)(in Slice!(T*, 1) F, Slice!(T*, 1) U, in T h2) nothrow
 {
     const auto N = F.shape[0];
     auto UF = U.field;
@@ -33,7 +33,8 @@ Params:
     U  = slice of dimension Dim
     h2 = the squared distance between the grid points
 +/
-void sweep_field(T, size_t Dim : 2, Color color)(in Slice!(T*, 2) F, Slice!(T*, 2) U, in T h2)
+@nogc
+void sweep_field(T, size_t Dim : 2, Color color)(in Slice!(T*, 2) F, Slice!(T*, 2) U, in T h2) nothrow
 {
     const auto m = F.shape[0];
     const auto n = F.shape[1];
@@ -64,7 +65,8 @@ Params:
     U  = slice of dimension Dim
     h2 = the squared distance between the grid points
 +/
-void sweep_field(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 3) U, in T h2)
+@nogc
+void sweep_field(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 3) U, in T h2) nothrow
 {
     const auto m = F.shape[0];
     const auto n = F.shape[1];
@@ -91,11 +93,9 @@ void sweep_field(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 
     }
 }
 
-
-
-
 /++ slow sweep for 1D +/
-void sweep_slice(T, size_t Dim : 1, Color color)(in Slice!(T*, 1) F, Slice!(T*, 1) U, in T h2)
+@nogc
+void sweep_slice(T, size_t Dim : 1, Color color)(in Slice!(T*, 1) F, Slice!(T*, 1) U, in T h2) nothrow
 {
     U[2 - color .. $ - 1].strided!0(2)[] = (
             U[1 - color .. $ - 2].strided!0(2) + U[3 - color .. $].strided!0(
@@ -103,7 +103,8 @@ void sweep_slice(T, size_t Dim : 1, Color color)(in Slice!(T*, 1) F, Slice!(T*, 
 }
 
 /++ slow sweep for 2D +/
-void sweep_slice(T, size_t Dim : 2, Color color)(in Slice!(T*, 2) F, Slice!(T*, 2) U, in T h2)
+@nogc
+void sweep_slice(T, size_t Dim : 2, Color color)(in Slice!(T*, 2) F, Slice!(T*, 2) U, in T h2) nothrow
 {
     const auto m = F.shape[0];
     const auto n = F.shape[1];
@@ -124,7 +125,8 @@ void sweep_slice(T, size_t Dim : 2, Color color)(in Slice!(T*, 2) F, Slice!(T*, 
     strideU[] /= cast(T) 4;
 }
 /++ slow sweep for 3D +/
-void sweep_slice(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 3) U, in T h2)
+@nogc
+void sweep_slice(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 3) U, in T h2) nothrow
 {
     const auto m = F.shape[0];
     const auto n = F.shape[1];
@@ -173,7 +175,8 @@ void sweep_slice(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 
 }
 
 /++ naive sweep for 1D +/
-void sweep_naive(T, size_t Dim : 1, Color color)(const Slice!(T*, 1) F, Slice!(T*, 1) U, T h2)
+@nogc
+void sweep_naive(T, size_t Dim : 1, Color color)(const Slice!(T*, 1) F, Slice!(T*, 1) U, T h2) nothrow
 {
 
     const auto n = F.shape[0];
@@ -187,7 +190,8 @@ void sweep_naive(T, size_t Dim : 1, Color color)(const Slice!(T*, 1) F, Slice!(T
 
 }
 /++ naive sweep for 2D +/
-void sweep_naive(T, size_t Dim : 2, Color color)(const Slice!(T*, 2) F, Slice!(T*, 2) U, T h2)
+@nogc
+void sweep_naive(T, size_t Dim : 2, Color color)(const Slice!(T*, 2) F, Slice!(T*, 2) U, T h2) nothrow
 {
     const auto n = F.shape[0];
     const auto m = F.shape[1];
@@ -204,7 +208,8 @@ void sweep_naive(T, size_t Dim : 2, Color color)(const Slice!(T*, 2) F, Slice!(T
     }
 }
 /++ naive sweep for 3D +/
-void sweep_naive(T, size_t Dim : 3, Color color)(const Slice!(T*, 3) F, Slice!(T*, 3) U, T h2)
+@nogc
+void sweep_naive(T, size_t Dim : 3, Color color)(const Slice!(T*, 3) F, Slice!(T*, 3) U, T h2) nothrow
 {
     const auto n = F.shape[0];
     const auto m = F.shape[1];
@@ -224,3 +229,4 @@ void sweep_naive(T, size_t Dim : 3, Color color)(const Slice!(T*, 3) F, Slice!(T
         }
     }
 }
+
