@@ -78,7 +78,7 @@ class AbstractCycle:
         e = prolongation(e, U.shape)
 
         # correction
-        U = U + e
+        U += e
 
         return self._postsmooth(F=F, U=U, h=h)
 
