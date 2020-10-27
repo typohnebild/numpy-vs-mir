@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-# @timer
 def GS_RB(
     F,
     U=None,
@@ -18,7 +17,6 @@ def GS_RB(
     max_iter=10_000_000,
     eps=1e-8,
     norm_iter=1000,
-    numba=True,
 ):
     """
     Solve AU = F, the poisson equation.
@@ -36,13 +34,13 @@ def GS_RB(
 
     if len(F.shape) == 1:
         # do the sweep
-        sweep = sweep_1D if numba else sweep_1D.py_func
+        sweep = sweep_1D
     elif len(F.shape) == 2:
         # do the sweep
-        sweep = sweep_2D if numba else sweep_2D.py_func
+        sweep = sweep_2D
     elif len(F.shape) == 3:
         # Anzahl an Gauss-Seidel-Iterationen ausfuehren
-        sweep = sweep_3D if numba else sweep_3D.py_func
+        sweep = sweep_3D
     else:
         raise ValueError("Wrong Shape!!!")
 

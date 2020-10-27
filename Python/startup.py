@@ -36,7 +36,14 @@ def getopts():
         help='unix time stamp in nanoseconds of the programm call')
 
     options, _ = parser.parse_args()
+    if not options.numba:
+        deactivate_numba_jit()
     return options
+
+
+def deactivate_numba_jit():
+    import os
+    os.environ['NUMBA_DISABLE_JIT'] = '1'
 
 
 def wait(options):

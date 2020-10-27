@@ -84,8 +84,7 @@ class AbstractCycle:
 
 
 class PoissonCycle(AbstractCycle):
-    def __init__(self, F, v1, v2, mu, l, numba, eps=1e-8):
-        self.numba = numba
+    def __init__(self, F, v1, v2, mu, l, eps=1e-8):
         super().__init__(F, v1, v2, mu, l, eps)
 
     def _presmooth(self, F, U, h=None):
@@ -94,8 +93,7 @@ class PoissonCycle(AbstractCycle):
             U=U,
             h=h,
             max_iter=self.v1,
-            eps=self.eps,
-            numba=self.numba)
+            eps=self.eps)
 
     def _postsmooth(self, F, U, h=None):
         return GS_RB(
@@ -103,8 +101,7 @@ class PoissonCycle(AbstractCycle):
             U=U,
             h=h,
             max_iter=self.v2,
-            eps=self.eps,
-            numba=self.numba)
+            eps=self.eps)
 
     def _compute_residual(self, F, U, h):
         return F - apply_poisson(U, h)
@@ -116,8 +113,7 @@ class PoissonCycle(AbstractCycle):
             h=h,
             max_iter=100_000,
             eps=self.eps,
-            norm_iter=5,
-            numba=self.numba)
+            norm_iter=5)
 
     def norm(self, U):
         residual = self._residual(U)
