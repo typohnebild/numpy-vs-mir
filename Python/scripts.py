@@ -6,7 +6,7 @@ import numpy as np
 import problemgenerator.heatmap as hm
 import multipy.tools.operators as op
 import multipy.tools.util as util
-from multipy.multigrid import poisson_multigrid, general_multigrid
+from multipy.multigrid import poisson_multigrid
 from multipy.GaussSeidel import GaussSeidel as gs
 from multipy.GaussSeidel import GaussSeidel_RB as gsrb
 
@@ -67,16 +67,6 @@ def simulate_3D_multigrid(N, iter_cycle=5, numba=True):
     U = hm.initMap_3D(N)
     F = hm.heat_sources_3D(N)
     return poisson_multigrid(F, U, 0, 2, 2, 2, iter_cycle, numba=numba)
-
-
-@util.timer
-def simulate_2D_general_multigrid(N, iter_cycle=5):
-    grid = hm.initMap_2D(N)
-    rhs = hm.heat_sources_2D(N)
-    A, U, F = op.reshape_grid(grid, rhs)
-    U = general_multigrid(A, F, U, 0, 4, 4, 1, iter_cycle)
-    grid[1:-1, 1:-1] = U.reshape((N - 2, N - 2))
-    return grid
 
 
 def draw2D(U):
