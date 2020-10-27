@@ -18,8 +18,8 @@ benchmark() {
 	#   so the delay is acutally delayed by additionally 500ms.
 	# We want to make sure that perf starts measuring when
 	#   Python benchmark is in wait state.
-	delay=2500
-	delayPerf=2400
+	delay=4000
+	delayPerf=3900
 
 	export OPENBLAS_NUM_THREADS=$threads
 	export MKL_NUM_THREADS=$threads
