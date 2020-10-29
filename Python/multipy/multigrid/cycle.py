@@ -10,22 +10,25 @@ from .prolongation import prolongation
 
 
 class AbstractCycle:
-    def __init__(self, F, v1, v2, mu, l, eps=1e-8):
+    def __init__(self, F, v1, v2, mu, l, eps=1e-8, h=None):
         self.v1 = v1
         self.v2 = v2
         self.mu = mu
         self.F = F
         self.l = l
         self.eps = eps
-        self.h = 1 / F.shape[0]
+        if h is None:
+            self.h = 1 / F.shape[0]
+        else:
+            self.h = h
         if (self.l == 0):
             self.l = int(np.log2(self.F.shape[0])) - 1
         # ceck if l is plausible
         if np.log2(self.F.shape[0]) < self.l:
             raise ValueError('false value of levels')
 
-    def __call__(self, U, h=None):
-        return self.do_cycle(self.F, U, self.l, h)
+    def __call__(self, U):
+        return self.do_cycle(self.F, U, self.l, self.h)
 
     @abstractmethod
     def _presmooth(self, F, U, h):
@@ -60,9 +63,7 @@ class AbstractCycle:
             e = self.do_cycle(r, e, l, h)
         return e
 
-    def do_cycle(self, F, U, l, h=None):
-        if h is None:
-            h = 1 / U.shape[0]
+    def do_cycle(self, F, U, l, h):
 
         if l <= 1 or U.shape[0] <= 1:
             return self._solve(F, U, h)
@@ -84,8 +85,8 @@ class AbstractCycle:
 
 
 class PoissonCycle(AbstractCycle):
-    def __init__(self, F, v1, v2, mu, l, eps=1e-8):
-        super().__init__(F, v1, v2, mu, l, eps)
+    def __init__(self, F, v1, v2, mu, l, eps=1e-8, h=None):
+        super().__init__(F, v1, v2, mu, l, eps, h)
 
     def _presmooth(self, F, U, h=None):
         return GS_RB(

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle):
+def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle, h=None):
     """Implementation of MultiGrid iterations
        should solve AU = F
        A is poisson equation
@@ -22,12 +22,12 @@ def poisson_multigrid(F, U, l, v1, v2, mu, iter_cycle):
        @return x n vector
     """
     eps = 1e-3
-    cycle = PoissonCycle(F, v1, v2, mu, l, eps)
+    cycle = PoissonCycle(F, v1, v2, mu, l, eps, h)
     return multigrid(cycle, U, eps, iter_cycle)
 
 
 def multigrid(cycle, U, eps, iter_cycle):
-    for i in range(1, iter_cycle + 1):
+    for i in range(1, iter_cycle + 1) :
         U = cycle(U)
         norm = cycle.norm(U)
         logger.debug(f"Residual has a L2-Norm of {norm:.4} after {i} MGcycle")

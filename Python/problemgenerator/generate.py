@@ -5,7 +5,7 @@ import os
 import numpy as np
 
 from heatmap import create_problem_1D, create_problem_2D, create_problem_3D
-
+from femwave import create_2D
 
 def save_to_npy(file, tensor):
     np.save(file, tensor)

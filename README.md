@@ -317,6 +317,10 @@ Python for-loops which are not competitive for this application.
 As performance measures we use the execution time and the number of
 floating-point operations (FLOP) per second (FLOP/s).
 
+<!--
+Hier sollte noch was hin WIE wir die Probleme generieren und WAS fuer Probleme wir generieren!!!
+-->
+
 As multigrid benchmarks ([D Benchmark](#d-benchmark), [Python Benchmark](#python-benchmark),
 [Benchmarks Combined](#benchmarks-combined)) we solve problems in size of
 16, 32, 48, 64, 128, 192, .. 1216, 1280, 1408, 1536, ...,
