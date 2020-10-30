@@ -78,7 +78,7 @@ public:
         enforce(l == 0 || log2(F.shape[0]) > l, "l is to big for F");
         this.F = F;
         this.l = l;
-        this.h = h ? h : 1.0 / F.shape[0];
+        this.h = h != 0 ? h : 1.0 / F.shape[0];
         this.mu = mu;
         if (this.l == 0)
         {
