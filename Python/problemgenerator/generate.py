@@ -2,10 +2,12 @@
 
 import sys
 import os
+import optparse
 import numpy as np
 
 from heatmap import create_problem_1D, create_problem_2D, create_problem_3D
 from femwave import create_2D
+
 
 def save_to_npy(file, tensor):
     np.save(file, tensor)
@@ -45,8 +47,19 @@ def save_problem(base, dim, tensor):
 
 
 if __name__ == "__main__":
-    if not len(sys.argv) == 4:
+    parser = optparse.OptionParser()
+    parser.add_option('-t', action='store', default='heat', dest='type',
+                      help='select problem type heat|wave')
+
+    options, args = parser.parse_args()
+    if not len(args) == 3:
         print(f"{sys.argv[0]} base dimension N")
         exit(1)
-    base, dim, N = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
-    save_problem(base, dim, generate_problem(dim)(N))
+
+    base, dim, N = args[0], int(args[1]), int(args[2])
+    if options.type == 'heat':
+        save_problem(base, dim, generate_problem(dim)(N))
+    elif options.type == 'wave' and dim == 2:
+        save_problem(base, dim, np.array(create_2D(N)))
+    else:
+        raise Exception('invalid type or dimension')
