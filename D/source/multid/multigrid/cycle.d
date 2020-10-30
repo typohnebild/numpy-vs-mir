@@ -52,7 +52,7 @@ protected:
 
         U = presmooth(F, U, current_h);
 
-        auto r = compute_residual(F, U, current_h * 2);
+        auto r = compute_residual(F, U, current_h);
 
         r = restriction(r);
 

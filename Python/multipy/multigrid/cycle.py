@@ -70,7 +70,7 @@ class AbstractCycle:
 
         U = self._presmooth(F=F, U=U, h=h)
 
-        r = self._compute_residual(F=F, U=U, h=2 * h)
+        r = self._compute_residual(F=F, U=U, h=h)
 
         r = self.restriction(r)
 
