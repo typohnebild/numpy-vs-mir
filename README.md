@@ -51,7 +51,7 @@ The animation below shows the result of these calculations.
 
 <div align="center">
     <p align="center">
-        <img src="graphs/heatmap.gif?raw=true">
+        <img src="graphs/wave.gif?raw=true">
     </p>
 </div>
 
