@@ -62,11 +62,12 @@ def simulate_2D_multigrid(N, iter_cycle=5):
     F = hm.heat_sources_2D(N)
     return poisson_multigrid(F, U, 0, 2, 2, 2, iter_cycle)
 
+
 @util.timer
 def simulate_2D_FEM_multigrid(N, iter_cycle=5):
     U, F = fw.create_2D(N)
-    h = 1/(N - 1)
-    return poisson_multigrid(F, U, 0, 2, 2, 1, iter_cycle, h)
+    h = 1 / N
+    return poisson_multigrid(F, U, 0, 2, 2, 1, iter_cycle, h=h)
 
 
 @util.timer
@@ -100,5 +101,5 @@ def draw3D(map):
     fig.show()
 
 
-# if __name__ == "__main__":
-#     simulate_2D_multigrid(40, 10)
+if __name__ == "__main__":
+    simulate_2D_FEM_multigrid(128, 50)

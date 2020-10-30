@@ -27,7 +27,7 @@ def main():
     wait(options)
 
     start = time.perf_counter()
-    poisson_multigrid(F, U, 0, 2, 2, 2, 100)
+    poisson_multigrid(F, U, 0, 2, 2, 1, 100)
 
     logging.info(time.perf_counter() - start)
 
