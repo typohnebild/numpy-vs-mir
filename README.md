@@ -83,8 +83,7 @@ for discretization. The discrete version on rectangular 2D-Grid looks like this:
 u<sub>i, j+1</sub> + u<sub>i, j-1</sub> - 4 \* u<sub>i, j</sub> ) = f<sub>i,j</sub>
 
 Where `h` is the distance between the grid points.
-The boundaries are managed by the Dirichlet boundary condition, that means the boundaries of the
-Matrices are not updated. (see [here](https://www.math.uci.edu/~chenlong/226/FDM.pdf))
+(see [here](https://www.math.uci.edu/~chenlong/226/FDM.pdf))
 
 ### Red-Black Gauss Seidel
 
@@ -160,7 +159,7 @@ logic of a multigrid cycle and how the correction shall be computed.
 
         U = self._presmooth(F=F, U=U, h=h)
 
-        r = self._compute_residual(F=F, U=U, h=2 * h)
+        r = self._compute_residual(F=F, U=U, h=h)
 
         r = self.restriction(r)
 
@@ -204,7 +203,7 @@ version from Python to D.
 
         U = presmooth(F, U, current_h);
 
-        auto r = compute_residual(F, U, current_h * 2);
+        auto r = compute_residual(F, U, current_h);
 
         r = restriction(r);
 
@@ -257,11 +256,11 @@ Python for-loops which are not competitive for this application.
 
   - _Python_
     - Python 3.7.3
-    - NumPy 1.19.0
-    - Numba 0.50.1
-    - Intel Python Distribution 2020.2.902
+    - NumPy 1.19.3
+    - Numba 0.51.2
+    - Intel Python Distribution 2020.4.912
       - NumPy 1.18.5
-      - Numba 0.49.1
+      - Numba 0.51.2
   - _D_
     - LDC 1.23 [pre-built package](https://github.com/ldc-developers/ldc/releases)
     - mir-algorithm 3.9.6
@@ -317,8 +316,15 @@ Python for-loops which are not competitive for this application.
 As performance measures we use the execution time and the number of
 floating-point operations (FLOP) per second (FLOP/s).
 
+As an example problem we choose the [Poisson-Equation](#poisson-equation) with the two dimensional
+function f(x,y) = sin(2&pi;x)cos(2&pi;y), since the analytical solution is given by
+u(x,y) = sin(2&pi;x)cos(2&pi;y) / (8&pi;<sup>2</sup>).
+Therefore, it is verry simple to check our resluts.
+The boundaries are managed with the Dirichlet boundary condition, that means the boundaries of the
+Matrices are not updated.
+The initial condition for `U` is zero.
 <!--
-Hier sollte noch was hin WIE wir die Probleme generieren und WAS fuer Probleme wir generieren!!!
+Hier ggf ein Link zum GIF oder ein Bild einfuegen.
 -->
 
 As multigrid benchmarks ([D Benchmark](#d-benchmark), [Python Benchmark](#python-benchmark),
@@ -326,7 +332,8 @@ As multigrid benchmarks ([D Benchmark](#d-benchmark), [Python Benchmark](#python
 16, 32, 48, 64, 128, 192, .. 1216, 1280, 1408, 1536, ...,
 2432, 2560, 2816, ..., 3840, 4096.
 Each problem is solved with a Multigrid W-cycle with 2 pre- and postsmoothing steps.
-As stop criteria we use an epsilon of 1e-3.
+As stop criteria we use an epsilon of 1e-6 multiplied with the squared problem size.
+This makes the stop criteria independent of the problem size.
 For each permutation of the setup option a run is done 3 times.
 
 We also compare the performance of the solvers in the different versions
@@ -338,11 +345,17 @@ by 16 in each step.
 From problem size 384 &times; 384 to 1280 &times; 1280 we increase the step size to 64.
 The number of Gauss-Seidel iterations is fixed to 5000 for each problem size.
 
+In order to make sure that each benchmark deals with the same problems, these are generated
+beforehand and written into `.npy` files. These files are later imported to the benchmark programs.
+
 To see if parallelization causes some differences in performance, we measure the Python code with
 1 and with 8 threads.
 We do not actively parallelize the code and only set the number of allowed threads through the
 environment variables (see [here](https://gitlab.cs.fau.de/bu49mebu/hpc-project/-/blob/master/Python/run.sh#L24)).
 In addition, we also distinguish measurements between with or without optimizations using Numba.
+As mentioned above, the sweep method in the Gauss-Seidel algorithm as well as the
+intergrid operations restriction and prolongation are accelerated with the
+[Numba jit decorator](https://numba.pydata.org/numba-doc/latest/reference/jit-compilation.html).
 We also experiment with the
 _[Intel Python Distribution](https://software.intel.com/content/www/us/en/develop/tools/distribution-for-python.html)_
 to speed up our implementation. The _Intel Python Distribution_ is a
@@ -415,7 +428,9 @@ there are 2 floating point operations.
 
 The following table contains some details about how many multigrid cycles and levels are performed
 for the according problem sizes:
-
+<!--
+TODO: Tabelle an neue Daten anpassen!!!
+-->
 | Problem size     | 16  | 32  | 48  | 64  | 128 | 192 | 256 | 320 | 384 | 448 | 512 | 576 | 640 | 704 | 768 | 832 | 896 | 960 | 1024 | 1088 | 1152 | 1216 | 1280 | 1408 | 1536 | 1664 | 1792 | 1920 | 2048 | 2176 | 2304 | 2432 | 2560 | 2816 | 3072 | 3328 | 3584 | 3840 | 4096 |
 | :--------------- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
 | Multigird cycles | 17  | 19  | 21  | 22  | 25  | 26  | 27  | 28  | 29  | 30  | 30  | 31  | 31  | 32  | 32  | 32  | 33  | 33  |  33  |  33  |  34  |  34  |  34  |  34  |  35  |  35  |  36  |  36  |  36  |  36  |  37  |  37  |  37  |  37  |  38  |  38  |  39  |  39  |  39  |
