@@ -5,6 +5,10 @@ buildconf=${2:-'multigrid'}
 
 [ "$buildconf" = "multigrid" ] || [ "$buildconf" = "gsrb" ] || exit 1
 
+generate_problem() {
+	../Python/problemgenerator/generate.py "$problempath" 2 "$1" -t "wave"
+}
+
 generate_problems() {
 	[ -e "$problempath" ] || mkdir -p "$problempath"
 	# delete existing problems
@@ -12,26 +16,26 @@ generate_problems() {
 	STEP=$([ "$buildconf" = "multigrid" ] && echo "64" || echo "16")
 	# generate new problems
 	for i in $(seq 1 20); do
-		../Python/problemgenerator/generate.py "$problempath" 2 $((i * STEP))
+		generate_problem $((i * STEP))
 	done
 
 	if [ "$buildconf" = "gsrb" ]; then
 		for i in $(seq 1 15); do
-            ../Python/problemgenerator/generate.py "$problempath" 2 $((320 + (i * 64)))
+			generate_problem $((320 + (i * 64)))
 		done
 	fi
 
 	if [ "$buildconf" = "multigrid" ]; then
-		../Python/problemgenerator/generate.py "$problempath" 2 16
-		../Python/problemgenerator/generate.py "$problempath" 2 32
-		../Python/problemgenerator/generate.py "$problempath" 2 48
+		generate_problem 16
+		generate_problem 32
+		generate_problem 48
 		N=1280
 		for i in $(seq 1 10); do
-			../Python/problemgenerator/generate.py "$problempath" 2 $((N + i * 128))
+			generate_problem $((N + i * 128))
 		done
 		N=2560
 		for i in $(seq 1 6); do
-			../Python/problemgenerator/generate.py "$problempath" 2 $((N + i * 256))
+			generate_problem $((N + i * 256))
 		done
 	fi
 }
