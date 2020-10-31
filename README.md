@@ -196,7 +196,7 @@ version from Python to D.
 
     Slice!(T*, Dim) do_cycle(Slice!(T*, Dim) F, Slice!(T*, Dim) U, uint l, T current_h)
     {
-        if (l <= 0 || U.shape[0] <= 1)
+        if (l <= 1 || U.shape[0] <= 1)
         {
             return solve(F, U, current_h);
         }
@@ -476,7 +476,7 @@ For big problems, the Python runs can be grouped by applying and not applying th
 | :---------------------------------------: | :--------------------------------------: |
 | ![](graphs/multigridD_flops.png?raw=true) | ![](graphs/multigridD_time.png?raw=true) |
 
-In the right figure we see the FLOP/s achieved during the benchmarks with the different
+In the left figure we see the FLOP/s achieved during the benchmarks with the different
 D implementations.
 The _field_ version performs best, then follows close the _naive_ version.
 The _slice_ version achieves the lowest FLOP/s, since it is the most time consuming version,
