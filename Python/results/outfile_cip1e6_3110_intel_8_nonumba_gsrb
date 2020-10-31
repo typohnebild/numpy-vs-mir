@@ -1,0 +1,41 @@
+############ INFOS
+Sat 31 Oct 2020 05:43:05 PM CET
+Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz
+numpy version: 1.18.5
+blas_mkl_info:
+    libraries = ['mkl_rt', 'pthread']
+    library_dirs = ['/proj/ciptmp/bu49mebu/IntelDistributionPython/intelpython3/lib']
+    define_macros = [('SCIPY_MKL_H', None), ('HAVE_CBLAS', None)]
+    include_dirs = ['/proj/ciptmp/bu49mebu/IntelDistributionPython/intelpython3/include']
+blas_opt_info:
+    libraries = ['mkl_rt', 'pthread']
+    library_dirs = ['/proj/ciptmp/bu49mebu/IntelDistributionPython/intelpython3/lib']
+    define_macros = [('SCIPY_MKL_H', None), ('HAVE_CBLAS', None)]
+    include_dirs = ['/proj/ciptmp/bu49mebu/IntelDistributionPython/intelpython3/include']
+lapack_mkl_info:
+    libraries = ['mkl_rt', 'pthread']
+    library_dirs = ['/proj/ciptmp/bu49mebu/IntelDistributionPython/intelpython3/lib']
+    define_macros = [('SCIPY_MKL_H', None), ('HAVE_CBLAS', None)]
+    include_dirs = ['/proj/ciptmp/bu49mebu/IntelDistributionPython/intelpython3/include']
+lapack_opt_info:
+    libraries = ['mkl_rt', 'pthread']
+    library_dirs = ['/proj/ciptmp/bu49mebu/IntelDistributionPython/intelpython3/lib']
+    define_macros = [('SCIPY_MKL_H', None), ('HAVE_CBLAS', None)]
+    include_dirs = ['/proj/ciptmp/bu49mebu/IntelDistributionPython/intelpython3/include']
+############ END INFOS
+size:dim:time:cycles:error:scalar_single:scalar_double:128b_packed_double:128b_packed_single:256b_packed_double:256b_packed_single:empty
+1024:2D:37.5678845802322:5000:0.0:40,006:15,672,420,049:0:0:3,915,580,000:0:
+1024:2D:37.3156977519393:5000:0.0:40,006:15,672,420,049:0:0:3,915,580,000:0:
+1024:2D:36.977572600357234:5000:0.0:40,006:15,672,420,049:0:0:3,915,580,000:0:
+1088:2D:44.71850207261741:5000:0.0:40,006:17,696,740,049:0:0:4,421,360,000:0:
+1088:2D:44.568416338413954:5000:0.0:40,006:17,696,740,049:0:0:4,421,360,000:0:
+1088:2D:43.982820521108806:5000:0.0:40,006:17,696,740,049:0:0:4,421,360,000:0:
+112:2D:0.5277481200173497:5000:0.0:0:440,030:0:0:90,640,000:0:
+112:2D:0.5100140459835529:5000:0.0:0:440,030:0:0:90,640,000:0:
+112:2D:0.5139438780024648:5000:0.0:0:440,030:0:0:90,640,000:0:
+1152:2D:51.92274694237858:5000:0.0:40,006:19,844,100,049:0:0:4,957,800,000:0:
+1152:2D:51.59092812333256:5000:0.0:40,006:19,844,100,049:0:0:4,957,800,000:0:
+1152:2D:51.52133378852159:5000:0.0:40,006:19,844,100,049:0:0:4,957,800,000:0:
+1216:2D:59.04936694353819:5000:0.0:40,006:22,114,180,049:0:0:5,524,980,000:0:
+1216:2D:58.84582297410816:5000:0.0:40,006:22,114,180,049:0:0:5,524,980,000:0:
+1216:2D:58.44677664898336:5000:0.0:40,006:22,114,180,049:0:0:5,524,980,000:0:

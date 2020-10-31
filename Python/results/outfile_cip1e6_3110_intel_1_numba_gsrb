@@ -1,0 +1,41 @@
+############ INFOS
+Sat 31 Oct 2020 05:43:04 PM CET
+Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz
+numpy version: 1.18.5
+blas_mkl_info:
+    libraries = ['mkl_rt', 'pthread']
+    library_dirs = ['/proj/ciptmp/bu49mebu/IntelDistributionPython/intelpython3/lib']
+    define_macros = [('SCIPY_MKL_H', None), ('HAVE_CBLAS', None)]
+    include_dirs = ['/proj/ciptmp/bu49mebu/IntelDistributionPython/intelpython3/include']
+blas_opt_info:
+    libraries = ['mkl_rt', 'pthread']
+    library_dirs = ['/proj/ciptmp/bu49mebu/IntelDistributionPython/intelpython3/lib']
+    define_macros = [('SCIPY_MKL_H', None), ('HAVE_CBLAS', None)]
+    include_dirs = ['/proj/ciptmp/bu49mebu/IntelDistributionPython/intelpython3/include']
+lapack_mkl_info:
+    libraries = ['mkl_rt', 'pthread']
+    library_dirs = ['/proj/ciptmp/bu49mebu/IntelDistributionPython/intelpython3/lib']
+    define_macros = [('SCIPY_MKL_H', None), ('HAVE_CBLAS', None)]
+    include_dirs = ['/proj/ciptmp/bu49mebu/IntelDistributionPython/intelpython3/include']
+lapack_opt_info:
+    libraries = ['mkl_rt', 'pthread']
+    library_dirs = ['/proj/ciptmp/bu49mebu/IntelDistributionPython/intelpython3/lib']
+    define_macros = [('SCIPY_MKL_H', None), ('HAVE_CBLAS', None)]
+    include_dirs = ['/proj/ciptmp/bu49mebu/IntelDistributionPython/intelpython3/include']
+############ END INFOS
+size:dim:time:cycles:error:scalar_single:scalar_double:128b_packed_double:128b_packed_single:256b_packed_double:256b_packed_single:empty
+1024:2D:25.93078090902418:5000:0.0:0:31,334,520,030:0:0:0:0:
+1024:2D:25.89311719313264:5000:0.0:0:31,334,520,030:0:0:0:0:
+1024:2D:25.829317644238472:5000:0.0:0:31,334,520,030:0:0:0:0:
+1088:2D:31.005373719148338:5000:0.0:0:35,381,880,030:0:0:0:0:
+1088:2D:30.858078449964523:5000:0.0:0:35,381,880,030:0:0:0:0:
+1088:2D:30.870757688768208:5000:0.0:0:35,381,880,030:0:0:0:0:
+112:2D:0.3149154866114259:5000:0.0:0:363,000,030:0:0:0:0:
+112:2D:0.28445965610444546:5000:0.0:0:363,000,030:0:0:0:0:
+112:2D:0.3147180648520589:5000:0.0:0:363,000,030:0:0:0:0:
+1152:2D:35.13558872696012:5000:0.0:0:39,675,000,030:0:0:0:0:
+1152:2D:35.12164186965674:5000:0.0:0:39,675,000,030:0:0:0:0:
+1152:2D:35.0935580432415:5000:0.0:0:39,675,000,030:0:0:0:0:
+1216:2D:40.0398419033736:5000:0.0:0:44,213,880,030:0:0:0:0:
+1216:2D:40.032967678271234:5000:0.0:0:44,213,880,030:0:0:0:0:
+1216:2D:40.12140481453389:5000:0.0:0:44,213,880,030:0:0:0:0:

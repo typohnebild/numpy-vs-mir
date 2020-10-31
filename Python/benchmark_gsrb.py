@@ -5,7 +5,6 @@ import logging
 
 from startup import DEFAULT_PROBLEM, getopts, wait
 
-from multipy.GaussSeidel.GaussSeidel_RB import GS_RB
 from multipy.tools.util import load_problem, timer
 
 
@@ -31,7 +30,6 @@ def main():
             level=logging.INFO)
 
     wait(options)
-
     start = time.perf_counter()
     GS_RB(
         F,
