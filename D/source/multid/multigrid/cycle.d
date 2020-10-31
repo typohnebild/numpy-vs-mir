@@ -45,7 +45,7 @@ protected:
 
     Slice!(T*, Dim) do_cycle(Slice!(T*, Dim) F, Slice!(T*, Dim) U, uint l, T current_h)
     {
-        if (l <= 0 || U.shape[0] <= 1)
+        if (l <= 1 || U.shape[0] <= 1)
         {
             return solve(F, U, current_h);
         }
