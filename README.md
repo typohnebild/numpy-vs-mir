@@ -45,7 +45,8 @@ its library _[MIR](https://www.libmir.org/)_ and find out to which extend they a
 how the differences in the performance are.
 
 To do so we choose a more complex application from HPC and implement a multigrid solver
-in both languages. The measurement takes place by solving the Poisson equation in 2D with our
+in both languages.
+The measurement is done by solving the Poisson equation in 2D with our
 solvers.
 The animation below shows the result of these calculations.
 
@@ -75,7 +76,8 @@ using MIR and NumPy.
 ### Poisson Equation
 
 The Poisson Equation is -&Delta;u = f and is used in various fields to describe processes like
-fluid dynamics or heatmaps. To solve it numerically, the finte-difference method is usually applied
+fluid dynamics or heatmaps.
+To solve it numerically, the finte-difference method is usually applied
 for discretization. The discrete version on rectangular 2D-Grid looks like this:
 
 (&nabla;<sup>2</sup>u)<sub>i,j</sub> = <sup>1</sup>&frasl;<sub>(h<sup>2</sup>)</sub>
@@ -97,21 +99,24 @@ x<sup>(k+1)</sup><sub>i</sub> =
 <sub>i&gt;j</sub> a <sub>i,j</sub> x<sub>i,j</sub><sup>(k)</sup>)
 
 The naive implementation is not good to parallelize since the computation is forced to be sequential
-by construction. This issue is tackled by grouping the grid points into two independent groups.
+by construction.
+This issue is tackled by grouping the grid points into two independent groups.
 The corresponding method is called **Gauss-Seidel-Red-Black**.
 Therefore, the inside of the grid is divided into so-called red and black dots like a
-chessboard. It first calculates updates where the sum of indices is even (red), because these are
-independent. This step can be done in parallel. Afterwards the same is done
-for the cells where the sum of indices is odd (black).
+chessboard.
+It first calculates updates where the sum of indices is even (red), because these are
+independent.
+This step can be done in parallel.
+Afterwards the same is done for the cells where the sum of indices is odd (black).
 (see [here](https://www10.cs.fau.de/publications/theses/2005/Stuermer_SA_2005.pdf))
 
 ### Multigrid
 
-Multigrid is an iterative solver for systems of equations like `Ax = b`.
+A Multigrid method is an iterative solver for systems of equations like `Ax = b`.
 The main idea of multigrid is to solve a relaxed version of the problem with less variables instead
 of solving the problem directly.
 The solution for `Ax = b` is approximated by using the residual `r = b - Ax`.
-This residual discribes the distance of the current `x` to the targeted solution and is used to
+This residual describes the distance of the current `x` to the targeted solution and is used to
 calculate the error `e`.
 The error `e` is the solution to the system of equations `Ae = r`.
 It is solved in a restricted version which means that the problem has been transformed to a
@@ -175,7 +180,7 @@ logic of a multigrid cycle and how the correction shall be computed.
 
 The class _PoissonCycle_ is a specialization of this abstract _Cycle_. Here, the class specific
 methods like pre- and post-smoothing are implemented. Both smoothing implementations and also
-the solver are based on the Gauss-Seidel-Red-Black algorithm.
+the solver are using the Gauss-Seidel-Red-Black algorithm.
 
 ### D Multigrid
 
@@ -232,7 +237,7 @@ Gauss-Seidel-Red-Black sweep:
 
 1. Slices: Python like. Uses D Slices and Strides for grouping (Red-Black).
 2. Naive: one for-loop for each dimension. Matrix-Access via multi-dimensional Array.
-3. Fields: one for-loop for each dimension. Matrix is flattened. Access via flattened index.
+3. Fields: one for-loop. Matrix is flattened. Access via flattened index.
 
 The [first one](D/source/multid/gaussseidel/sweep.d#L98)
 is the approach to implement the Gauss-Seidel in a way, that it "looks" syntactical
@@ -331,10 +336,11 @@ As multigrid benchmarks ([D Benchmark](#d-benchmark), [Python Benchmark](#python
 [Benchmarks Combined](#benchmarks-combined)) we solve problems in size of
 16, 32, 48, 64, 128, 192, .. 1216, 1280, 1408, 1536, ...,
 2432, 2560, 2816, ..., 3840, 4096.
-Each problem is solved with a Multigrid W-cycle with 2 pre- and postsmoothing steps.
+Each problem is solved with a Multigrid V-cycle with 2 pre- and postsmoothing steps.
 As stop criteria we use an epsilon of 1e-6 multiplied with the squared problem size.
 This makes the stop criteria independent of the problem size.
 For each permutation of the setup option a run is done 3 times.
+And in evaluation the median of them is considered.
 
 We also compare the performance of the solvers in the different versions
 in a [Solver Benchmark](#solver-benchmark).
@@ -346,7 +352,8 @@ From problem size 384 &times; 384 to 1280 &times; 1280 we increase the step size
 The number of Gauss-Seidel iterations is fixed to 5000 for each problem size.
 
 In order to make sure that each benchmark deals with the same problems, these are generated
-beforehand and written into `.npy` files. These files are later imported to the benchmark programs.
+beforehand and written into `.npy` files.
+These files are later imported to the benchmark programs.
 
 To see if parallelization causes some differences in performance, we measure the Python code with
 1 and with 8 threads.
@@ -376,8 +383,8 @@ is used.
 
 To count the floating-point operations that occur while execution we use the
 Linux tool [_perf_](https://perf.wiki.kernel.org/index.php/Main_Page), which is
-build into the Linux kernel. It allows to gather a enormous variety of
-performance counters, if they are implemented by the CPU.
+build into the Linux kernel.
+It allows to gather a enormous variety of performance counters, if they are implemented by the CPU.
 The CPU we use offers the performance counters
 _scalar\_single_, _scalar\_double_, _128b\_packed\_double_,
 _128b\_packed\_single_, _256b\_packed\_double_, _256b\_packed\_single_
@@ -428,16 +435,15 @@ there are 2 floating point operations.
 
 The following table contains some details about how many multigrid cycles and levels are performed
 for the according problem sizes:
-<!--
-TODO: Tabelle an neue Daten anpassen!!!
--->
+
 | Problem size     | 16  | 32  | 48  | 64  | 128 | 192 | 256 | 320 | 384 | 448 | 512 | 576 | 640 | 704 | 768 | 832 | 896 | 960 | 1024 | 1088 | 1152 | 1216 | 1280 | 1408 | 1536 | 1664 | 1792 | 1920 | 2048 | 2176 | 2304 | 2432 | 2560 | 2816 | 3072 | 3328 | 3584 | 3840 | 4096 |
 | :--------------- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
-| Multigird cycles | 17  | 19  | 21  | 22  | 25  | 26  | 27  | 28  | 29  | 30  | 30  | 31  | 31  | 32  | 32  | 32  | 33  | 33  |  33  |  33  |  34  |  34  |  34  |  34  |  35  |  35  |  36  |  36  |  36  |  36  |  37  |  37  |  37  |  37  |  38  |  38  |  39  |  39  |  39  |
-| # levels         |  4  |  5  |  5  |  6  |  7  |  7  |  8  |  8  |  8  |  8  |  9  |  9  |  9  |  9  |  9  |  9  |  9  |  9  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  11  |  12  |
+| Multigird cycles | 4   | 7   | 8   | 8   | 9   | 10  | 10  | 10  | 11  | 11  | 11  | 11  | 11  | 11  | 11  | 11  | 11  | 11  | 11   | 12   | 11   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   |
+| # levels         | 4   | 5   | 5   | 6   | 7   | 7   | 8   | 8   | 8   | 8   | 9   | 9   | 9   | 9   | 9   | 9   | 9   | 9   | 10   | 10   | 10   | 10   | 10   | 10   | 10   | 10   | 10   | 10   | 11   | 11   | 11   | 11   | 11   | 11   | 11   | 11   | 11   | 11   | 12   |
 
 This table is representative for all benchmarks.
-The number of multigrid cycles and levels are valid for all multigrid implementations.
+Since every variation of or Multigrid implementation does the same calculation the number of cycles
+and levels are always the same. The number of levels are simply calculated with `|log2(N)| - 1`.
 
 ### Solver Benchmark
 
