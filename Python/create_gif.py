@@ -17,12 +17,16 @@ def main():
     cycle = PoissonCycle(F, 1, 0, 1, 0)
     ims = []
     fig = plt.figure()
-    ax = fig.gca(projection="3d") 
-    x = np.linspace(0,1,1024)
-    X,Y = np.meshgrid(x,x)
+    ax = fig.gca(projection="3d")
+    x = np.linspace(0, 1, 1024)
+    X, Y = np.meshgrid(x, x)
     for i in range(100):
         #im = plt.imshow(U, cmap='RdBu_r', interpolation='nearest')
-        im = ax.plot_surface(X, Y, U, alpha=0.7, cmap='magma')
+        im = ax.plot_surface(
+            X[1: -1, 1: -1],
+            Y[1: -1, 1: -1],
+            U[1: -1, 1: -1],
+            alpha=0.7, cmap='magma')
         t = ax.annotate(i, (0.1, 0.1), xycoords='figure fraction')
         norm = cycle.norm(U)
         n = ax.annotate(norm, (0.7, 0.1), xycoords='figure fraction')
