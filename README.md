@@ -441,7 +441,7 @@ for the according problem sizes:
 
 This table is representative for all benchmarks.
 Since every variation of or Multigrid implementation does the same calculation the number of cycles
-and levels are always the same. The number of levels are simply calculated with `|log2(N)| - 1`.
+and levels are always the same. The number of levels are simply calculated with `⌊log2(N)⌋ - 1`.
 
 ### Solver Benchmark
 
