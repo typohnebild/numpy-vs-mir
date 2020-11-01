@@ -322,12 +322,12 @@ As performance measures we use the execution time and the number of
 floating-point operations (FLOP) per second (FLOP/s).
 
 As an example problem we choose the [Poisson-Equation](#poisson-equation) with the two dimensional
-function f(x,y) = sin(2&pi;x)cos(2&pi;y), since the analytical solution is given by
-u(x,y) = sin(2&pi;x)cos(2&pi;y) / (8&pi;<sup>2</sup>).
+function ***f(x,y) = sin(2&pi;x)cos(2&pi;y)***, since the analytical solution is given by
+***u(x,y) = sin(2&pi;x)cos(2&pi;y) / (8&pi;<sup>2</sup>)***.
 Therefore, it is verry simple to check our resluts.
 The boundaries are managed with the Dirichlet boundary condition, that means the boundaries of the
 Matrices are not updated.
-The initial condition for `U` is zero.
+The iteration starts initially from zero.
 This [animation](#motivation) visalizes the results after each multigrid cycle.
 
 As multigrid benchmarks ([D Benchmark](#d-benchmark), [Python Benchmark](#python-benchmark),
