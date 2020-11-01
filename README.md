@@ -541,28 +541,6 @@ For smaller problem sizes we can observe a sharp increase in FLOP/s until they r
 round about problem size 500.
 For bigger prolem sizes the FLOP/s slightly drop and finally level out.
 
-<!--
-Furthermore, we can observe increases in execution time at specific problem size transitions
-for Python implementations like from 448 to 512 or from 1920 to 2048.
-At these transitions, the execution time in the D implementations remain largely the same.
-This is correlated to the increasing multigrid level as we can see in this
-[table](#table-multigrid-cycles).
-This effect can be explained by the problem size on the lowest multigrid level, which is solved by
-the solver.
-For example the problem size of 1920 &times; 1920 has a multigrid level of 11 which results in a
-low-level problem size of 5 &times; 5 while the next greater problem size of 2048 &times; 2048 with
-multigrid level 12 has a low-level problem size of just 3 &times; 3.
-This speeds up the computation of the solve step.
-As one can see, the execution time of the D implementations remain largely the same, which means
-that the speed up compensates for the additional multigrid level overhead.
-In contrast, the speed up is not sufficient to compensate for the overhead in our Python
-implementations, resulting in a considerably growth of execution time.
-
-Moreover, the FLOP/s of our D implementations increase faster and peak at smaller problem sizes
-than our Python implementations.
-After reaching the peak, the FLOP/s drop slightly and then remain stable.
--->
-
 
 ## Summary
 
