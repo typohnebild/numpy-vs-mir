@@ -328,9 +328,7 @@ Therefore, it is verry simple to check our resluts.
 The boundaries are managed with the Dirichlet boundary condition, that means the boundaries of the
 Matrices are not updated.
 The initial condition for `U` is zero.
-<!--
-Hier ggf ein Link zum GIF oder ein Bild einfuegen.
--->
+This [animation](#motivation) visalizes the results after each multigrid cycle.
 
 As multigrid benchmarks ([D Benchmark](#d-benchmark), [Python Benchmark](#python-benchmark),
 [Benchmarks Combined](#benchmarks-combined)) we solve problems in size of
