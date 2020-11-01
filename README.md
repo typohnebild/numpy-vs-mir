@@ -439,7 +439,7 @@ for the according problem sizes:
 | Problem size     | 16  | 32  | 48  | 64  | 128 | 192 | 256 | 320 | 384 | 448 | 512 | 576 | 640 | 704 | 768 | 832 | 896 | 960 | 1024 | 1088 | 1152 | 1216 | 1280 | 1408 | 1536 | 1664 | 1792 | 1920 | 2048 | 2176 | 2304 | 2432 | 2560 | 2816 | 3072 | 3328 | 3584 | 3840 | 4096 |
 | :--------------- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
 | Multigird cycles | 4   | 7   | 8   | 8   | 9   | 10  | 10  | 10  | 11  | 11  | 11  | 11  | 11  | 11  | 11  | 11  | 11  | 11  | 11   | 12   | 11   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   |
-| # levels         | 4   | 5   | 5   | 6   | 7   | 7   | 8   | 8   | 8   | 8   | 9   | 9   | 9   | 9   | 9   | 9   | 9   | 9   | 10   | 10   | 10   | 10   | 10   | 10   | 10   | 10   | 10   | 10   | 11   | 11   | 11   | 11   | 11   | 11   | 11   | 11   | 11   | 11   | 12   |
+| # levels         | 3   | 4   | 4   | 5   | 6   | 6   | 7   | 7   | 7   | 7   | 8   | 8   | 8   | 8   | 8   | 8   | 8   | 8   | 9   | 9   | 9   | 9   | 9   | 9   | 9   | 9   | 9   | 9   | 10   | 10   | 10   | 10   | 10   | 10   | 10   | 10   | 10   | 10   | 11   |
 
 This table is representative for all benchmarks.
 Since every variation of or Multigrid implementation does the same calculation the number of cycles
@@ -514,13 +514,13 @@ This might be an effect of the small problem sizes in the lowest multigrid-level
 When Numba is used, there is no big difference between the Intel Python distribution, that uses the
 Intel MKL and the "plain" Python version accelerated with Openblas.
 In the runs where Numba is not used, the Intel version is slower than the Openblas version,
-but runs more FLOP/s for problem sizes above 1500.
+but runs more FLOP/s for problem sizes above 800.
 One aspect that possibly plays into is the relatively old NumPy version that is used in the
 Intel Python distribution.
-The stepwise time curve is caused by the increased multigrid-level for the
+The smaller steps in the time curve are caused by the increased multigrid-level for the
 corresponding problem size (see [table](#table-multigrid-cycles)).
-These larger jumps in the required time also influence the ups and downs of the FLOP/s values
-accordingly and result in a serrated pattern.
+These jumps in the required execution time also influence the ups and downs of the FLOP/s values
+accordingly.
 
 
 ### Benchmarks combined
@@ -531,11 +531,18 @@ accordingly and result in a serrated pattern.
 | ![](graphs/multigrid_FLOPS_subplots.png?raw=true) | ![](graphs/multigrid_time_subplots.png?raw=true) |
 
 As already seen in the [Solver Benchmark](#solver-benchmark), the multigrid implementation in D
-outperforms the Python implementations. Even the slowest D version (_slice_) is by far faster than
+outperforms the Python implementations. Even the slowest D version (_slice_) is faster than
 the fastest Python version. This may be due to the optimization level of the D compiler, but also to
 the fact that compiled programs tend to be faster than interpreted ones.
 
-Furthermore, we can observe sharp increases in execution time at specific problem size transitions
+More or less all implementations follow a similar pattern in behaviour of execution time and FLOP/s
+as it can be seen in the figures with the single graphs.
+For smaller problem sizes we can observe a sharp increase in FLOP/s until they reach a peak
+round about problem size 500.
+For bigger prolem sizes the FLOP/s slightly drop and finally level out.
+
+<!--
+Furthermore, we can observe increases in execution time at specific problem size transitions
 for Python implementations like from 448 to 512 or from 1920 to 2048.
 At these transitions, the execution time in the D implementations remain largely the same.
 This is correlated to the increasing multigrid level as we can see in this
@@ -554,14 +561,15 @@ implementations, resulting in a considerably growth of execution time.
 Moreover, the FLOP/s of our D implementations increase faster and peak at smaller problem sizes
 than our Python implementations.
 After reaching the peak, the FLOP/s drop slightly and then remain stable.
+-->
 
 
 ## Summary
 
 From a performance perspective the MIR implementations are superior to the NumPy implementation.
 The big difference is especially visible in [this figures](#benchmarks-combined).
-For the biggest problem, the D versions take around 16-44 seconds,
-while the Python versions take from 68 to 110 seconds.
+For the biggest multigird problem, the D versions take around 5-10 seconds,
+while the Python versions take from 15 to 19 seconds.
 Propably this is mainly caused by the overhead of the Python interpreter
 and might be reduced by more optimization efforts.
 
