@@ -19,7 +19,7 @@ If you have suggestions for improvements, feel free to open an issue or a pull r
   - [Implementation](#implementation)
     - [Python Multigrid](#python-multigrid)
     - [D Multigrid](#d-multigrid)
-    - [Differences in Gauss–Seidel-Red-Black](#differences-in-gaussseidel-red-black)
+    - [Differences in Red-Black Gauss–Seidel](#differences-in-gaussseidel-red-black)
   - [Measurements](#measurements)
     - [Hardware/Software Setup](#hardwaresoftware-setup)
     - [What was measured?](#what-was-measured)
@@ -101,7 +101,7 @@ x<sup>(k+1)</sup><sub>i</sub> =
 The naive implementation is not good to parallelize since the computation is forced to be sequential
 by construction.
 This issue is tackled by grouping the grid points into two independent groups.
-The corresponding method is called **Gauss-Seidel-Red-Black**.
+The corresponding method is called **Red-Black Gauss-Seidel**.
 Therefore, the inside of the grid is divided into so-called red and black dots like a
 chessboard.
 It first calculates updates where the sum of indices is even (red), because these are
@@ -112,7 +112,8 @@ Afterwards the same is done for the cells where the sum of indices is odd (black
 
 ### Multigrid
 
-A Multigrid method is an iterative solver for systems of equations like `Ax = b`.
+A Multigrid method is an iterative solver for systems of equations in the form of `Ax = b`.
+Where `A` is N &times; M matrix and `x` and `b` are Vectors with N entries.
 The main idea of multigrid is to solve a relaxed version of the problem with less variables instead
 of solving the problem directly.
 The solution for `Ax = b` is approximated by using the residual `r = b - Ax`.
@@ -127,12 +128,13 @@ The solving of `Ae = r` can be done recursively until the costs for solving
 are negligible and can be done directly due to the smaller problem size.
 
 
-One multigrid cycle looks like the following:
+The basic scheme of a multigrid cycle looks like the following:
 
 - Pre-Smoothing – reducing high frequency errors using a few iterations of the Gauss–Seidel method.
 - Residual Computation – computing residual error after the smoothing operation(s).
-- Restriction – downsampling the residual error to a coarser grid.
-- Prolongation – interpolating a correction computed on a coarser grid into a finer grid.
+- Restriction – downsampling the residual to a coarser grid.
+- Compute error – sovle (recursively) the problem `Ae = r` on the coarser gird.
+- Prolongation – interpolating the correction computed on a coarser grid into a finer grid.
 - Correction – Adding prolongated coarser grid solution onto the finer grid.
 - Post-Smoothing – reducing further errors using a few iterations of the Gauss–Seidel method.
 
@@ -180,7 +182,7 @@ logic of a multigrid cycle and how the correction shall be computed.
 
 The class _PoissonCycle_ is a specialization of this abstract _Cycle_. Here, the class specific
 methods like pre- and post-smoothing are implemented. Both smoothing implementations and also
-the solver are using the Gauss-Seidel-Red-Black algorithm.
+the solver are using the Red-Black Gauss-Seidel algorithm.
 
 ### D Multigrid
 
@@ -221,19 +223,20 @@ version from Python to D.
     }
 ```
 
-### Differences in Gauss–Seidel-Red-Black
+### Differences in Red-Black Gauss–Seidel
 
 The implementations of the multigrid only differ essentially in syntactical
 matters. The main difference is in the used solver and smoother. More precisely, the difference
 is the Gauss-Seidel method.
 
 In Python, we use _[Numba](https://numba.pydata.org/)_ to speed up the sweep method in the
-Gauss-Seidel-Red-Black algorithm. It basically performs the update step by using
-the _NumPy_ array slices. The efficiency differences in using Numba or not are considered in the
+Red-Black Gauss-Seidel algorithm.
+It basically performs the update step by using the _NumPy_ array slices.
+The efficiency differences in using Numba or not are considered in the
 [Python-Benchmark](#python-benchmark).
 
 In order to estimate the fastest approach in D, we consider three variations of the
-Gauss-Seidel-Red-Black sweep:
+Red-Black Gauss-Seidel sweep:
 
 1. Slices: Python like. Uses D Slices and Strides for grouping (Red-Black).
 2. Naive: one for-loop for each dimension. Matrix-Access via multi-dimensional Array.
@@ -331,7 +334,8 @@ The iteration starts initially from zero.
 Except from the boundary cells, there already initialized with the correct solution.
 This [animation](#motivation) visualizes the results after each multigrid cycle.
 
-As multigrid benchmarks ([D Benchmark](#d-benchmark), [Python Benchmark](#python-benchmark),
+As benchmarks for the multigrid implementations
+([D Benchmark](#d-benchmark), [Python Benchmark](#python-benchmark),
 [Benchmarks Combined](#benchmarks-combined)) we solve problems in size of
 16, 32, 48, 64, 128, 192, .. 1216, 1280, 1408, 1536, ...,
 2432, 2560, 2816, ..., 3840, 4096.
@@ -364,12 +368,14 @@ intergrid operations restriction and prolongation are accelerated with the
 [Numba jit decorator](https://numba.pydata.org/numba-doc/latest/reference/jit-compilation.html).
 We also experiment with the
 _[Intel Python Distribution](https://software.intel.com/content/www/us/en/develop/tools/distribution-for-python.html)_
-to speed up our implementation. The _Intel Python Distribution_ is a
-combination of many Python-packages like _Numba_ or _NumPy_ that is
-optimized for Intel CPUs.
+to speed up our implementation.
+The _Intel Python Distribution_ is a combination of many Python-packages like _Numba_ or _NumPy_
+that is optimized for Intel CPUs.
+These packages are accelerated with the _Intel MKL_.
+When not using the _Intel Python Distribution_, NumPy is accelerated with the OpenBlas libary.
 
 In the [D-Benchmark](#d-benchmark) we differentiate the measurements between
-the sweep implementations _slice_, _naive_ and _field_.
+the sweep implementations _slice_, _naive_ and _field_ in the Gauss-Seidel method.
 
 
 ### How was measured?
@@ -400,12 +406,13 @@ So we want to avoid that _perf_ counts the FLOP/s that occur while this phase.
 To achieve this we use the delay option for _perf_, which delays the start of
 the measurement, and also delay our programs accordingly.
 The delay for the program is meant to be a bit longer than the actual startup
-phase. So the program needs to sleep after the warm-up until the delay is over.
+phase.
+So the program needs to sleep after the warm-up until the delay is over.
 It is meant that _perf_ starts to measure while the benchmark program is waiting till its delay
 is over.
-This should be no problem, because while waiting there should be no floating-point
-operation that would spoil our results. The real execution time is measured separately
-on program side.
+This is not problematic, because while waiting there should be no floating-point
+operation that would spoil our results.
+The actual execution time is measured separately on program side.
 
 This procedure is sufficient for our kind and complexity of project, but for more advanced
 projects it might be more suitable to use tools like
@@ -450,8 +457,8 @@ and levels are always the same. The number of levels are simply calculated with 
 | :---------------------------------: | :--------------------------------: |
 | ![](graphs/gsrb_flops.png?raw=true) | ![](graphs/gsrb_time.png?raw=true) |
 
-Here is already apparent that the D version with using the fields is the fastest one. While the
-Python implementation using the Intel Distribution without Numba is the slowest one.
+Here is already apparent that the D version with using the fields is the fastest one.
+While the Python implementation using the Intel Distribution without Numba is the slowest one.
 Furthermore, there is no difference in the single- and the multithreaded runs visible.
 This could be an effect of the relatively small array size, so multithreading would not be worthwhile.
 
