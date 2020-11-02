@@ -324,11 +324,12 @@ floating-point operations (FLOP) per second (FLOP/s).
 As an example problem we choose the [Poisson-Equation](#poisson-equation) with the two dimensional
 function ***f(x,y) = sin(2&pi;x)cos(2&pi;y)***, since the analytical solution is given by
 ***u(x,y) = sin(2&pi;x)cos(2&pi;y) / (8&pi;<sup>2</sup>)***.
-Therefore, it is verry simple to check our resluts.
+Therefore, it is very simple to check our results.
 The boundaries are managed with the Dirichlet boundary condition, that means the boundaries of the
 Matrices are not updated.
 The iteration starts initially from zero.
-This [animation](#motivation) visalizes the results after each multigrid cycle.
+Except from the boundary cells, there already initialized with the correct solution.
+This [animation](#motivation) visualizes the results after each multigrid cycle.
 
 As multigrid benchmarks ([D Benchmark](#d-benchmark), [Python Benchmark](#python-benchmark),
 [Benchmarks Combined](#benchmarks-combined)) we solve problems in size of
