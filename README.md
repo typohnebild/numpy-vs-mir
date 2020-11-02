@@ -19,7 +19,7 @@ If you have suggestions for improvements, feel free to open an issue or a pull r
   - [Implementation](#implementation)
     - [Python Multigrid](#python-multigrid)
     - [D Multigrid](#d-multigrid)
-    - [Differences in Red-Black Gauss–Seidel](#differences-in-gaussseidel-red-black)
+    - [Differences in Red-Black Gauss–Seidel](#differences-in-red-black-gaussseidel)
   - [Measurements](#measurements)
     - [Hardware/Software Setup](#hardwaresoftware-setup)
     - [What was measured?](#what-was-measured)
@@ -130,12 +130,12 @@ are negligible and can be done directly due to the smaller problem size.
 
 The basic scheme of a multigrid cycle looks like the following:
 
-- Pre-Smoothing – reducing high frequency errors using a few iterations of the Gauss–Seidel method.
-- Residual Computation – computing residual error after the smoothing operation(s).
-- Restriction – downsampling the residual to a coarser grid.
-- Compute error – sovle (recursively) the problem `Ae = r` on the coarser gird.
-- Prolongation – interpolating the correction computed on a coarser grid into a finer grid.
-- Correction – Adding prolongated coarser grid solution onto the finer grid.
+- Pre-Smoothing – reducing initial errors calculating a few iterations of the Gauss–Seidel method.
+- Residual Computation – computing residual error.
+- Restriction – downsampling the residual to a lower resolution.
+- Compute error – sovle (recursively) the problem `Ae = r` on the restricted residual.
+- Prolongation – interpolating the correction `e` back to the previous resolution.
+- Correction – Adding prolongated correction error onto the solution approximation `x`.
 - Post-Smoothing – reducing further errors using a few iterations of the Gauss–Seidel method.
 
 Various cycle types can be defined by looping the computation of the correction error &mu; times.
