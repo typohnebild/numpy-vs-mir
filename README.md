@@ -326,15 +326,17 @@ Python for-loops which are not competitive for this application.
 As performance measures we use the execution time and the number of
 floating-point operations (FLOP) per second (FLOP/s).
 
-As an example problem we choose the [Poisson-Equation](#poisson-equation) with the two dimensional
-function ***f(x,y) = sin(2&pi;x)cos(2&pi;y)***, since the analytical solution is given by
-***u(x,y) = sin(2&pi;x)cos(2&pi;y) / (8&pi;<sup>2</sup>)***.
+The example problem we choose is the [Poisson-Equation](#poisson-equation) with the two dimensional
+function **_f(x,y) = sin(2&pi;x)cos(2&pi;y)_**.
+The analytical solution is given by **_u(x,y) = sin(2&pi;x)cos(2&pi;y) / (8&pi;<sup>2</sup>)_**.
 Therefore, it is very simple to check our results.
 The boundaries are managed with the Dirichlet boundary condition, that means the boundaries of the
 Matrices are not updated.
 The iteration starts initially from zero.
 Except from the boundary cells, there already initialized with the correct solution.
 This [animation](#motivation) visualizes the results after each multigrid cycle.
+In the lower left corner it shows the number of the visualized cycle,
+as well as in the lower right corner the L2-Norm of the residual after each cycle.
 
 As benchmarks for the multigrid implementations
 ([D Benchmark](#d-benchmark), [Python Benchmark](#python-benchmark),
