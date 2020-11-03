@@ -34,7 +34,7 @@ If you have suggestions for improvements, feel free to open an issue or a pull r
 
 ## Motivation
 
-Python is a well known and often used programming language. Its C-based package NumPy allows an
+Python is a well known and often used programming language. Its C-based package NumPy allows
 efficient computation for a wide variety of problems.
 Although Python is popular and commonly used it is worth to look if there are
 other languages and if they perform similar or even better than the established
@@ -69,7 +69,8 @@ In [MIR Benchmark](https://github.com/tastyminerals/mir_benchmarks), D is compar
 Julia with respect to simple numerical operations like dot product, multiplication and sorting.
 Similar to our approach, MIR and NumPy is used in those implementations.
 
-Both works compare relatively simple instructions. We compare a more complex application, and not
+Both works compare the performance of individual matrix or vector operations.
+We compare a more complex application, and not
 just individual functions, by implementing a multigrid solver in D and Python
 using MIR and NumPy.
 
@@ -78,9 +79,10 @@ using MIR and NumPy.
 ### Poisson Equation
 
 The Poisson Equation is -&Delta;u = f and is used in various fields to describe processes like
-fluid dynamics or heatmaps.
+fluid dynamics or heat distribution.
 To solve it numerically, the finte-difference method is usually applied
-for discretization. The discrete version on rectangular 2D-Grid looks like this:
+for discretization.
+The discrete version on rectangular 2D-Grid looks like this:
 
 (&nabla;<sup>2</sup>u)<sub>i,j</sub> = <sup>1</sup>&frasl;<sub>(h<sup>2</sup>)</sub>
 (u<sub>i+1,j</sub> + u<sub>i - 1, j</sub> +
@@ -129,13 +131,12 @@ Since `e` has a lower resolution, it has to be interpolated to a higher resoluti
 The solving of `Ae = r` can be done recursively until the costs for solving
 are negligible and can be done directly due to the smaller problem size.
 
-
 The basic scheme of a multigrid cycle looks like the following:
 
 - Pre-Smoothing – reducing initial errors calculating a few iterations of the Gauss–Seidel method.
 - Residual Computation – computing residual error.
 - Restriction – downsampling the residual to a lower resolution.
-- Compute error – sovle (recursively) the problem `Ae = r` on the restricted residual.
+- Compute error – solve (recursively) the problem `Ae = r` on the restricted residual.
 - Prolongation – interpolating the correction `e` back to the previous resolution.
 - Correction – Adding prolongated correction error onto the solution approximation `x`.
 - Post-Smoothing – reducing further errors using a few iterations of the Gauss–Seidel method.
@@ -149,8 +150,8 @@ approximation. (see [here](https://www.math.ust.hk/~mawang/teaching/math532/mgtu
 
 ### Python Multigrid
 
-The Python multigrid implementation is based on an abstract class _Cycle_. It contains the basic
-logic of a multigrid cycle and how the correction shall be computed.
+The Python multigrid implementation is based on an abstract class _Cycle_.
+It contains the basic logic of a multigrid cycle and how the correction shall be computed.
 
 ```python
     def _compute_correction(self, r, l, h):
@@ -183,8 +184,8 @@ logic of a multigrid cycle and how the correction shall be computed.
 ```
 
 The class _PoissonCycle_ is a specialization of this abstract _Cycle_. Here, the class specific
-methods like pre- and post-smoothing are implemented. Both smoothing implementations and also
-the solver are using the Red-Black Gauss-Seidel algorithm.
+methods like pre- and post-smoothing are implemented.
+Both smoothing implementations and also the solver are using the Red-Black Gauss-Seidel algorithm.
 
 ### D Multigrid
 
@@ -248,7 +249,8 @@ The [first one](D/source/multid/gaussseidel/sweep.d#L98)
 is the approach to implement the Gauss-Seidel in a way, that it "looks" syntactical
 like the [Python](Python/multipy/GaussSeidel/GaussSeidel_RB.py#L85) implementation.
 But since the indexing operator of the MIR slices does not support striding,
-it is needed to do with a extra function call.
+it is needed to do with a extra function call of
+[`strided`](http://mir-algorithm.libmir.org/mir_ndslice_dynamic.html#.strided).
 The [second](D/source/multid/gaussseidel/sweep.d#L176),
 the "naive" version is an implementation as it can be found in an textbook.
 The [third](D/source/multid/gaussseidel/sweep.d#L16) one is the most
@@ -381,7 +383,6 @@ When not using the _Intel Python Distribution_, NumPy is accelerated with the Op
 In the [D-Benchmark](#d-benchmark) we differentiate the measurements between
 the sweep implementations _slice_, _naive_ and _field_ in the Gauss-Seidel method.
 
-
 ### How was measured?
 
 To measure the execution time we use the `perf_counter()` from the
@@ -448,8 +449,8 @@ for the according problem sizes:
 
 | Problem size     | 16  | 32  | 48  | 64  | 128 | 192 | 256 | 320 | 384 | 448 | 512 | 576 | 640 | 704 | 768 | 832 | 896 | 960 | 1024 | 1088 | 1152 | 1216 | 1280 | 1408 | 1536 | 1664 | 1792 | 1920 | 2048 | 2176 | 2304 | 2432 | 2560 | 2816 | 3072 | 3328 | 3584 | 3840 | 4096 |
 | :--------------- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
-| Multigird cycles | 4   | 7   | 8   | 8   | 9   | 10  | 10  | 10  | 11  | 11  | 11  | 11  | 11  | 11  | 11  | 11  | 11  | 11  | 11   | 12   | 11   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   | 12   |
-| # levels         | 3   | 4   | 4   | 5   | 6   | 6   | 7   | 7   | 7   | 7   | 8   | 8   | 8   | 8   | 8   | 8   | 8   | 8   | 9   | 9   | 9   | 9   | 9   | 9   | 9   | 9   | 9   | 9   | 10   | 10   | 10   | 10   | 10   | 10   | 10   | 10   | 10   | 10   | 11   |
+| Multigird cycles |  4  |  7  |  8  |  8  |  9  | 10  | 10  | 10  | 11  | 11  | 11  | 11  | 11  | 11  | 11  | 11  | 11  | 11  |  11  |  12  |  11  |  12  |  12  |  12  |  12  |  12  |  12  |  12  |  12  |  12  |  12  |  12  |  12  |  12  |  12  |  12  |  12  |  12  |  12  |
+| # levels         |  3  |  4  |  4  |  5  |  6  |  6  |  7  |  7  |  7  |  7  |  8  |  8  |  8  |  8  |  8  |  8  |  8  |  8  |  9   |  9   |  9   |  9   |  9   |  9   |  9   |  9   |  9   |  9   |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  10  |  11  |
 
 This table is representative for all benchmarks.
 Since every variation of or Multigrid implementation does the same calculation the number of cycles
@@ -487,7 +488,6 @@ Therefore, using the Intel environment without Numba is not appropriate.
 However, both runs without Numba perform very poorly.
 For big problems, the Python runs can be grouped by applying and not applying the Numba `jit`.
 
-
 ### D Benchmark
 
 |                  Flop/s                   |                   Time                   |
@@ -507,7 +507,6 @@ for greater problem sizes between the _slice_ the other two implementations.
 Furthermore, the execution times for small problem sizes are in the range of several milliseconds.
 As a result, even small changes in the execution time have a great impact to the
 corresponding FLOP/s value.
-
 
 ### Python Benchmark
 
@@ -532,7 +531,6 @@ corresponding problem size (see [table](#table-multigrid-cycles)).
 These jumps in the required execution time also influence the ups and downs of the FLOP/s values
 accordingly.
 
-
 ### Benchmarks combined
 
 |                      Flop/s                       |                       Time                       |
@@ -550,7 +548,6 @@ as it can be seen in the figures with the single graphs.
 For smaller problem sizes we can observe a sharp increase in FLOP/s until they reach a peak
 round about problem size 500.
 For bigger prolem sizes the FLOP/s slightly drop and finally level out.
-
 
 ## Summary
 
