@@ -51,9 +51,11 @@ solvers.
 The animation below shows the result of these calculations.
 
 <div align="center">
-    <p align="center">
-        <img src="graphs/wave.gif?raw=true">
-    </p>
+<p align="center">
+<figure>
+<img src="graphs/wave.gif?raw=true">
+<figcaption>Visualization of the results of the Multigrid algorithm after each cycle (lower left) and the L2-Norm of the residual (lower right).</figcaption>
+</figure></p>
 </div>
 
 ## Related Work
