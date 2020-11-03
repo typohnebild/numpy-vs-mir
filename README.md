@@ -52,10 +52,12 @@ The animation below shows the result of these calculations.
 
 <div align="center">
 <p align="center">
-<figure>
+<figure align="center">
 <img src="graphs/wave.gif?raw=true">
+<br/>
 <figcaption>Visualization of the results of the Multigrid algorithm after each cycle (lower left) and the L2-Norm of the residual (lower right).</figcaption>
-</figure></p>
+</figure>
+</p>
 </div>
 
 ## Related Work
