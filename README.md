@@ -261,6 +261,11 @@ In the end it looks like a C/C++ implementation would look like.
 
 We do not compare these different variations in Python, because this would mean to use high level
 Python for-loops which are not competitive for this application.
+When using _Numba_ this might change a bit, because in some cases _Numba_ achieves more speedup on
+python loops then on the _NumPy_ array operations.
+When experimenting with that it showed up that the difference was in our use case not to big,
+so we sticked with the sliced version.
+Also because a loop version without _Numba_ would have been significant slower.
 
 ## Measurements
 
