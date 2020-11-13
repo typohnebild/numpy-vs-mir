@@ -32,7 +32,7 @@ def restriction(A):
     return ret
 
 
-@jit(nopython=True, fastmath=True)
+@jit(nopython=True, fastmath=True, parallel=True)
 def restriction_1D(A, ret, end):
     # get every second element in A
     ret[:end:] = A[::2]
@@ -40,7 +40,7 @@ def restriction_1D(A, ret, end):
     ret[-1] = A[-1]
 
 
-@jit(nopython=True, fastmath=True)
+@jit(nopython=True, fastmath=True, parallel=True)
 def restriction_2D(A, ret, end):
     # get every second element in A
     ret[:end:, :end:] = A[::2, ::2]
@@ -51,7 +51,7 @@ def restriction_2D(A, ret, end):
     ret[-1, -1] = A[-1, -1]
 
 
-@jit(nopython=True, fastmath=True)
+@jit(nopython=True, fastmath=True, parallel=True)
 def restriction_3D(A, ret, end):
     # get every second element in A
     ret[:end:, :end:, :end:] = A[::2, ::2, ::2]
@@ -88,7 +88,7 @@ def weighted_restriction(A):
     return ret
 
 
-@jit(nopython=True, fastmath=True)
+@jit(nopython=True, fastmath=True, parallel=True)
 def weighted_restriction_1D(A, ret):
     # core
     ret[1:-1] /= 2
@@ -96,7 +96,7 @@ def weighted_restriction_1D(A, ret):
     ret[1:-1] += (A[1:-2:2] + A[3::2]) / 4
 
 
-@jit(nopython=True, fastmath=True)
+@jit(nopython=True, fastmath=True, parallel=True)
 def weighted_restriction_2D(A, ret):
     # core
     ret[1:-1, 1:-1] /= 4
@@ -108,7 +108,7 @@ def weighted_restriction_2D(A, ret):
                         A[3::2, 1:-2:2] + A[3::2, 3::2]) / 16
 
 
-@jit(nopython=True, fastmath=True)
+@jit(nopython=True, fastmath=True, parallel=True)
 def weighted_restriction_3D(A, ret):
     # core
     ret[1:-1, 1:-1, 1:-1] *= 8

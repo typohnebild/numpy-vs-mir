@@ -37,7 +37,7 @@ def prolongation(e, fine_shape):
     return w
 
 
-@jit(nopython=True, fastmath=True)
+@jit(nopython=True, fastmath=True, parallel=True)
 def prolongation_1D(w, e, end):
     # copy e to every second index in w
     w[:-1:2] = e[:-1]
@@ -47,7 +47,7 @@ def prolongation_1D(w, e, end):
     w[-1] = e[-1]
 
 
-@jit(nopython=True, fastmath=True)
+@jit(nopython=True, fastmath=True, parallel=True)
 def prolongation_2D(w, e, end, wend):
     # copy elements from e to w
     w[:-1:2, :-1:2] = e[:-1, :-1]
@@ -72,7 +72,7 @@ def prolongation_2D(w, e, end, wend):
     ) / 4
 
 
-@jit(nopython=True, fastmath=True)
+@jit(nopython=True, fastmath=True, parallel=True)
 def prolongation_3D(w, e, end, wend):
     # copy elements from e to w
     w[:-1:2, :-1:2, :-1:2] = e[:-1, :-1, :-1]

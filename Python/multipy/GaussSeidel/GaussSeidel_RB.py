@@ -70,7 +70,7 @@ def GS_RB(
 
 
 # --- 1D Fall ---
-@jit(nopython=True, fastmath=True)
+@jit(nopython=True, fastmath=True, parallel=True)
 def sweep_1D(color, F, U, h2):
     """
     Do the sweeps.
@@ -86,7 +86,7 @@ def sweep_1D(color, F, U, h2):
 
 
 # --- 2D Fall ---
-@jit(nopython=True, fastmath=True)
+@jit(nopython=True, fastmath=True, parallel=True)
 def sweep_2D(color, F, U, h2):
     """
     Do the sweeps.
@@ -113,7 +113,7 @@ def sweep_2D(color, F, U, h2):
 
 
 # --- 3D Fall ---
-@jit(nopython=True, fastmath=True)
+@jit(nopython=True, fastmath=True, parallel=True)
 def sweep_3D(color, F, U, h2):
     """
     Do the sweeps.
