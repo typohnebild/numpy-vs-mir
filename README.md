@@ -260,12 +260,13 @@ optimized version with accessing the underling D-array of the MIR slice directly
 In the end it looks like a C/C++ implementation would look like.
 
 We do not compare these different variations in Python, because this would mean to use high level
-Python for-loops which are not competitive for this application.
-When using _Numba_ this might change a bit, because in some cases _Numba_ achieves more speedup on
-python loops then on the _NumPy_ array operations.
-When experimenting with that it showed up that the difference was in our use case not to big,
-so we sticked with the sliced version.
-Also because a loop version without _Numba_ would have been significant slower.
+Python for-loops which are not competitive for this application at
+least without further optimizations.
+A sweep implementation with loops can be accelerated by using _Numba_ such that it runs faster than
+the implementation based on the _Numpy_ array operations.
+However, it turns out that the performance increase in our use case is not too high,
+so we do not consider a loop version in our benchmarks.
+Especially because a loop version would have been significantly slower without _Numba_.
 
 ## Measurements
 
@@ -379,6 +380,9 @@ In addition, we also distinguish measurements between with or without optimizati
 As mentioned above, the sweep method in the Gauss-Seidel algorithm as well as the
 intergrid operations restriction and prolongation are accelerated with the
 [Numba jit decorator](https://numba.pydata.org/numba-doc/latest/reference/jit-compilation.html).
+During development we also used the jit decorator with the argument `parallel=True`.
+Nevertheless, this shows no significant effect in our implementation,
+so we not use that argument for our benchmarks.
 We also experiment with the
 _[Intel Python Distribution](https://software.intel.com/content/www/us/en/develop/tools/distribution-for-python.html)_
 to speed up our implementation.
