@@ -1,12 +1,12 @@
 module multid.multigrid.cycle;
 
+import mir.conv : to;
+import mir.exception : enforce;
+import mir.math : log2;
 import mir.ndslice : Slice, slice;
-import std.exception : enforce;
-import std.math : log2;
-import std.conv : to;
-import std.traits : isFloatingPoint;
-import multid.multigrid.prolongation : prolongation;
 import multid.gaussseidel.redblack : SweepType;
+import multid.multigrid.prolongation : prolongation;
+import std.traits : isFloatingPoint;
 
 /++
     Abstract base class for the Cycles it implements the base MG sheme
@@ -75,14 +75,15 @@ public:
     +/
     this(Slice!(T*, Dim) F, uint mu, uint l, T h)
     {
-        enforce(l == 0 || log2(F.shape[0]) > l, "l is to big for F");
+        auto ls = F.shape[0].to!double.log2;
+        enforce!"l is to big for F"(l == 0 || ls > l);
         this.F = F;
         this.l = l;
         this.h = h != 0 ? h : 1.0 / F.shape[0];
         this.mu = mu;
         if (this.l == 0)
         {
-            this.l = F.shape[0].log2.to!uint - 1;
+            this.l = ls.to!uint - 1;
         }
     }
 
@@ -122,13 +123,13 @@ protected:
     override Slice!(T*, Dim) presmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
 
-        return GS_RB!(T, Dim, v1, 1_000, eps, sweep)(F, U, current_h);
+        return GS_RB!(v1, 1_000, eps, sweep)(F, U, current_h);
     }
 
     override Slice!(T*, Dim) postsmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
 
-        return GS_RB!(T, Dim, v2, 1_000, eps, sweep)(F, U, current_h);
+        return GS_RB!(v2, 1_000, eps, sweep)(F, U, current_h);
     }
 
     override Slice!(T*, Dim) compute_residual(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
@@ -140,7 +141,7 @@ protected:
 
     override Slice!(T*, Dim) solve(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
-        return GS_RB!(T, Dim, 100_000, 5, eps, sweep)(F, U, current_h);
+        return GS_RB!(100_000, 5, eps, sweep)(F, U, current_h);
     }
 
     override Slice!(T*, Dim) restriction(Slice!(T*, Dim) U)
@@ -174,7 +175,7 @@ public:
 
 unittest
 {
-    import std.algorithm : all;
+    import mir.algorithm.iteration : all;
     import multid.tools.util : randomMatrix;
 
     const size_t N = 10;
@@ -203,7 +204,7 @@ unittest
 
     assert(U[0][0 .. $].all!"a == 1.0");
     assert(U[1 .. $, 0].all!"a == 1.0");
-    assert(U[$ - 1][1 .. $].all!"a== 0.0");
+    assert(U[$ - 1][1 .. $].all!"a == 0.0");
     assert(U[1 .. $, $ - 1].all!"a == 0.0");
 
     // it should be at least a bit smaller than before

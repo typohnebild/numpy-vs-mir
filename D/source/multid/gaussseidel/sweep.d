@@ -1,6 +1,8 @@
 module multid.gaussseidel.sweep;
 
-import mir.ndslice : slice, sliced, Slice, strided;
+import mir.math: fastmath;
+import mir.algorithm.iteration: each;
+import mir.ndslice : slice, sliced, Slice, SliceKind, strided;
 import multid.gaussseidel.redblack : Color;
 
 /++
@@ -12,15 +14,15 @@ Params:
     U  = slice of dimension Dim
     h2 = the squared distance between the grid points
 +/
-@nogc
-void sweep_field(T, size_t Dim : 1, Color color)(in Slice!(T*, 1) F, Slice!(T*, 1) U, in T h2) nothrow
+@nogc @fastmath
+void sweep_field(Color color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
 {
     const auto N = F.shape[0];
     auto UF = U.field;
     auto FF = F.field;
     for (size_t i = 2u - color; i < N - 1u; i += 2u)
     {
-        UF[i] = (UF[i - 1u] + UF[i + 1u] - FF[i] * h2) / 2.0;
+        UF[i] = (UF[i - 1u] + UF[i + 1u] - FF[i] * h2) * (T(1) /  2);
     }
 }
 
@@ -33,8 +35,8 @@ Params:
     U  = slice of dimension Dim
     h2 = the squared distance between the grid points
 +/
-@nogc
-void sweep_field(T, size_t Dim : 2, Color color)(in Slice!(T*, 2) F, Slice!(T*, 2) U, in T h2) nothrow
+@nogc @fastmath
+void sweep_field(Color color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
 {
     const auto m = F.shape[0];
     const auto n = F.shape[1];
@@ -51,7 +53,7 @@ void sweep_field(T, size_t Dim : 2, Color color)(in Slice!(T*, 2) F, Slice!(T*, 
                     UF[flatindex - m] +
                     UF[flatindex + m] +
                     UF[flatindex - 1] +
-                    UF[flatindex + 1] - h2 * FF[flatindex]) / cast(T) 4;
+                    UF[flatindex + 1] - h2 * FF[flatindex]) * (T(1) / 4);
         }
     }
 }
@@ -65,8 +67,8 @@ Params:
     U  = slice of dimension Dim
     h2 = the squared distance between the grid points
 +/
-@nogc
-void sweep_field(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 3) U, in T h2) nothrow
+@nogc @fastmath
+void sweep_field(Color color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
 {
     const auto m = F.shape[0];
     const auto n = F.shape[1];
@@ -87,96 +89,127 @@ void sweep_field(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 
                         UF[flatindex - l] +
                         UF[flatindex + l] +
                         UF[flatindex - 1] +
-                        UF[flatindex + 1] - h2 * FF[flatindex]) / 6.0;
+                        UF[flatindex + 1] - h2 * FF[flatindex]) * (T(1) / 6);
             }
         }
     }
 }
 
-/++ slow sweep for 1D +/
-@nogc
-void sweep_slice(T, size_t Dim : 1, Color color)(in Slice!(T*, 1) F, Slice!(T*, 1) U, in T h2) nothrow
+// TODO: add to Mir
+@fastmath auto strideAll(T, size_t Dim, SliceKind kind)(Slice!(T*, Dim, kind) slice, size_t factor)
 {
-    U[2 - color .. $ - 1].strided!0(2)[] = (
-            U[1 - color .. $ - 2].strided!0(2) + U[3 - color .. $].strided!0(
-            2) - h2 * F[2 - color .. $ - 1].strided!0(2)) / 2.0;
+    import mir.internal.utility: Iota;
+    import std.meta: Repeat;
+    return slice.strided!(Iota!Dim)(Repeat!(Dim, factor));
+}
+
+private struct SweepKernel(T, size_t Dim)
+{
+    import std.meta: Repeat;
+
+    T h2;
+
+    this(T h2)
+    {
+        this.h2 = h2;
+    }
+
+    @fastmath
+    void opCall()(ref scope T r, ref scope const Repeat!(2 * Dim, T) neighbors, ref scope const T f) const
+    {
+        T sum = neighbors[0];
+        foreach (ref neighbor; neighbors[1 .. $])
+            sum += neighbor;
+        r = (sum - f * h2) * (T(1) / neighbors.length);
+    }
+}
+
+/++ slow sweep for 1D +/
+@nogc @fastmath
+void sweep_slice(Color color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
+{
+    auto kernel = SweepKernel!(T, 1)(h2);
+
+    each!kernel(
+        U[2 - color .. $ - 1].strideAll(2),
+        U[1 - color .. $ - 2].strideAll(2),
+        U[3 - color .. $].strideAll(2),
+        F[2 - color .. $ - 1].strideAll(2));
 }
 
 /++ slow sweep for 2D +/
-@nogc
-void sweep_slice(T, size_t Dim : 2, Color color)(in Slice!(T*, 2) F, Slice!(T*, 2) U, in T h2) nothrow
+@nogc @fastmath
+void sweep_slice(Color color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
 {
-    const auto m = F.shape[0];
-    const auto n = F.shape[1];
-    auto strideU = U[1 .. m - 1, 1 + color .. n - 1].strided!(0, 1)(2, 2);
-    strideU[] = U[0 .. m - 2, 1 + color .. n - 1].strided!(0, 1)(2, 2);
-    strideU[] += U[2 .. m, 1 + color .. n - 1].strided!(0, 1)(2, 2);
-    strideU[] += U[1 .. m - 1, color .. n - 2].strided!(0, 1)(2, 2);
-    strideU[] += U[1 .. m - 1, 2 + color .. n].strided!(0, 1)(2, 2);
-    strideU[] -= F[1 .. m - 1, 1 + color .. n - 1].strided!(0, 1)(2, 2) * h2;
-    strideU[] /= cast(T) 4;
+    auto kernel = SweepKernel!(T, 2)(h2);
 
-    strideU = U[2 .. m - 1, 2 - color .. n - 1].strided!(0, 1)(2, 2);
-    strideU[] = U[1 .. m - 2, 2 - color .. n - 1].strided!(0, 1)(2, 2);
-    strideU[] += U[3 .. m, 2 - color .. n - 1].strided!(0, 1)(2, 2);
-    strideU[] += U[2 .. m - 1, 1 - color .. n - 2].strided!(0, 1)(2, 2);
-    strideU[] += U[2 .. m - 1, 3 - color .. n].strided!(0, 1)(2, 2);
-    strideU[] -= F[2 .. m - 1, 2 - color .. n - 1].strided!(0, 1)(2, 2) * h2;
-    strideU[] /= cast(T) 4;
+    each!kernel(
+        U[1 .. $ - 1, 1 + color .. $ - 1].strideAll(2),
+        U[0 .. $ - 2, 1 + color .. $ - 1].strideAll(2),
+        U[2 .. $, 1 + color .. $ - 1].strideAll(2),
+        U[1 .. $ - 1, color .. $ - 2].strideAll(2),
+        U[1 .. $ - 1, 2 + color .. $].strideAll(2),
+        F[1 .. $ - 1, 1 + color .. $ - 1].strideAll(2));
+
+    each!kernel(
+        U[2 .. $ - 1, 2 - color .. $ - 1].strideAll(2),
+        U[1 .. $ - 2, 2 - color .. $ - 1].strideAll(2),
+        U[3 .. $, 2 - color .. $ - 1].strideAll(2),
+        U[2 .. $ - 1, 1 - color .. $ - 2].strideAll(2),
+        U[2 .. $ - 1, 3 - color .. $].strideAll(2),
+        F[2 .. $ - 1, 2 - color .. $ - 1].strideAll(2));
 }
+
 /++ slow sweep for 3D +/
-@nogc
-void sweep_slice(T, size_t Dim : 3, Color color)(in Slice!(T*, 3) F, Slice!(T*, 3) U, in T h2) nothrow
+@nogc @fastmath
+void sweep_slice(Color color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
 {
-    const auto m = F.shape[0];
-    const auto n = F.shape[1];
-    const auto o = F.shape[2];
+    auto kernel = SweepKernel!(T, 3)(h2);
 
-    auto strideU = U[2 .. m - 1, 1 .. n - 1, 1 + color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] = U[1 .. m - 2, 1 .. n - 1, 1 + color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[3 .. m, 1 .. n - 1, 1 + color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[2 .. m - 1, 0 .. n - 2, 1 + color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[2 .. m - 1, 2 .. n, 1 + color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[2 .. m - 1, 1 .. n - 1, color .. o - 2].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[2 .. m - 1, 1 .. n - 1, 2 + color .. o].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] -= F[2 .. m - 1, 1 .. n - 1, 1 + color .. o - 1].strided!(0, 1, 2)(2, 2, 2) * h2;
-    strideU[] /= cast(T) 6;
+    each!kernel(
+        U[2 .. $ - 1, 1 .. $ - 1, 1 + color .. $ - 1].strideAll(2),
+        U[1 .. $ - 2, 1 .. $ - 1, 1 + color .. $ - 1].strideAll(2),
+        U[3 .. $, 1 .. $ - 1, 1 + color .. $ - 1].strideAll(2),
+        U[2 .. $ - 1, 0 .. $ - 2, 1 + color .. $ - 1].strideAll(2),
+        U[2 .. $ - 1, 2 .. $, 1 + color .. $ - 1].strideAll(2),
+        U[2 .. $ - 1, 1 .. $ - 1, color .. $ - 2].strideAll(2),
+        U[2 .. $ - 1, 1 .. $ - 1, 2 + color .. $].strideAll(2),
+        F[2 .. $ - 1, 1 .. $ - 1, 1 + color .. $ - 1].strideAll(2));
 
-    strideU = U[1 .. m - 1, 1 .. n - 1, 2 - color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] = U[0 .. m - 2, 1 .. n - 1, 2 - color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[2 .. m, 1 .. n - 1, 2 - color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[1 .. m - 1, 0 .. n - 2, 2 - color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[1 .. m - 1, 2 .. n, 2 - color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[1 .. m - 1, 1 .. n - 1, 1 - color .. o - 2].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[1 .. m - 1, 1 .. n - 1, 3 - color .. o].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] -= F[1 .. m - 1, 1 .. n - 1, 2 - color .. o - 1].strided!(0, 1, 2)(2, 2, 2) * h2;
-    strideU[] /= cast(T) 6;
+    each!kernel(
+        U[1 .. $ - 1, 1 .. $ - 1, 2 - color .. $ - 1].strideAll(2),
+        U[0 .. $ - 2, 1 .. $ - 1, 2 - color .. $ - 1].strideAll(2),
+        U[2 .. $, 1 .. $ - 1, 2 - color .. $ - 1].strideAll(2),
+        U[1 .. $ - 1, 0 .. $ - 2, 2 - color .. $ - 1].strideAll(2),
+        U[1 .. $ - 1, 2 .. $, 2 - color .. $ - 1].strideAll(2),
+        U[1 .. $ - 1, 1 .. $ - 1, 1 - color .. $ - 2].strideAll(2),
+        U[1 .. $ - 1, 1 .. $ - 1, 3 - color .. $].strideAll(2),
+        F[1 .. $ - 1, 1 .. $ - 1, 2 - color .. $ - 1].strideAll(2));
 
-    strideU = U[1 .. m - 1, 2 .. n - 1, 1 + color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] = U[0 .. m - 2, 2 .. n - 1, 1 + color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[2 .. m, 2 .. n - 1, 1 + color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[1 .. m - 1, 1 .. n - 2, 1 + color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[1 .. m - 1, 3 .. n, 1 + color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[1 .. m - 1, 2 .. n - 1, color .. o - 2].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[1 .. m - 1, 2 .. n - 1, 2 + color .. o].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] -= F[1 .. m - 1, 2 .. n - 1, 1 + color .. o - 1].strided!(0, 1, 2)(2, 2, 2) * h2;
-    strideU[] /= cast(T) 6;
+    each!kernel(
+        U[1 .. $ - 1, 2 .. $ - 1, 1 + color .. $ - 1].strideAll(2),
+        U[0 .. $ - 2, 2 .. $ - 1, 1 + color .. $ - 1].strideAll(2),
+        U[2 .. $, 2 .. $ - 1, 1 + color .. $ - 1].strideAll(2),
+        U[1 .. $ - 1, 1 .. $ - 2, 1 + color .. $ - 1].strideAll(2),
+        U[1 .. $ - 1, 3 .. $, 1 + color .. $ - 1].strideAll(2),
+        U[1 .. $ - 1, 2 .. $ - 1, color .. $ - 2].strideAll(2),
+        U[1 .. $ - 1, 2 .. $ - 1, 2 + color .. $].strideAll(2),
+        F[1 .. $ - 1, 2 .. $ - 1, 1 + color .. $ - 1].strideAll(2));
 
-    strideU = U[2 .. m - 1, 2 .. n - 1, 2 - color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] = U[1 .. m - 2, 2 .. n - 1, 2 - color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[3 .. m, 2 .. n - 1, 2 - color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[2 .. m - 1, 1 .. n - 2, 2 - color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[2 .. m - 1, 3 .. n, 2 - color .. o - 1].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[2 .. m - 1, 2 .. n - 1, 1 - color .. o - 2].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] += U[2 .. m - 1, 2 .. n - 1, 3 - color .. o].strided!(0, 1, 2)(2, 2, 2);
-    strideU[] -= F[2 .. m - 1, 2 .. n - 1, 2 - color .. o - 1].strided!(0, 1, 2)(2, 2, 2) * h2;
-    strideU[] /= cast(T) 6;
-
+    each!kernel(
+        U[2 .. $ - 1, 2 .. $ - 1, 2 - color .. $ - 1].strideAll(2),
+        U[1 .. $ - 2, 2 .. $ - 1, 2 - color .. $ - 1].strideAll(2),
+        U[3 .. $, 2 .. $ - 1, 2 - color .. $ - 1].strideAll(2),
+        U[2 .. $ - 1, 1 .. $ - 2, 2 - color .. $ - 1].strideAll(2),
+        U[2 .. $ - 1, 3 .. $, 2 - color .. $ - 1].strideAll(2),
+        U[2 .. $ - 1, 2 .. $ - 1, 1 - color .. $ - 2].strideAll(2),
+        U[2 .. $ - 1, 2 .. $ - 1, 3 - color .. $].strideAll(2),
+        F[2 .. $ - 1, 2 .. $ - 1, 2 - color .. $ - 1].strideAll(2));
 }
 
 /++ naive sweep for 1D +/
-@nogc
-void sweep_naive(T, size_t Dim : 1, Color color)(const Slice!(T*, 1) F, Slice!(T*, 1) U, T h2) nothrow
+@nogc @fastmath
+void sweep_naive(Color color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
 {
 
     const auto n = F.shape[0];
@@ -184,14 +217,14 @@ void sweep_naive(T, size_t Dim : 1, Color color)(const Slice!(T*, 1) F, Slice!(T
     {
         if (i % 2 == color)
         {
-            U[i] = (U[i - 1u] + U[i + 1u] - F[i] * h2) / 2.0;
+            U[i] = (U[i - 1u] + U[i + 1u] - F[i] * h2) * (T(1) /  2);
         }
     }
 
 }
 /++ naive sweep for 2D +/
-@nogc
-void sweep_naive(T, size_t Dim : 2, Color color)(const Slice!(T*, 2) F, Slice!(T*, 2) U, T h2) nothrow
+@nogc @fastmath
+void sweep_naive(Color color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
 {
     const auto n = F.shape[0];
     const auto m = F.shape[1];
@@ -202,14 +235,14 @@ void sweep_naive(T, size_t Dim : 2, Color color)(const Slice!(T*, 2) F, Slice!(T
         {
             if ((i + j) % 2 == color)
             {
-                U[i, j] = (U[i - 1, j] + U[i + 1, j] + U[i, j - 1] + U[i, j + 1] - h2 * F[i, j]) / 4.0;
+                U[i, j] = (U[i - 1, j] + U[i + 1, j] + U[i, j - 1] + U[i, j + 1] - h2 * F[i, j]) * (T(1) / 4);
             }
         }
     }
 }
 /++ naive sweep for 3D +/
-@nogc
-void sweep_naive(T, size_t Dim : 3, Color color)(const Slice!(T*, 3) F, Slice!(T*, 3) U, T h2) nothrow
+@nogc @fastmath
+void sweep_naive(Color color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
 {
     const auto n = F.shape[0];
     const auto m = F.shape[1];
@@ -223,7 +256,7 @@ void sweep_naive(T, size_t Dim : 3, Color color)(const Slice!(T*, 3) F, Slice!(T
                 if ((i + j + k) % 2 == color)
                 {
                     U[i, j, k] = (U[i - 1, j, k] + U[i + 1, j, k] + U[i, j - 1,
-                            k] + U[i, j + 1, k] + U[i, j, k - 1] + U[i, j, k + 1] - h2 * F[i, j, k]) / 6.0;
+                            k] + U[i, j + 1, k] + U[i, j, k - 1] + U[i, j, k + 1] - h2 * F[i, j, k]) * (T(1) / 6);
                 }
             }
         }

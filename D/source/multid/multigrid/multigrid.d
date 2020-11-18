@@ -42,7 +42,7 @@ Params:
 
 Returns: U
 +/
-Slice!(T*, Dim) poisson_multigrid(T, size_t Dim, uint v1, uint v2)(
+Slice!(T*, Dim) poisson_multigrid(uint v1, uint v2, T, size_t Dim)(
         Slice!(T*, Dim) F, Slice!(T*, Dim) U, uint level, uint mu, size_t iter_cycles,
         string sweep = "field", T eps = 1e-6, T h = 0)
 {
@@ -87,9 +87,9 @@ unittest
     F[$ - 1][1 .. $] = 0.0;
     F[1 .. $, $ - 1] = 0.0;
     auto U1 = U.dup;
-    poisson_multigrid!(double, 2, 2, 2)(F, U, 0, 2, 100, "field", 1e-9);
+    poisson_multigrid!(2, 2)(F, U, 0, 2, 100, "field", 1e-9);
 
-    GS_RB!(double, 2)(F, U1, h);
+    GS_RB(F, U1, h);
 
     import numir : approxEqual;
 

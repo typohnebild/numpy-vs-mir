@@ -10,7 +10,7 @@ import mir.ndslice;
         h = distance between grid points
     Returns: x = A*U
 +/
-Slice!(T*, Dim) apply_poisson(T, size_t Dim)(in Slice!(T*, Dim) U, in T h)
+Slice!(T*, Dim) apply_poisson(T, size_t Dim)(Slice!(const(T)*, Dim) U, const T h)
 {
     auto x = slice!(T)(U.shape);
     const T h2 = h * h;
@@ -98,7 +98,7 @@ Slice!(T*, Dim) apply_poisson(T, size_t Dim)(in Slice!(T*, Dim) U, in T h)
 /++
     Computes F - AU were A is the poisson matrix
 +/
-Slice!(T*, Dim) compute_residual(T, size_t Dim)(in Slice!(T*, Dim) F, in Slice!(T*, Dim) U, in T current_h)
+Slice!(T*, Dim) compute_residual(T, size_t Dim)(Slice!(const(T)*, Dim) F, Slice!(const(T)*, Dim) U, const T current_h)
 {
     auto AU = apply_poisson!(T, Dim)(U, current_h);
     AU.field[] = F.field[] - AU.field[];

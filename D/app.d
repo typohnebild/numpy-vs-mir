@@ -19,7 +19,7 @@ void main(string[] argv)
     void warmup()
     {
         auto UF1 = npyload!(double, 2)(i.default_path);
-        poisson_multigrid!(double, 2, 2, 2)(UF1[1].slice, UF1[0].slice, 0, 1, 1);
+        poisson_multigrid!(2, 2)(UF1[1].slice, UF1[0].slice, 0, 1, 1);
     }
 
     const uint dim = getDim(i.path);
@@ -30,19 +30,19 @@ void main(string[] argv)
         auto UF = npyload!(double, 1)(i.path);
         warmup();
         i.wait_till();
-        poisson_multigrid!(double, 1, 2, 2)(UF[1].slice, UF[0].slice, 0, 1, 100, i.sweep);
+        poisson_multigrid!(2, 2)(UF[1].slice, UF[0].slice, 0, 1, 100, i.sweep);
         break;
     case 2:
         auto UF = npyload!(double, 2)(i.path);
         warmup();
         i.wait_till();
-        poisson_multigrid!(double, 2, 2, 2)(UF[1].slice, UF[0].slice, 0, 1, 100, i.sweep);
+        poisson_multigrid!(2, 2)(UF[1].slice, UF[0].slice, 0, 1, 100, i.sweep);
         break;
     case 3:
         auto UF = npyload!(double, 3)(i.path);
         warmup();
         i.wait_till();
-        poisson_multigrid!(double, 3, 2, 2)(UF[1].slice, UF[0].slice, 0, 1, 100, i.sweep);
+        poisson_multigrid!(2, 2)(UF[1].slice, UF[0].slice, 0, 1, 100, i.sweep);
         break;
     default:
         throw new Exception("wrong dimension!");

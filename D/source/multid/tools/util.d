@@ -1,8 +1,6 @@
 module multid.tools.util;
-import mir.ndslice : Slice, slice;
-import std.range : generate;
-import std.random : uniform;
-import std.algorithm : fill;
+
+import mir.ndslice.slice: Slice;
 
 /++ Timer Template +/
 template Timer()
@@ -28,8 +26,9 @@ template Timer()
 /++ Generator for random matrix with dimension Dim and dimension size N +/
 Slice!(T*, Dim) randomMatrix(T, size_t Dim)(size_t N)
 {
+    import mir.random.algorithm: randomSlice;
+    import mir.random.variable: uniformVar;
+
     size_t[Dim] shape = N;
-    auto ret = slice!T(shape);
-    ret.field.fill(generate!(() => uniform(0.0, 1.0)));
-    return ret;
+    return uniformVar!T(0, 1).randomSlice(shape);
 }

@@ -1,14 +1,17 @@
 module multid.multigrid.restriction;
 
-import mir.ndslice : Slice, slice, sliced, strided, iota, as, fuse;
-import std.exception : enforce;
+import mir.math: fastmath;
+import mir.ndslice : Slice, slice, sliced, strided, iota, as, fuse, dropToHypercube;
+import mir.exception : enforce;
 import numir : approxEqual;
 
 /++
 This is the implementation of a restriction for 1D
 +/
-Slice!(T*, Dim) restriction(T, size_t Dim : 1)(in Slice!(T*, Dim) A)
+@fastmath
+Slice!(T*, Dim) restriction(T, size_t Dim : 1)(Slice!(const(T)*, Dim) A)
 {
+    pragma(inline, false);
     auto N = A.shape[0] / 2 + 1;
     auto ret = slice!T([N]);
     const auto end = N - (A.shape[0] + 1) % 2;
@@ -29,9 +32,11 @@ Slice!(T*, Dim) restriction(T, size_t Dim : 1)(in Slice!(T*, Dim) A)
 This is the implementation of a restriction for 2D
 works only for square grids
 +/
-Slice!(T*, Dim) restriction(T, size_t Dim : 2)(in Slice!(T*, Dim) A)
+@fastmath
+Slice!(T*, Dim) restriction(T, size_t Dim : 2)(Slice!(const(T)*, Dim) A)
 {
-    enforce(A.shape[0] == A.shape[1], "not all dimensions have the same length");
+    pragma(inline, false);
+    enforce!"not all dimensions have the same length"(A.dropToHypercube.shape == A.shape);
     const auto M = A.shape[0];
     const auto N = M / 2 + 1;
     auto ret = slice!T([N, N]);
@@ -68,9 +73,11 @@ Slice!(T*, Dim) restriction(T, size_t Dim : 2)(in Slice!(T*, Dim) A)
 This is the implementation of a restriction for 3D
 works only if all dimensions have the same length
 +/
-Slice!(T*, Dim) restriction(T, size_t Dim : 3)(in Slice!(T*, Dim) A)
+@fastmath
+Slice!(T*, Dim) restriction(T, size_t Dim : 3)(Slice!(const(T)*, Dim) A)
 {
-    enforce(A.shape[0] == A.shape[1] && A.shape[1] == A.shape[2], "not all dimensions have the same length");
+    pragma(inline, false);
+    enforce!"not all dimensions have the same length"(A.dropToHypercube.shape == A.shape);
     const auto M = A.shape[0];
     const auto N = M / 2 + 1;
     auto ret = slice!T([N, N, N]);
@@ -107,11 +114,13 @@ Slice!(T*, Dim) restriction(T, size_t Dim : 3)(in Slice!(T*, Dim) A)
 /++
 This is the implementation of a weighted_restriction 1D
 +/
-Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 1)(in Slice!(T*, Dim) A)
+@fastmath
+Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 1)(Slice!(const(T)*, Dim) A)
 {
+    pragma(inline, false);
     const auto M = A.shape[0];
     const auto N = M / 2 + 1;
-    auto ret = restriction!(T, Dim)(A);
+    auto ret = restriction(A);
     auto AF = A.field;
     foreach (i; 1u .. N - 1u)
     {
@@ -123,12 +132,14 @@ Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 1)(in Slice!(T*, Dim) A)
 /++
 This is the implementation of a weighted_restriction 2D
 +/
-Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 2)(in Slice!(T*, Dim) A)
+@fastmath
+Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 2)(Slice!(const(T)*, Dim) A)
 {
-    enforce(A.shape[0] == A.shape[1], "not all dimensions have the same length");
+    pragma(inline, false);
+    enforce!"not all dimensions have the same length"(A.dropToHypercube.shape == A.shape);
     const auto M = A.shape[0];
     const auto N = M / 2 + 1;
-    auto ret = restriction!(T, Dim)(A);
+    auto ret = restriction(A);
     auto AF = A.field;
 
     foreach (i; 1u .. N - 1u)
@@ -152,12 +163,14 @@ Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 2)(in Slice!(T*, Dim) A)
 /++
 This is the implementation of a weighted_restriction 3D
 +/
-Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 3)(in Slice!(T*, Dim) A)
+@fastmath
+Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 3)(Slice!(const(T)*, Dim) A)
 {
-    enforce(A.shape[0] == A.shape[1] && A.shape[1] == A.shape[2], "not all dimensions have the same length");
+    pragma(inline, false);
+    enforce!"not all dimensions have the same length"(A.dropToHypercube.shape == A.shape);
     const auto M = A.shape[0];
     const auto N = M / 2 + 1;
-    auto ret = restriction!(T, Dim)(A);
+    auto ret = restriction(A);
     auto AF = A.field;
     foreach (k; 1u .. N - 1u)
     {
@@ -196,12 +209,12 @@ Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 3)(in Slice!(T*, Dim) A)
 unittest
 {
     auto arr = iota(10).slice;
-    auto ret = restriction!(long, 1)(arr);
+    auto ret = restriction(arr);
     auto correct = [0, 2, 4, 6, 8, 9];
     assert(ret == correct);
 
     arr = iota(11).slice;
-    ret = restriction!(long, 1)(arr);
+    ret = restriction(arr);
     correct = [0, 2, 4, 6, 8, 10];
     assert(ret == correct);
 }
@@ -209,13 +222,13 @@ unittest
 // Test restriction 2D
 unittest
 {
-    auto arr = iota([5, 5]).slice;
-    auto ret = restriction!(long, 2)(arr);
+    auto arr = [5, 5].iota.slice;
+    auto ret = restriction(arr);
     auto correct = [[0, 2, 4], [10, 12, 14], [20, 22, 24]];
     assert(ret == correct);
 
-    arr = iota([6, 6]).slice;
-    ret = restriction!(long, 2)(arr);
+    arr = [6, 6].iota.slice;
+    ret = restriction(arr);
     correct = [[0, 2, 4, 5], [12, 14, 16, 17], [24, 26, 28, 29], [30, 32, 34, 35]];
     assert(ret == correct);
 }
@@ -223,8 +236,8 @@ unittest
 // Test restrtiction 3D
 unittest
 {
-    auto arr = iota([5, 5, 5]).slice;
-    auto ret = restriction!(long, 3)(arr);
+    auto arr = [5, 5, 5].iota.slice;
+    auto ret = restriction(arr);
     auto correct = [[[0., 2., 4.],
             [10., 12., 14.],
             [20., 22., 24.]],
@@ -238,8 +251,8 @@ unittest
             [120., 122., 124.]]];
     assert(ret == correct);
 
-    arr = iota([6, 6, 6]).slice;
-    ret = restriction!(long, 3)(arr);
+    arr = [6, 6, 6].iota.slice;
+    ret = restriction(arr);
     correct = [[[0., 2., 4., 5.],
             [12., 14., 16., 17.],
             [24., 26., 28., 29.],
@@ -266,12 +279,12 @@ unittest
 unittest
 {
     auto arr = iota(10).slice;
-    auto ret = weighted_restriction!(long, 1)(arr);
+    auto ret = weighted_restriction(arr);
     auto correct = [0, 2, 4, 6, 8, 9];
     assert(ret == correct);
 
     arr = iota(11).slice;
-    ret = weighted_restriction!(long, 1)(arr);
+    ret = weighted_restriction(arr);
     correct = [0, 2, 4, 6, 8, 10];
     assert(ret == correct);
 }
@@ -279,12 +292,12 @@ unittest
 unittest
 {
     auto arr2 = [1.0, 2.0, 3.0, 2.0, 1.0].sliced;
-    auto ret2 = weighted_restriction!(double, 1)(arr2);
+    auto ret2 = weighted_restriction(arr2);
     auto correct2 = [1.0, 2.5, 1.0];
     assert(ret2 == correct2);
 
     arr2 = [1.0, 2.0, 3.0, 3.0, 2.0, 1.0].sliced;
-    ret2 = weighted_restriction!(double, 1)(arr2);
+    ret2 = weighted_restriction(arr2);
     correct2 = [1.0, 2.75, 2.0, 1.0];
     assert(ret2 == correct2);
 }
@@ -292,13 +305,13 @@ unittest
 // Test weighted_restriction 2D long
 unittest
 {
-    auto arr = iota([5, 5]).slice;
-    auto ret = weighted_restriction!(long, 2)(arr);
+    auto arr = [5, 5].iota.slice;
+    auto ret = weighted_restriction(arr);
     auto correct = [[0, 2, 4], [10, 12, 14], [20, 22, 24]];
     assert(ret == correct);
 
-    arr = iota([6, 6]).slice;
-    ret = restriction!(long, 2)(arr);
+    arr = [6, 6].iota.slice;
+    ret = restriction(arr);
     correct = [[0, 2, 4, 5], [12, 14, 16, 17], [24, 26, 28, 29], [30, 32, 34, 35]];
     assert(ret == correct);
 }
@@ -310,7 +323,7 @@ unittest
         3.0, 4.0, 5.0, 4.0, 3.0,
         4.0, 5.0, 6.0, 5.0, 4.0,
         5.0, 6.0, 7.0, 6.0, 5.0].sliced(5, 5);
-    auto ret2 = weighted_restriction!(double, 2)(arr2);
+    auto ret2 = weighted_restriction(arr2);
     auto correct2 = [[1.0, 3.0, 1.0],
         [3.0, 4.5, 3.0],
         [5.0, 7.0, 5.0]];
@@ -322,7 +335,7 @@ unittest
         4.0, 5.0, 6.0, 6.0, 5.0, 4.0,
         5.0, 6.0, 7.0, 7.0, 6.0, 5.0,
         6.0, 7.0, 8.0, 8.0, 7.0, 6.0].sliced(6, 6);
-    ret2 = weighted_restriction!(double, 2)(arr2);
+    ret2 = weighted_restriction(arr2);
     correct2 = [[1.0, 3.0, 2.0, 1.0],
         [3.0, 4.75, 4.0, 3.0],
         [5.0, 6.75, 6.0, 5.0],
@@ -333,8 +346,8 @@ unittest
 // Test weighted_restriction 3D double
 unittest
 {
-    auto arr = iota([5, 5, 5]).as!double.slice;
-    auto ret = weighted_restriction!(double, 3)(arr);
+    auto arr = [5, 5, 5].iota.as!double.slice;
+    auto ret = weighted_restriction(arr);
     auto correct = [[[0., 2., 4.],
             [10., 12., 14.],
             [20., 22., 24.]],
@@ -348,8 +361,8 @@ unittest
             [120., 122., 124.]]];
     assert(ret == correct);
 
-    arr = iota([6, 6, 6]).as!double.slice;
-    ret = restriction!(double, 3)(arr);
+    arr = [6, 6, 6].iota.as!double.slice;
+    ret = restriction(arr);
     correct = [[[0., 2., 4., 5.],
             [12., 14., 16., 17.],
             [24., 26., 28., 29.],
@@ -392,7 +405,7 @@ unittest
         0.9038084, 0.45367844, 0.41827524, 0.95954425,
         0.30096364, 0.37174358, 0.45047108, 0.47731472,
         0.98000574, 0.49313159, 0.44181032, 0.97419118].sliced(4, 4);
-    auto ret = weighted_restriction!(double, 2)(arr);
+    auto ret = weighted_restriction(arr);
 
     assert(approxEqual(ret, correct, 1e-2, 1e-8));
 }
@@ -420,7 +433,7 @@ unittest
         [0.99019009, 0.54380879, 0.5277031, 0.6169349, 0.14346233],
         [0.24181791, 0.44420891, 0.44207825, 0.45405526, 0.51607495],
         [0.68527047, 0.13484427, 0.23751941, 0.20323849, 0.59139025]];
-    auto ret = weighted_restriction!(double, 2)(arr.fuse);
+    auto ret = weighted_restriction(arr.fuse);
 
     assert(approxEqual(ret, correct.fuse, 1e-8, 1e-8));
 }

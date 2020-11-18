@@ -3,12 +3,11 @@ module startup;
 
 template init()
 {
-
     import core.thread : Thread;
+    import mir.conv : to;
     import std.datetime.stopwatch : StopWatch, msecs;
     import std.experimental.logger : infof, globalLogLevel, LogLevel;
     import std.getopt : getopt;
-    import std.conv : to;
 
     StopWatch sw;
 

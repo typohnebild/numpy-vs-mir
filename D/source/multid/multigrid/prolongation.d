@@ -1,5 +1,6 @@
 module multid.multigrid.prolongation;
 
+import mir.math: fastmath;
 import mir.ndslice : slice, Slice;
 import numir : approxEqual;
 
@@ -10,8 +11,10 @@ This is the implementation of a prolongation
         fine_shape = the shape of the returned grid
     Returns: the finer grid with interpolated values in between
 +/
-Slice!(T*, Dim) prolongation(T, size_t Dim)(in Slice!(T*, Dim) e, in size_t[Dim] fine_shape)
+@fastmath
+Slice!(T*, Dim) prolongation(T, size_t Dim)(Slice!(const(T)*, Dim) e, const size_t[Dim] fine_shape)
 {
+    pragma(inline, false);
     auto w = slice!T(fine_shape);
     immutable end = e.shape[0] - (fine_shape[0] + 1) % 2;
     auto WF = w.field;
