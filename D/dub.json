@@ -2,10 +2,9 @@
   "name": "multid",
 
   "dependencies": {
-    "mir-algorithm": "~>3.9.6",
+    "mir-algorithm": "~>3.10.4",
     "mir-random": "~>2.2.14",
-    "numir": "~>2.0.5",
-    "pretty_array": "~>1.0.2"
+    "numir": "~>2.0.5"
   },
   "configurations": [
     {
@@ -13,7 +12,7 @@
       "targetName": "multigrid",
       "mainSourceFile": "app.d",
       "compiler": "ldc",
-      "dflags-ldc": ["-mcpu=native", "--boundscheck=off"],
+      "dflags-ldc": ["-mcpu=native"],
       "targetType": "executable"
     },
     {
@@ -22,13 +21,13 @@
       "targetType": "executable",
       "targetName": "multid-static",
       "compiler": "ldc",
-      "dflags-ldc": ["--static"]
+      "dflags-ldc": ["-mcpu=native", "--static"]
     },
     {
       "name": "gsrb",
       "mainSourceFile": "GSRBBenchmark.d",
       "targetName": "gsrb",
-      "dflags-ldc": ["-mcpu=native", "--boundscheck=off"],
+      "dflags-ldc": ["-mcpu=native"],
       "targetType": "executable",
       "compiler": "ldc"
     }
