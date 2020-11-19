@@ -5,7 +5,7 @@ import multid.multigrid.cycle;
 import multid.multigrid.multigrid;
 import multid.multigrid.restriction;
 import multid.tools.util;
-import pretty_array;
+// import pretty_array;
 import std.datetime.stopwatch : StopWatch;
 import std.stdio;
 
@@ -28,7 +28,7 @@ void test3D()
     const double h = 1.0 / double(N);
 
     GS_RB(F, U, h);
-    U.prettyArr.writeln;
+    // U.prettyArr.writeln;
 
 }
 
@@ -49,7 +49,7 @@ void test2D()
     const double h = 1.0 / double(N);
 
     GS_RB(F, U, h);
-    U.prettyArr.writeln;
+    // U.prettyArr.writeln;
 
 }
 
@@ -68,7 +68,7 @@ void test1D()
     const double h = 1.0 / double(N);
 
     GS_RB!(30_000)(F, U, h);
-    U.prettyArr.writeln;
+    // U.prettyArr.writeln;
 
 }
 

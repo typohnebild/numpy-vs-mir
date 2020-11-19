@@ -6,15 +6,26 @@ import mir.exception : enforce;
 import numir : approxEqual;
 
 /++
-This is the implementation of a restriction for 1D
+This is the implementation of a restriction for 1D, 2D, 3D
 +/
 @fastmath
-Slice!(T*, Dim) restriction(T, size_t Dim : 1)(Slice!(const(T)*, Dim) A)
+Slice!(T*, Dim) restriction(T, size_t Dim)(Slice!(const(T)*, Dim) A)
 {
     pragma(inline, false);
-    auto N = A.shape[0] / 2 + 1;
-    auto ret = slice!T([N]);
-    const auto end = N - (A.shape[0] + 1) % 2;
+    size_t[Dim] shape = A.length / 2 + 1;
+    auto ret = shape.slice!T;
+    restriction(ret, A);
+    return ret;
+}
+
+@nogc @fastmath
+void restriction(T, size_t Dim : 1)(Slice!(T*, Dim) ret, Slice!(const(T)*, Dim) A)
+{
+    assert(A.length / 2 + 1 == ret.length);
+    pragma(inline, false);
+    const M = A.length;
+    const N = ret.length;
+    const end = N - (M + 1) % 2;
     auto AF = A.field;
 
     foreach (i; 0 .. end)
@@ -24,23 +35,17 @@ Slice!(T*, Dim) restriction(T, size_t Dim : 1)(Slice!(const(T)*, Dim) A)
     }
     // special case: outer corner
     ret.field[$ - 1] = AF[$ - 1];
-
-    return ret;
 }
 
-/++
-This is the implementation of a restriction for 2D
-works only for square grids
-+/
-@fastmath
-Slice!(T*, Dim) restriction(T, size_t Dim : 2)(Slice!(const(T)*, Dim) A)
+@nogc @fastmath
+void restriction(T, size_t Dim : 2)(Slice!(T*, Dim) ret, Slice!(const(T)*, Dim) A)
 {
     pragma(inline, false);
     enforce!"not all dimensions have the same length"(A.dropToHypercube.shape == A.shape);
-    const auto M = A.shape[0];
-    const auto N = M / 2 + 1;
-    auto ret = slice!T([N, N]);
-    const auto end = N - (A.shape[0] + 1) % 2;
+    assert(A.length / 2 + 1 == ret.length);
+    const M = A.length;
+    const N = ret.length;
+    const end = N - (M + 1) % 2;
     auto AF = A.field;
 
     foreach (i; 0 .. end)
@@ -65,23 +70,17 @@ Slice!(T*, Dim) restriction(T, size_t Dim : 2)(Slice!(const(T)*, Dim) A)
     }
     // special case: outer corner
     ret.field[$ - 1] = AF[$ - 1];
-
-    return ret;
 }
 
-/++
-This is the implementation of a restriction for 3D
-works only if all dimensions have the same length
-+/
-@fastmath
-Slice!(T*, Dim) restriction(T, size_t Dim : 3)(Slice!(const(T)*, Dim) A)
+@nogc @fastmath
+void restriction(T, size_t Dim : 3)(Slice!(T*, Dim) ret, Slice!(const(T)*, Dim) A)
 {
     pragma(inline, false);
     enforce!"not all dimensions have the same length"(A.dropToHypercube.shape == A.shape);
-    const auto M = A.shape[0];
-    const auto N = M / 2 + 1;
-    auto ret = slice!T([N, N, N]);
-    const auto end = N - (A.shape[0] + 1) % 2;
+    assert(A.length / 2 + 1 == ret.length);
+    const M = A.length;
+    const N = ret.length;
+    const end = N - (M + 1) % 2;
     auto AF = A.field;
 
     foreach (k; 0 .. end)
@@ -107,39 +106,45 @@ Slice!(T*, Dim) restriction(T, size_t Dim : 3)(Slice!(const(T)*, Dim) A)
     ret[$ - 1, $ - 1, 0 .. end] = A[$ - 1, $ - 1, 0 .. $].strided!(0)(2);
     // special case: outer corner
     ret.field[$ - 1] = AF[$ - 1];
-
-    return ret;
 }
 
 /++
-This is the implementation of a weighted_restriction 1D
+This is the implementation of a restriction for 1D, 2D, 3D
 +/
 @fastmath
-Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 1)(Slice!(const(T)*, Dim) A)
+Slice!(T*, Dim) weighted_restriction(T, size_t Dim)(Slice!(const(T)*, Dim) A)
 {
     pragma(inline, false);
-    const auto M = A.shape[0];
-    const auto N = M / 2 + 1;
-    auto ret = restriction(A);
+    size_t[Dim] shape = A.length / 2 + 1;
+    auto ret = shape.slice!T;
+    weighted_restriction(ret, A);
+    return ret;
+}
+
+@fastmath
+void weighted_restriction(T, size_t Dim : 1)(Slice!(T*, Dim) ret, Slice!(const(T)*, Dim) A)
+{
+    assert(ret.length == A.length / 2 + 1);
+    pragma(inline, false);
+    const M = A.length;
+    const N = M / 2 + 1;
+    restriction(ret, A);
     auto AF = A.field;
+
     foreach (i; 1u .. N - 1u)
     {
         ret.field[i] = ret.field[i] / 2 + (AF[i * 2 - 1u] + AF[i * 2 + 1u]) / cast(T)(4);
     }
-    return ret;
 }
 
-/++
-This is the implementation of a weighted_restriction 2D
-+/
 @fastmath
-Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 2)(Slice!(const(T)*, Dim) A)
+void weighted_restriction(T, size_t Dim : 2)(Slice!(T*, Dim) ret, Slice!(const(T)*, Dim) A)
 {
     pragma(inline, false);
     enforce!"not all dimensions have the same length"(A.dropToHypercube.shape == A.shape);
-    const auto M = A.shape[0];
-    const auto N = M / 2 + 1;
-    auto ret = restriction(A);
+    const M = A.length;
+    const N = M / 2 + 1;
+    restriction(ret, A);
     auto AF = A.field;
 
     foreach (i; 1u .. N - 1u)
@@ -157,21 +162,18 @@ Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 2)(Slice!(const(T)*, Dim) A
                         AF[indexA + 1 - M] + AF[indexA + 1 + M]) / cast(T)(16);
         }
     }
-    return ret;
 }
 
-/++
-This is the implementation of a weighted_restriction 3D
-+/
 @fastmath
-Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 3)(Slice!(const(T)*, Dim) A)
+void weighted_restriction(T, size_t Dim : 3)(Slice!(T*, Dim) ret, Slice!(const(T)*, Dim) A)
 {
     pragma(inline, false);
     enforce!"not all dimensions have the same length"(A.dropToHypercube.shape == A.shape);
-    const auto M = A.shape[0];
-    const auto N = M / 2 + 1;
-    auto ret = restriction(A);
+    const M = A.length;
+    const N = M / 2 + 1;
+    restriction(ret, A);
     auto AF = A.field;
+
     foreach (k; 1u .. N - 1u)
     {
         foreach (i; 1u .. N - 1u)
@@ -202,7 +204,6 @@ Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 3)(Slice!(const(T)*, Dim) A
             }
         }
     }
-    return ret;
 }
 
 // Test restriction 1D

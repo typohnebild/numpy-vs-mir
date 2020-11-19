@@ -15,14 +15,16 @@ This is the implementation of a prolongation
 Slice!(T*, Dim) prolongation(T, size_t Dim)(Slice!(const(T)*, Dim) e, size_t[Dim] fine_shape)
 {
     auto w = slice!T(fine_shape);
-    prolongation(e, w);
+    prolongation(w, e);
     return w;
 }
 
 @nogc @fastmath
-void prolongation(T, size_t Dim)(Slice!(const(T)*, Dim) e, Slice!(T*, Dim) w)
+void prolongation(T, size_t Dim)(Slice!(T*, Dim) w, Slice!(const(T)*, Dim) e)
 {
     pragma(inline, false);
+    import std.conv;
+    assert(w.length / 2 + 1 == e.length);
     immutable end = e.shape[0] - (w.shape[0] + 1) % 2;
     auto WF = w.field;
     auto EF = e.field;

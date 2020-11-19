@@ -15,8 +15,9 @@ class Cycle(T, size_t Dim) if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 {
 protected:
     uint mu, l;
-    Slice!(T*, Dim) F;
+    Slice!(T*, Dim) initialF;
     T[] Rdata;
+    Slice!(T*, Dim + 1)[] temp;
 
     final auto R(size_t[Dim] shape)
     {
@@ -25,20 +26,19 @@ protected:
 
     T h;
 
-    abstract @nogc void presmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h);
-    abstract @nogc void postsmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h);
-    abstract @nogc Slice!(T*, Dim) compute_residual(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h);
-    abstract @nogc void solve(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h);
-    abstract Slice!(T*, Dim) restriction(Slice!(T*, Dim) U);
+    abstract @nogc void presmooth(Slice!(const(T)*, Dim) F, Slice!(T*, Dim) U, T current_h);
+    abstract @nogc void postsmooth(Slice!(const(T)*, Dim) F, Slice!(T*, Dim) U, T current_h);
+    abstract @nogc Slice!(T*, Dim) compute_residual(Slice!(const(T)*, Dim) F, Slice!(const(T)*, Dim) U, T current_h);
+    abstract @nogc void solve(Slice!(const(T)*, Dim) F, Slice!(T*, Dim) U, T current_h);
+    abstract @nogc void restriction(Slice!(T*, Dim) res, Slice!(const(T)*, Dim) U);
 
-    Slice!(T*, Dim) compute_correction(Slice!(T*, Dim) r, uint l, T current_h)
+    @nogc void compute_correction(Slice!(T*, Dim) e, Slice!(const(T)*, Dim) r, uint d, T current_h)
     {
-        auto e = slice!T(r.shape, 0);
+        e[] = 0;
         foreach (_; 0 .. mu)
         {
-            do_cycle(r, e, l, current_h);
+            do_cycle(r, e, d, current_h);
         }
-        return e;
     }
 
     /++ adds the correction vector to the U +/
@@ -48,9 +48,9 @@ protected:
         U.field[] += e.field[];
     }
 
-    void do_cycle(Slice!(T*, Dim) F, Slice!(T*, Dim) U, uint l, T current_h)
+    @nogc void do_cycle(Slice!(const(T)*, Dim) F, Slice!(T*, Dim) U, uint d, T current_h)
     {
-        if (l <= 1 || U.shape[0] <= 1)
+        if (d + 1 >= l || U.shape[0] <= 1)
         {
             solve(F, U, current_h);
             return;
@@ -60,12 +60,14 @@ protected:
 
         auto r = compute_residual(F, U, current_h);
 
-        r = restriction(r);
+        auto res = temp[d][0];
+        restriction(res, r);
 
-        r = compute_correction(r, l - 1, current_h * 2);
+        auto cor = temp[d][1];
+        compute_correction(cor, res, d + 1, current_h * 2);
 
         auto e = R(U.shape);
-        prolongation!(T, Dim)(r, e);
+        prolongation(e, cor);
 
         add_correction(U, e);
 
@@ -79,13 +81,13 @@ public:
         F = Dim-slice as righthandsite
         mu = indicator for type of cycle
         l = the depth of the multigrid cycle if it is set to 0, the maxmium depth is choosen
-        h = is the distance between the grid points if set to 0 1 / F.shape[0] is used
+        h = is the distance between the grid points if set to 0 1 / F.length is used
     +/
     this(Slice!(T*, Dim) F, uint mu, uint l, T h)
     {
         auto ls = F.shape[0].to!double.log2;
         enforce!"l is to big for F"(l == 0 || ls > l);
-        this.F = F;
+        this.initialF = F;
         this.Rdata = F.shape.slice!double.field;
         this.l = l;
         this.h = h != 0 ? h : 1.0 / F.shape[0];
@@ -94,6 +96,18 @@ public:
         {
             this.l = ls.to!uint - 1;
         }
+        auto m = F.length;
+        
+        if (m > 1) do
+        {
+            m = m / 2 + 1;
+            size_t[Dim + 1] shape = m;
+            shape[0] = 2;
+            temp ~= shape.slice!double;
+            if (m == 2)
+                break;
+        }
+        while(m > 2);
     }
 
     /++
@@ -109,7 +123,7 @@ public:
     +/
     void cycle(Slice!(T*, Dim) U)
     {
-        do_cycle(this.F, U, this.l, this.h);
+        do_cycle(this.initialF, U, 0, this.h);
     }
 
     /++ Computes the l2 norm of U and the inital F+/
@@ -129,21 +143,21 @@ class PoissonCycle(T, size_t Dim, uint v1, uint v2, SweepType sweep = SweepType.
     import multid.gaussseidel.redblack : GS_RB;
 
 protected:
-    override void presmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
+    override void presmooth(Slice!(const(T)*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
         auto r = R(F.shape);
         T norm;
         auto it = GS_RB!(v1, 1_000, eps, sweep)(F, U, r, current_h, norm);
     }
 
-    override void postsmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
+    override void postsmooth(Slice!(const(T)*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
         auto r = R(F.shape);
         T norm;
         auto it = GS_RB!(v2, 1_000, eps, sweep)(F, U, r, current_h, norm);
     }
 
-    override Slice!(T*, Dim) compute_residual(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
+    override Slice!(T*, Dim) compute_residual(Slice!(const(T)*, Dim) F, Slice!(const(T)*, Dim) U, T current_h)
     {
         import ap = multid.tools.apply_poisson;
 
@@ -152,18 +166,17 @@ protected:
         return r;
     }
 
-    override void solve(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
+    override void solve(Slice!(const(T)*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
         auto r = R(F.shape);
         T norm;
         auto it = GS_RB!(100_000, 5, eps, sweep)(F, U, r, current_h, norm);
     }
 
-    override Slice!(T*, Dim) restriction(Slice!(T*, Dim) U)
+    override void restriction(Slice!(T*, Dim) res, Slice!(const(T)*, Dim) U)
     {
         import multid.multigrid.restriction : weighted_restriction;
-
-        return weighted_restriction!(T, Dim)(U);
+        return weighted_restriction(res, U);
     }
 
 public:
@@ -172,7 +185,7 @@ public:
         F = Dim-slice as righthandside
         mu = indicator for type of cycle
         l = the depth of the multigrid cycle if it is set to 0, the maxmium depth is choosen
-        h = is the distance between the grid points if set to 0 1 / F.shape[0] is used
+        h = is the distance between the grid points if set to 0 1 / F.length is used
     +/
     this(Slice!(T*, Dim) F, uint mu, uint l, T h)
     {
@@ -183,7 +196,7 @@ public:
     {
         import multid.tools.norm : nrmL2;
 
-        auto res = residual(F, U);
+        auto res = residual(initialF, U);
         return nrmL2(res);
     }
 }
