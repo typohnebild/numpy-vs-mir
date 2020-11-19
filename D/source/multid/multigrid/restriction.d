@@ -58,7 +58,13 @@ Slice!(T*, Dim) weighted_restriction(T, size_t Dim)(Slice!(const(T)*, Dim) A)
 void weighted_restriction(T, size_t N)(Slice!(T*, N) r, Slice!(const(T)*, N) A)
 {
     weighted_restriction_borders(r, A);
-    weighted_restriction_impl(r, A);
+    auto rc = r.canonical;
+    static foreach (d; 0 .. N)
+    {
+        rc.popFront!d;
+        rc.popBack!d;
+    }
+    rc.assignImpl!N = A.weights3;
 }
 
 @nogc @fastmath
@@ -78,35 +84,26 @@ void weighted_restriction_borders(T, size_t N)(Slice!(T*, N) r, Slice!(const(T)*
     }
 }
 
-@nogc @fastmath
-private void weighted_restriction_impl(T, size_t N)(Slice!(T*, N) r, Slice!(const(T)*, N) A)
+
+private template assignImpl(size_t N)
 {
-    auto rc = r.canonical;
-    static foreach (d; 0 .. N)
+    @nogc @fastmath
+    void assignImpl(T)(ref T a, const T b) @fastmath
+        if (isNumeric!T)
     {
-        rc.popFront!d;
-        rc.popBack!d;
+        enum factor = 2 ^^ (N * 2);
+        static if (__traits(isIntegral, T))
+            a = b / factor;
+        else
+            a = b * (T(1) / (factor));
     }
-    rc.assignImpl = A.weights3;
-    enum factor = 2 ^^ (N * 2);
-    static if (__traits(isIntegral, T))
-        rc[] /= factor;
-    else
-        rc[] *= T(1) / (factor);
-}
 
-private @nogc @fastmath
-void assignImpl(T)(ref T a, T b) @fastmath
-    if (isNumeric!T)
-{
-    a = b;
-}
-
-private @nogc @fastmath
-void assignImpl(Slice1, Slice2)(Slice1 a, Slice2 b) @fastmath @property
-    if (isSlice!Slice1)
-{
-    each!assignImpl(a.byDim!0, b[1 .. $].stride(2));
+    @nogc @fastmath
+    void assignImpl(Slice1, Slice2)(Slice1 a, Slice2 b) @fastmath @property
+        if (isSlice!Slice1)
+    {
+        each!assignImpl(a.byDim!0, b[1 .. $].stride(2));
+    }
 }
 
 private @nogc @fastmath
@@ -122,12 +119,12 @@ auto sum3(It1, It2, It3)(Slice!It1 a, Slice!It2 b, Slice!It3 c) @fastmath
     return zip!true(a, b, c).map!(.sum3);
 }
 
+// constructs lazy view of sums
 private @nogc @fastmath
 auto weights3(T, size_t N, SliceKind kind)(Slice!(const(T)*, N, kind) a) @fastmath
 {
-    alias slideSum = slide!(3, sum3);
     static if (N == 1)
-        return slide!(3, sum3)(a);
+        return a.slide!(3, sum3);
     else
         return a.byDim!0.map!weights3.slide!(3, sum3);
 }
