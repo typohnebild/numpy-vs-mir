@@ -3,7 +3,7 @@ module multid.multigrid.cycle;
 import mir.conv : to;
 import mir.exception : enforce;
 import mir.math : log2;
-import mir.ndslice : Slice, slice;
+import mir.ndslice : Slice, slice, iota, sliced;
 import multid.gaussseidel.redblack : SweepType;
 import multid.multigrid.prolongation : prolongation;
 import std.traits : isFloatingPoint;
@@ -16,12 +16,19 @@ class Cycle(T, size_t Dim) if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 protected:
     uint mu, l;
     Slice!(T*, Dim) F;
+    T[] Rdata;
+
+    final auto R(size_t[Dim] shape)
+    {
+        return Rdata[0 .. shape.iota.elementCount].sliced(shape);
+    }
+
     T h;
 
-    abstract Slice!(T*, Dim) presmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h);
-    abstract Slice!(T*, Dim) postsmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h);
-    abstract Slice!(T*, Dim) compute_residual(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h);
-    abstract Slice!(T*, Dim) solve(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h);
+    abstract @nogc void presmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h);
+    abstract @nogc void postsmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h);
+    abstract @nogc Slice!(T*, Dim) compute_residual(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h);
+    abstract @nogc void solve(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h);
     abstract Slice!(T*, Dim) restriction(Slice!(T*, Dim) U);
 
     Slice!(T*, Dim) compute_correction(Slice!(T*, Dim) r, uint l, T current_h)
@@ -29,39 +36,40 @@ protected:
         auto e = slice!T(r.shape, 0);
         foreach (_; 0 .. mu)
         {
-            e = do_cycle(r, e, l, current_h);
-
+            do_cycle(r, e, l, current_h);
         }
         return e;
     }
 
     /++ adds the correction vector to the U +/
-    Slice!(T*, Dim) add_correction(Slice!(T*, Dim) U, Slice!(T*, Dim) e)
+    @nogc void add_correction(Slice!(T*, Dim) U, Slice!(const(T)*, Dim) e)
     {
 
         U.field[] += e.field[];
-        return U;
     }
 
-    Slice!(T*, Dim) do_cycle(Slice!(T*, Dim) F, Slice!(T*, Dim) U, uint l, T current_h)
+    void do_cycle(Slice!(T*, Dim) F, Slice!(T*, Dim) U, uint l, T current_h)
     {
         if (l <= 1 || U.shape[0] <= 1)
         {
-            return solve(F, U, current_h);
+            solve(F, U, current_h);
+            return;
         }
 
-        U = presmooth(F, U, current_h);
+        presmooth(F, U, current_h);
 
         auto r = compute_residual(F, U, current_h);
 
         r = restriction(r);
 
-        auto e = compute_correction(r, l - 1, current_h * 2);
+        r = compute_correction(r, l - 1, current_h * 2);
 
-        e = prolongation!(T, Dim)(e, U.shape);
-        U = add_correction(U, e);
+        auto e = R(U.shape);
+        prolongation!(T, Dim)(r, e);
 
-        return postsmooth(F, U, current_h);
+        add_correction(U, e);
+
+        postsmooth(F, U, current_h);
     }
 
 public:
@@ -78,6 +86,7 @@ public:
         auto ls = F.shape[0].to!double.log2;
         enforce!"l is to big for F"(l == 0 || ls > l);
         this.F = F;
+        this.Rdata = F.shape.slice!double.field;
         this.l = l;
         this.h = h != 0 ? h : 1.0 / F.shape[0];
         this.mu = mu;
@@ -90,7 +99,7 @@ public:
     /++
         This computes the residual
     +/
-    Slice!(T*, Dim) residual(Slice!(T*, Dim) F, Slice!(T*, Dim) U)
+    @nogc Slice!(T*, Dim) residual(Slice!(T*, Dim) F, Slice!(T*, Dim) U)
     {
         return compute_residual(F, U, this.h);
     }
@@ -98,13 +107,13 @@ public:
     /++
         The actual function to caculate a cycle
     +/
-    Slice!(T*, Dim) cycle(Slice!(T*, Dim) U)
+    void cycle(Slice!(T*, Dim) U)
     {
-        return do_cycle(this.F, U, this.l, this.h);
+        do_cycle(this.F, U, this.l, this.h);
     }
 
     /++ Computes the l2 norm of U and the inital F+/
-    abstract T norm(Slice!(T*, Dim) U);
+    @nogc abstract T norm(Slice!(T*, Dim) U);
 }
 
 /++ Poisson Cycle:
@@ -120,28 +129,34 @@ class PoissonCycle(T, size_t Dim, uint v1, uint v2, SweepType sweep = SweepType.
     import multid.gaussseidel.redblack : GS_RB;
 
 protected:
-    override Slice!(T*, Dim) presmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
+    override void presmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
-
-        return GS_RB!(v1, 1_000, eps, sweep)(F, U, current_h);
+        auto r = R(F.shape);
+        T norm;
+        auto it = GS_RB!(v1, 1_000, eps, sweep)(F, U, r, current_h, norm);
     }
 
-    override Slice!(T*, Dim) postsmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
+    override void postsmooth(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
-
-        return GS_RB!(v2, 1_000, eps, sweep)(F, U, current_h);
+        auto r = R(F.shape);
+        T norm;
+        auto it = GS_RB!(v2, 1_000, eps, sweep)(F, U, r, current_h, norm);
     }
 
     override Slice!(T*, Dim) compute_residual(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
         import ap = multid.tools.apply_poisson;
 
-        return ap.compute_residual!(T, Dim)(F, U, current_h);
+        auto r = R(F.shape);
+        ap.compute_residual!(T, Dim)(r, F, U, current_h);
+        return r;
     }
 
-    override Slice!(T*, Dim) solve(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
+    override void solve(Slice!(T*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
-        return GS_RB!(100_000, 5, eps, sweep)(F, U, current_h);
+        auto r = R(F.shape);
+        T norm;
+        auto it = GS_RB!(100_000, 5, eps, sweep)(F, U, r, current_h, norm);
     }
 
     override Slice!(T*, Dim) restriction(Slice!(T*, Dim) U)

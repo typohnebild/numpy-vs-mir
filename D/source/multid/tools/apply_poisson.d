@@ -1,5 +1,6 @@
 module multid.tools.apply_poisson;
 
+import mir.math: fastmath;
 import mir.ndslice;
 
 /++
@@ -12,7 +13,15 @@ import mir.ndslice;
 +/
 Slice!(T*, Dim) apply_poisson(T, size_t Dim)(Slice!(const(T)*, Dim) U, const T h)
 {
-    auto x = slice!(T)(U.shape);
+    auto x = U.shape.slice!T;
+    apply_poisson(x, U, h);
+    return x;
+}
+
+@nogc @fastmath
+void apply_poisson(T, size_t Dim)(Slice!(T*, Dim) x, Slice!(const(T)*, Dim) U, const T h)
+{
+    assert(x.shape == U.shape);
     const T h2 = h * h;
     auto UF = U.field;
 
@@ -91,17 +100,25 @@ Slice!(T*, Dim) apply_poisson(T, size_t Dim)(Slice!(const(T)*, Dim) U, const T h
     {
         static assert(false, Dim.stringof ~ " is not a supported dimension!");
     }
-
-    return x;
 }
 
 /++
     Computes F - AU were A is the poisson matrix
 +/
+@nogc @fastmath
+void compute_residual(T, size_t Dim)(Slice!(T*, Dim) R, Slice!(const(T)*, Dim) F, Slice!(const(T)*, Dim) U, const T current_h)
+{
+    assert(U.shape == F.shape);
+    assert(R.shape == F.shape);
+    apply_poisson(R, U, current_h);
+    R.field[] = F.field[] - R.field[];
+}
+
 Slice!(T*, Dim) compute_residual(T, size_t Dim)(Slice!(const(T)*, Dim) F, Slice!(const(T)*, Dim) U, const T current_h)
 {
-    auto AU = apply_poisson!(T, Dim)(U, current_h);
-    AU.field[] = F.field[] - AU.field[];
+    auto AU = U.shape.slice!T;
+    assert(AU.shape == F.shape);
+    compute_residual(AU, F, U, current_h);
     return AU;
 }
 

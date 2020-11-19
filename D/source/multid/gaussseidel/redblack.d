@@ -1,7 +1,7 @@
 module multid.gaussseidel.redblack;
 
 import mir.math: fastmath;
-import mir.ndslice : slice, sliced, Slice, strided;
+import mir.ndslice : slice, uninitSlice, sliced, Slice, strided;
 import multid.gaussseidel.sweep;
 import multid.tools.apply_poisson : compute_residual;
 import multid.tools.norm : nrmL2;
@@ -37,29 +37,49 @@ it solves AU = F, with A being a poisson matrix like this
         1 .. 1 1 1 1
 so the borders of U remain unchanged
 Params:
-    U = slice of dimension Dim
     F = slice of dimension Dim
+    U = slice of dimension Dim
+    R = slice of dimension Dim
     h = the distance between the grid points
 Returns: U
 +/
-@fastmath
+
 Slice!(T*, Dim) GS_RB(size_t max_iter = 10_000_000, size_t norm_iter = 1_000,
-        double eps = 1e-8, SweepType sweeptype = SweepType.field, T, size_t Dim)(Slice!(const(T)*, Dim) F, Slice!(T*, Dim) U, const T h)
+        double eps = 1e-8, SweepType sweeptype = SweepType.field, T, size_t Dim)(
+            Slice!(const(T)*, Dim) F,
+            Slice!(T*, Dim) U,
+            const T h)
         if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 {
-    pragma(inline, false);
+    auto R = U.shape.slice!T;
+    T norm;
+    auto it = GS_RB!(max_iter, norm_iter, eps, sweeptype)(F, U, R, h, norm);
+    logf("GS_RB converged after %d iterations with %e error", it, norm);
+    return U;
+}
+
+@nogc @fastmath
+size_t GS_RB(size_t max_iter = 10_000_000, size_t norm_iter = 1_000,
+        double eps = 1e-8, SweepType sweeptype = SweepType.field, T, size_t Dim)(
+            Slice!(const(T)*, Dim) F,
+            Slice!(T*, Dim) U,
+            Slice!(T*, Dim) R, //residual
+            const T h,
+            out T norm)
+        if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
+{
     mixin("alias sweep = sweep_" ~ sweeptype ~ ";");
 
     const T h2 = h * h;
-    T norm = 0;
-    size_t it = 0;
-
+    size_t it;
+    norm = 0;
     while (it < max_iter)
     {
         it++;
         if (it % norm_iter == 0)
         {
-            norm = compute_residual(F, U, h).nrmL2;
+            compute_residual(R, F, U, h);
+            norm = R.nrmL2;
             if (norm <= eps)
             {
                 break;
@@ -71,8 +91,7 @@ Slice!(T*, Dim) GS_RB(size_t max_iter = 10_000_000, size_t norm_iter = 1_000,
         // schwarze Halbiteration
         sweep!(Color.black)(F, U, h2);
     }
-    logf("GS_RB converged after %d iterations with %e error", it, norm);
-    return U;
+    return it;
 }
 
 unittest

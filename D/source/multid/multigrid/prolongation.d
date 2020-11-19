@@ -11,12 +11,19 @@ This is the implementation of a prolongation
         fine_shape = the shape of the returned grid
     Returns: the finer grid with interpolated values in between
 +/
-@fastmath
-Slice!(T*, Dim) prolongation(T, size_t Dim)(Slice!(const(T)*, Dim) e, const size_t[Dim] fine_shape)
+
+Slice!(T*, Dim) prolongation(T, size_t Dim)(Slice!(const(T)*, Dim) e, size_t[Dim] fine_shape)
+{
+    auto w = slice!T(fine_shape);
+    prolongation(e, w);
+    return w;
+}
+
+@nogc @fastmath
+void prolongation(T, size_t Dim)(Slice!(const(T)*, Dim) e, Slice!(T*, Dim) w)
 {
     pragma(inline, false);
-    auto w = slice!T(fine_shape);
-    immutable end = e.shape[0] - (fine_shape[0] + 1) % 2;
+    immutable end = e.shape[0] - (w.shape[0] + 1) % 2;
     auto WF = w.field;
     auto EF = e.field;
 
@@ -32,11 +39,11 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(Slice!(const(T)*, Dim) e, const size
     }
     else static if (Dim == 2)
     {
-        immutable NW = fine_shape[1];
+        immutable NW = w.shape[1];
         immutable NE = e.shape[1];
 
-        auto idxe = (size_t i, size_t j) => i * NE + j;
-        auto idxw = (size_t i, size_t j) => i * NW + j;
+        alias idxe = (size_t i, size_t j) => i * NE + j;
+        alias idxw = (size_t i, size_t j) => i * NW + j;
 
         foreach (i; 0 .. end - 1)
         {
@@ -68,7 +75,7 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(Slice!(const(T)*, Dim) e, const size
         // Since we restrict always to N//2 + 1 we need to handle the case if
         // the finer grid is even sized, because that means between the last
         // and the forelast is no new colomn that needs to be calculated
-        if (fine_shape[0] % 2 == 0)
+        if (w.shape[0] % 2 == 0)
         {
             foreach (j; 0 .. end - 1)
             {
@@ -86,16 +93,16 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(Slice!(const(T)*, Dim) e, const size
     }
     else static if (Dim == 3)
     {
-        immutable MW = fine_shape[0];
-        immutable NW = fine_shape[1];
-        immutable OW = fine_shape[2];
+        immutable MW = w.shape[0];
+        immutable NW = w.shape[1];
+        immutable OW = w.shape[2];
 
         immutable ME = e.shape[0];
         immutable NE = e.shape[1];
         immutable OE = e.shape[2];
 
-        auto idxe = (size_t i, size_t j, size_t k) => i * (ME * NE) + j * NE + k;
-        auto idxw = (size_t i, size_t j, size_t k) => i * (MW * NW) + j * NW + k;
+        alias idxe = (size_t i, size_t j, size_t k) => i * (ME * NE) + j * NE + k;
+        alias idxw = (size_t i, size_t j, size_t k) => i * (MW * NW) + j * NW + k;
 
         WF[$ - 1] = EF[$ - 1];
 
@@ -204,7 +211,7 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(Slice!(const(T)*, Dim) e, const size
         // Since we restrict always to N//2 + 1 we need to handle the case if
         // the finer grid is even sized, because that means between the last
         // and the forelast is no new colomn that needs to be calculated
-        if (fine_shape[0] % 2 == 0) // != e.shape[0] % 2)
+        if (w.shape[0] % 2 == 0) // != e.shape[0] % 2)
         {
 
             foreach (i; 0 .. end - 1)
@@ -324,7 +331,6 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(Slice!(const(T)*, Dim) e, const size
     {
         static assert(false, Dim.stringof ~ " is not a supported dimension!");
     }
-    return w;
 }
 
 // Tests 1D
