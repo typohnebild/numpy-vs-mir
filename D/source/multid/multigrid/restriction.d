@@ -1,42 +1,46 @@
 module multid.multigrid.restriction;
 
-import mir.math: fastmath;
-import mir.ndslice;
 import mir.algorithm.iteration: each;
 import mir.exception : enforce;
+import mir.math: fastmath;
+import mir.ndslice;
 import numir : approxEqual;
+import std.traits: isNumeric;
 
 /++
 This is the implementation of a restriction for 1D, 2D, 3D
 +/
 @fastmath
-Slice!(T*, Dim) restriction(T, size_t Dim)(Slice!(const(T)*, Dim) A)
-{
-    pragma(inline, false);
-    size_t[Dim] shape = A.length / 2 + 1;
-    auto ret = shape.slice!T;
-    restriction(ret, A);
-    return ret;
-}
 
-@nogc @fastmath
-void restriction(T, size_t Dim)(
-    Slice!(T*, Dim) r,
-    Slice!(const(T)*, Dim) A)
+// TODO: move to mir.algorithm.iteration
+
+template restriction(alias fun = "a = b")
 {
-    static if (Dim == 1)
+    import mir.functional: naryFun;
+
+    static if (__traits(isSame, naryFun!fun, fun))
+    Slice!(T*, Dim) restriction(T, size_t Dim)(Slice!(const(T)*, Dim) A)
     {
-        auto a = A.strided(2);
-        r[0 .. a.length] = a;
-        r.back = A.back;
+        size_t[Dim] shape = A.length / 2 + 1;
+        auto ret = shape.slice!T;
+        .restriction!fun(ret, A);
+        return ret;
+    }
+
+    static if (__traits(isSame, naryFun!fun, fun))
+    @nogc @fastmath
+    void restriction(IteratorA, IteratorB, size_t N, SliceKind aKind, SliceKind bKind)(Slice!(IteratorA, N, aKind) a, Slice!(IteratorB, N, bKind) b)
+    {
+        import std.traits: Select;
+        alias f = Select!(N == 1, fun, .restriction!fun);
+        each!f(a[0 .. $ - 1].byDim!0, b[0 .. $ - 1].byDim!0.strided(2));
+        f(a.back, b.back);
     }
     else
-    {
-        auto a = A.byDim!0.strided(2);
-        r[0 .. a.length].byDim!0.each!restriction(a);
-        restriction(r.back, A.back);
-    }
+        alias restriction = .restriction!(naryFun!fun);
 }
+
+
 
 /++
 This is the implementation of a restriction for 1D, 2D, 3D
@@ -44,103 +48,95 @@ This is the implementation of a restriction for 1D, 2D, 3D
 @fastmath
 Slice!(T*, Dim) weighted_restriction(T, size_t Dim)(Slice!(const(T)*, Dim) A)
 {
-    pragma(inline, false);
     size_t[Dim] shape = A.length / 2 + 1;
     auto ret = shape.slice!T;
     weighted_restriction(ret, A);
     return ret;
 }
 
-@fastmath
-void weighted_restriction(T, size_t Dim : 1)(Slice!(T*, Dim) ret, Slice!(const(T)*, Dim) A)
+@nogc @fastmath
+void weighted_restriction(T, size_t N)(Slice!(T*, N) r, Slice!(const(T)*, N) A)
 {
-    assert(ret.length == A.length / 2 + 1);
-    pragma(inline, false);
-    const M = A.length;
-    const N = M / 2 + 1;
-    restriction(ret, A);
-    auto AF = A.field;
+    weighted_restriction_borders(r, A);
+    weighted_restriction_impl(r, A);
+}
 
-    foreach (i; 1u .. N - 1u)
+@nogc @fastmath
+void weighted_restriction_borders(T, size_t N)(Slice!(T*, N) r, Slice!(const(T)*, N) A)
+{
+    import std.traits: Select;
+    static if (N == 1)
     {
-        ret.field[i] = ret.field[i] / 2 + (AF[i * 2 - 1u] + AF[i * 2 + 1u]) / cast(T)(4);
+        r.front = A.front;
+        r.back = A.back;
+    }
+    else
+    {
+        restriction(r.front, A.front);
+        each!weighted_restriction_borders(r[1 .. $ - 1].byDim!0, A[2 .. $ - 1].byDim!0.strided(2));
+        restriction(r.back, A.back);
     }
 }
 
-@fastmath
-void weighted_restriction(T, size_t Dim : 2)(Slice!(T*, Dim) ret, Slice!(const(T)*, Dim) A)
+@nogc @fastmath
+private void weighted_restriction_impl(T, size_t N)(Slice!(T*, N) r, Slice!(const(T)*, N) A)
 {
-    pragma(inline, false);
-    enforce!"not all dimensions have the same length"(A.dropToHypercube.shape == A.shape);
-    const M = A.length;
-    const N = M / 2 + 1;
-    restriction(ret, A);
-    auto AF = A.field;
-
-    foreach (i; 1u .. N - 1u)
+    auto rc = r.canonical;
+    static foreach (d; 0 .. N)
     {
-        foreach (j; 1u .. N - 1u)
-        {
-            auto indexR = i * N + j;
-            auto indexA = i * M * 2 + j * 2;
-            ret.field[indexR] = ret.field[indexR] / cast(T)(4) +
-                (
-                        AF[indexA - 1] + AF[indexA + 1] +
-                        AF[indexA - M] + AF[indexA + M]) / cast(T)(8) +
-                (
-                        AF[indexA - 1 - M] + AF[indexA - 1 + M] +
-                        AF[indexA + 1 - M] + AF[indexA + 1 + M]) / cast(T)(16);
-        }
+        rc.popFront!d;
+        rc.popBack!d;
     }
+    rc.assignImpl = A.weights3;
+    enum factor = 2 ^^ (N * 2);
+    static if (__traits(isIntegral, T))
+        rc[] /= factor;
+    else
+        rc[] *= T(1) / (factor);
 }
 
-@fastmath
-void weighted_restriction(T, size_t Dim : 3)(Slice!(T*, Dim) ret, Slice!(const(T)*, Dim) A)
+private @nogc @fastmath
+void assignImpl(T)(ref T a, T b) @fastmath
+    if (isNumeric!T)
 {
-    pragma(inline, false);
-    enforce!"not all dimensions have the same length"(A.dropToHypercube.shape == A.shape);
-    const M = A.length;
-    const N = M / 2 + 1;
-    restriction(ret, A);
-    auto AF = A.field;
+    a = b;
+}
 
-    foreach (k; 1u .. N - 1u)
-    {
-        foreach (i; 1u .. N - 1u)
-        {
-            foreach (j; 1u .. N - 1u)
-            {
-                auto indexR = k * (N * N) + i * N + j;
-                auto indexA = k * (M * M) * 2 + i * M * 2 + j * 2;
-                ret.field[indexR] = (
-                        ret.field[indexR] * cast(T)(8) +
-                        (
-                            AF[indexA - 1] + AF[indexA + 1] +
-                            AF[indexA - M] + AF[indexA + M] +
-                            AF[indexA - M * M] + AF[indexA + M * M]) * cast(T)(4) +
-                        (
-                            AF[indexA - 1 - M] + AF[indexA + 1 + M] +
-                            AF[indexA - 1 + M] + AF[indexA + 1 - M] +
-                            AF[indexA - 1 - M * M] + AF[indexA + 1 + M * M] +
-                            AF[indexA - 1 + M * M] + AF[indexA + 1 - M * M] +
-                            AF[indexA - M - M * M] + AF[indexA + M + M * M] +
-                            AF[indexA - M + M * M] + AF[indexA + M - M * M]) * cast(
-                            T)(2) +
-                        (AF[indexA - 1 - M - M * M] + AF[indexA + 1 - M - M * M] +
-                            AF[indexA - 1 + M - M * M] + AF[indexA + 1 + M - M * M] +
-                            AF[indexA - 1 - M + M * M] + AF[indexA + 1 - M + M * M] +
-                            AF[indexA - 1 + M + M * M] + AF[indexA + 1 + M + M * M])) /
-                    cast(T)(64);
-            }
-        }
-    }
+private @nogc @fastmath
+void assignImpl(Slice1, Slice2)(Slice1 a, Slice2 b) @fastmath @property
+    if (isSlice!Slice1)
+{
+    each!assignImpl(a.byDim!0, b[1 .. $].stride(2));
+}
+
+private @nogc @fastmath
+auto sum3(T)(const T a, const T b, const T c) @fastmath
+    if (isNumeric!T)
+{
+    return a + b * 2 + c;
+}
+
+private @nogc @fastmath
+auto sum3(It1, It2, It3)(Slice!It1 a, Slice!It2 b, Slice!It3 c) @fastmath
+{
+    return zip!true(a, b, c).map!(.sum3);
+}
+
+private @nogc @fastmath
+auto weights3(T, size_t N, SliceKind kind)(Slice!(const(T)*, N, kind) a) @fastmath
+{
+    alias slideSum = slide!(3, sum3);
+    static if (N == 1)
+        return slide!(3, sum3)(a);
+    else
+        return a.byDim!0.map!weights3.slide!(3, sum3);
 }
 
 // Test restriction 1D
 unittest
 {
     auto arr = iota(10).slice;
-    auto ret = restriction(arr);
+    auto ret = restriction!"a = b"(arr);
     auto correct = [0, 2, 4, 6, 8, 9];
     assert(ret == correct);
 
@@ -233,6 +229,7 @@ unittest
     assert(ret2 == correct2);
 }
 
+
 // Test weighted_restriction 2D long
 unittest
 {
@@ -258,6 +255,7 @@ unittest
     auto correct2 = [[1.0, 3.0, 1.0],
         [3.0, 4.5, 3.0],
         [5.0, 7.0, 5.0]];
+
     assert(ret2 == correct2);
 
     arr2 = [1.0, 2.0, 3.0, 3.0, 2.0, 1.0,
