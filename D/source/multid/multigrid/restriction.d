@@ -1,7 +1,8 @@
 module multid.multigrid.restriction;
 
 import mir.math: fastmath;
-import mir.ndslice : Slice, slice, sliced, strided, iota, as, fuse, dropToHypercube;
+import mir.ndslice;
+import mir.algorithm.iteration: each;
 import mir.exception : enforce;
 import numir : approxEqual;
 
@@ -19,93 +20,22 @@ Slice!(T*, Dim) restriction(T, size_t Dim)(Slice!(const(T)*, Dim) A)
 }
 
 @nogc @fastmath
-void restriction(T, size_t Dim : 1)(Slice!(T*, Dim) ret, Slice!(const(T)*, Dim) A)
+void restriction(T, size_t Dim)(
+    Slice!(T*, Dim) r,
+    Slice!(const(T)*, Dim) A)
 {
-    assert(A.length / 2 + 1 == ret.length);
-    pragma(inline, false);
-    const M = A.length;
-    const N = ret.length;
-    const end = N - (M + 1) % 2;
-    auto AF = A.field;
-
-    foreach (i; 0 .. end)
+    static if (Dim == 1)
     {
-        // get every second element in AF
-        ret.field[i] = AF[i * 2];
+        auto a = A.strided(2);
+        r[0 .. a.length] = a;
+        r.back = A.back;
     }
-    // special case: outer corner
-    ret.field[$ - 1] = AF[$ - 1];
-}
-
-@nogc @fastmath
-void restriction(T, size_t Dim : 2)(Slice!(T*, Dim) ret, Slice!(const(T)*, Dim) A)
-{
-    pragma(inline, false);
-    enforce!"not all dimensions have the same length"(A.dropToHypercube.shape == A.shape);
-    assert(A.length / 2 + 1 == ret.length);
-    const M = A.length;
-    const N = ret.length;
-    const end = N - (M + 1) % 2;
-    auto AF = A.field;
-
-    foreach (i; 0 .. end)
+    else
     {
-        foreach (j; 0 .. end)
-        {
-            // get every second element in AF
-            auto flattindexret = i * N + j;
-            auto flattindexA = i * M * 2 + j * 2;
-            ret.field[flattindexret] = AF[flattindexA];
-        }
+        auto a = A.byDim!0.strided(2);
+        r[0 .. a.length].byDim!0.each!restriction(a);
+        restriction(r.back, A.back);
     }
-    // special case: borders
-    foreach (i; 0 .. end)
-    {
-        auto indexrowR = (N - 1) * N + i;
-        auto indexrowA = (M - 1) * M + 2 * i;
-        auto indexcolR = N * i + N - 1;
-        auto indexcolA = M * 2 * i + M - 1;
-        ret.field[indexrowR] = AF[indexrowA];
-        ret.field[indexcolR] = AF[indexcolA];
-    }
-    // special case: outer corner
-    ret.field[$ - 1] = AF[$ - 1];
-}
-
-@nogc @fastmath
-void restriction(T, size_t Dim : 3)(Slice!(T*, Dim) ret, Slice!(const(T)*, Dim) A)
-{
-    pragma(inline, false);
-    enforce!"not all dimensions have the same length"(A.dropToHypercube.shape == A.shape);
-    assert(A.length / 2 + 1 == ret.length);
-    const M = A.length;
-    const N = ret.length;
-    const end = N - (M + 1) % 2;
-    auto AF = A.field;
-
-    foreach (k; 0 .. end)
-    {
-        foreach (i; 0 .. end)
-        {
-            foreach (j; 0 .. end)
-            {
-                // get every second element in AF
-                auto flattindexret = k * (N * N) + i * N + j;
-                auto flattindexA = k * (M * M) * 2 + i * M * 2 + j * 2;
-                ret.field[flattindexret] = AF[flattindexA];
-            }
-        }
-    }
-    // special case: inner borders
-    ret[0 .. end, 0 .. end, $ - 1] = A[0 .. $, 0 .. $, $ - 1].strided(2);
-    ret[$ - 1, 0 .. end, 0 .. end] = A[$ - 1, 0 .. $, 0 .. $].strided(2);
-    ret[0 .. end, $ - 1, 0 .. end] = A[0 .. $, $ - 1, 0 .. $].strided(2);
-    // special case: outer borders
-    ret[0 .. end, $ - 1, $ - 1] = A[0 .. $, $ - 1, $ - 1].strided(2);
-    ret[$ - 1, 0 .. end, $ - 1] = A[$ - 1, 0 .. $, $ - 1].strided(2);
-    ret[$ - 1, $ - 1, 0 .. end] = A[$ - 1, $ - 1, 0 .. $].strided(2);
-    // special case: outer corner
-    ret.field[$ - 1] = AF[$ - 1];
 }
 
 /++
