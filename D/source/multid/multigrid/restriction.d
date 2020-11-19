@@ -97,13 +97,13 @@ void restriction(T, size_t Dim : 3)(Slice!(T*, Dim) ret, Slice!(const(T)*, Dim) 
         }
     }
     // special case: inner borders
-    ret[0 .. end, 0 .. end, $ - 1] = A[0 .. $, 0 .. $, $ - 1].strided!(0, 1)(2, 2);
-    ret[$ - 1, 0 .. end, 0 .. end] = A[$ - 1, 0 .. $, 0 .. $].strided!(0, 1)(2, 2);
-    ret[0 .. end, $ - 1, 0 .. end] = A[0 .. $, $ - 1, 0 .. $].strided!(0, 1)(2, 2);
+    ret[0 .. end, 0 .. end, $ - 1] = A[0 .. $, 0 .. $, $ - 1].strided(2);
+    ret[$ - 1, 0 .. end, 0 .. end] = A[$ - 1, 0 .. $, 0 .. $].strided(2);
+    ret[0 .. end, $ - 1, 0 .. end] = A[0 .. $, $ - 1, 0 .. $].strided(2);
     // special case: outer borders
-    ret[0 .. end, $ - 1, $ - 1] = A[0 .. $, $ - 1, $ - 1].strided!(0)(2);
-    ret[$ - 1, 0 .. end, $ - 1] = A[$ - 1, 0 .. $, $ - 1].strided!(0)(2);
-    ret[$ - 1, $ - 1, 0 .. end] = A[$ - 1, $ - 1, 0 .. $].strided!(0)(2);
+    ret[0 .. end, $ - 1, $ - 1] = A[0 .. $, $ - 1, $ - 1].strided(2);
+    ret[$ - 1, 0 .. end, $ - 1] = A[$ - 1, 0 .. $, $ - 1].strided(2);
+    ret[$ - 1, $ - 1, 0 .. end] = A[$ - 1, $ - 1, 0 .. $].strided(2);
     // special case: outer corner
     ret.field[$ - 1] = AF[$ - 1];
 }
