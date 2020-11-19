@@ -1,7 +1,8 @@
 module multid.multigrid.prolongation;
 
+import mir.functional: naryFun;
 import mir.math: fastmath;
-import mir.ndslice : slice, Slice;
+import mir.ndslice;
 import numir : approxEqual;
 
 /++
@@ -20,319 +21,23 @@ Slice!(T*, Dim) prolongation(T, size_t Dim)(Slice!(const(T)*, Dim) e, size_t[Dim
 }
 
 @nogc @fastmath
-void prolongation(T, size_t Dim)(Slice!(T*, Dim) w, Slice!(const(T)*, Dim) e)
+void prolongation(IteratorA, IteratorB, size_t N, SliceKind aKind, SliceKind bKind)(Slice!(IteratorA, N, aKind) a, Slice!(IteratorB, N, bKind) b)
 {
-    pragma(inline, false);
-    import std.conv;
-    assert(w.length / 2 + 1 == e.length);
-    immutable end = e.shape[0] - (w.shape[0] + 1) % 2;
-    auto WF = w.field;
-    auto EF = e.field;
-
-    static if (Dim == 1)
+    static if (N == 1)
     {
-        for (size_t i = 1; i < end; i++)
-        {
-            w.field[2 * i - 1] = (e.field[i - 1] + e.field[i]) / 2;
-            w.field[2 * i] = e.field[i];
-        }
-        w.field[$ - 1] = e.field[$ - 1];
-        w.field[0] = e.field[0];
-    }
-    else static if (Dim == 2)
-    {
-        immutable NW = w.shape[1];
-        immutable NE = e.shape[1];
-
-        alias idxe = (size_t i, size_t j) => i * NE + j;
-        alias idxw = (size_t i, size_t j) => i * NW + j;
-
-        foreach (i; 0 .. end - 1)
-        {
-            foreach (j; 0 .. end - 1)
-            {
-                // the value that is copied
-                WF[idxw(2 * i, 2 * j)] = EF[idxe(i, j)];
-                // the value next a copied one
-                WF[idxw(2 * i, 2 * j + 1)] = (EF[idxe(i, j)] + EF[idxe(i, j + 1)]) / 2;
-                // the value below a copied one
-                WF[idxw(2 * i + 1, 2 * j)] = (EF[idxe(i + 1, j)] + EF[idxe(i, j)]) / 2;
-                // interpolation
-                WF[idxw(2 * i + 1, 2 * j + 1)] = (
-                        EF[idxe(i, j)] +
-                        EF[idxe(i, j + 1)] +
-                        EF[idxe(i + 1, j)] +
-                        EF[idxe(i + 1, j + 1)]) / 4;
-            }
-            WF[idxw(2 * i, 2 * (end - 1))] = EF[idxe(i, end - 1)];
-            WF[idxw(2 * i + 1, 2 * (end - 1))] = (EF[idxe(i + 1, end - 1)] +
-                    EF[idxe(i, end - 1)]) / 2;
-
-            // this is for the last row and the last colomn
-            WF[idxw(2 * (end - 1), 2 * i)] = EF[idxe(end - 1, i)];
-            WF[idxw(2 * (end - 1), 2 * i + 1)] = (EF[idxe(end - 1, i)] + EF[idxe(end - 1, i + 1)]) / 2;
-        }
-        WF[$ - 1] = EF[$ - 1];
-
-        // Since we restrict always to N//2 + 1 we need to handle the case if
-        // the finer grid is even sized, because that means between the last
-        // and the forelast is no new colomn that needs to be calculated
-        if (w.shape[0] % 2 == 0)
-        {
-            foreach (j; 0 .. end - 1)
-            {
-                WF[idxw(NW - 1, 2 * j)] = EF[idxe(NE - 1, j)];
-                WF[idxw(NW - 1, 2 * j + 1)] = (EF[idxe(NE - 1, j)] + EF[idxe(NE - 1, j + 1)]) / 2;
-
-                WF[idxw(2 * j, NW - 1)] = EF[idxe(j, NE - 1)];
-
-                WF[idxw(2 * j + 1, NW - 1)] = (
-                        EF[idxe(j, NE - 1)] +
-                        EF[idxe(j + 1, NE - 1)]) / 2;
-            }
-            w[$ - 2 .. $, $ - 2 .. $] = e[$ - 2 .. $, $ - 2 .. $];
-        }
-    }
-    else static if (Dim == 3)
-    {
-        immutable MW = w.shape[0];
-        immutable NW = w.shape[1];
-        immutable OW = w.shape[2];
-
-        immutable ME = e.shape[0];
-        immutable NE = e.shape[1];
-        immutable OE = e.shape[2];
-
-        alias idxe = (size_t i, size_t j, size_t k) => i * (ME * NE) + j * NE + k;
-        alias idxw = (size_t i, size_t j, size_t k) => i * (MW * NW) + j * NW + k;
-
-        WF[$ - 1] = EF[$ - 1];
-
-        foreach (i; 0 .. end - 1)
-        {
-            foreach (j; 0 .. end - 1)
-            {
-                foreach (k; 0 .. end - 1)
-                {
-                    WF[idxw(2 * i, 2 * j, 2 * k)] = EF[idxe(i, j, k)];
-
-                    WF[idxw(2 * i, 2 * j, 2 * k + 1)] = (EF[idxe(i, j, k)] + EF[idxe(i, j, k + 1)]) / 2;
-                    WF[idxw(2 * i, 2 * j + 1, 2 * k)] = (EF[idxe(i, j, k)] + EF[idxe(i, j + 1, k)]) / 2;
-
-                    WF[idxw(2 * i + 1, 2 * j, 2 * k)] = (EF[idxe(i, j, k)] + EF[idxe(i + 1, j, k)]) / 2;
-
-                    WF[idxw(2 * i, 2 * j + 1, 2 * k + 1)] = (
-                            EF[idxe(i, j, k)] +
-                            EF[idxe(i, j + 1, k)] +
-                            EF[idxe(i, j, k + 1)] +
-                            EF[idxe(i, j + 1, k + 1)]) / 4;
-
-                    WF[idxw(2 * i + 1, 2 * j + 1, 2 * k)] = (
-                            EF[idxe(i, j, k)] +
-                            EF[idxe(i, j + 1, k)] +
-                            EF[idxe(i + 1, j, k)] +
-                            EF[idxe(i + 1, j + 1, k)]) / 4;
-
-                    WF[idxw(2 * i + 1, 2 * j, 2 * k + 1)] = (
-                            EF[idxe(i, j, k)] +
-                            EF[idxe(i, j, k + 1)] +
-                            EF[idxe(i + 1, j, k)] +
-                            EF[idxe(i + 1, j, k + 1)]) / 4;
-
-                    WF[idxw(2 * i + 1, 2 * j + 1, 2 * k + 1)] = (
-                            EF[idxe(i, j, k)] +
-                            EF[idxe(i, j + 1, k)] +
-                            EF[idxe(i, j, k + 1)] +
-                            EF[idxe(i, j + 1, k + 1)] +
-                            EF[idxe(i + 1, j, k)] +
-                            EF[idxe(i + 1, j, k + 1)] +
-                            EF[idxe(i + 1, j + 1, k)] +
-                            EF[idxe(i + 1, j + 1, k + 1)]) / 8;
-
-                }
-
-                WF[idxw(2 * i, 2 * j, 2 * (end - 1))] = EF[idxe(i, j, end - 1)];
-
-                WF[idxw(2 * i, 2 * j + 1, 2 * (end - 1))] = (
-                        EF[idxe(i, j, (end - 1))] + EF[idxe(i, j + 1, (end - 1))]) / 2;
-
-                WF[idxw(2 * i, 2 * (end - 1), 2 * j + 1)] = (
-                        EF[idxe(i, (end - 1), j)] + EF[idxe(i, (end - 1), j + 1)]) / 2;
-
-                WF[idxw(2 * (end - 1), 2 * i, 2 * j)] = EF[idxe(end - 1, i, j)];
-
-                WF[idxw(2 * (end - 1), 2 * i, 2 * j + 1)] = (
-                        EF[idxe(end - 1, i, j)] + EF[idxe(end - 1, i, j + 1)]) / 2;
-
-                WF[idxw(2 * i, 2 * (end - 1), 2 * j)] = EF[idxe(i, end - 1, j)];
-
-                WF[idxw(2 * (end - 1), 2 * i + 1, 2 * j)] = (
-                        EF[idxe(end - 1, i, j)] + EF[idxe(end - 1, i + 1, j)]) / 2;
-
-                WF[idxw(2 * i + 1, 2 * j, 2 * (end - 1))] = (
-                        EF[idxe(i, j, (end - 1))] + EF[idxe(i + 1, j, (end - 1))]) / 2;
-
-                WF[idxw(2 * i + 1, 2 * (end - 1), 2 * j)] = (
-                        EF[idxe(i, (end - 1), j)] + EF[idxe(i + 1, (end - 1), j)]) / 2;
-
-                WF[idxw(2 * (end - 1), 2 * i + 1, 2 * j + 1)] = (
-                        EF[idxe((end - 1), i, j)] +
-                        EF[idxe((end - 1), i + 1, j)] +
-                        EF[idxe((end - 1), i, j + 1)] +
-                        EF[idxe((end - 1), i + 1, j + 1)]) / 4;
-
-                WF[idxw(2 * i + 1, 2 * j + 1, 2 * (end - 1))] = (
-                        EF[idxe(i, j, (end - 1))] +
-                        EF[idxe(i, j + 1, (end - 1))] +
-                        EF[idxe(i + 1, j, (end - 1))] +
-                        EF[idxe(i + 1, j + 1, (end - 1))]) / 4;
-
-                WF[idxw(2 * i + 1, 2 * (end - 1), 2 * j + 1)] = (
-                        EF[idxe(i, (end - 1), j)] +
-                        EF[idxe(i, (end - 1), j + 1)] +
-                        EF[idxe(i + 1, (end - 1), j)] +
-                        EF[idxe(i + 1, (end - 1), j + 1)]) / 4;
-
-            }
-
-            WF[idxw(2 * i, 2 * (end - 1), 2 * (end - 1))] = EF[idxe(i, end - 1, end - 1)];
-
-            WF[idxw(2 * i + 1, 2 * (end - 1), 2 * (end - 1))] = (
-                    EF[idxe(i, end - 1, end - 1)] + EF[idxe(i + 1, end - 1, end - 1)]) / 2;
-
-            WF[idxw(2 * (end - 1), 2 * i, 2 * (end - 1))] = EF[idxe(end - 1, i, end - 1)];
-
-            WF[idxw(2 * (end - 1), 2 * i + 1, 2 * (end - 1))] = (
-                    EF[idxe(end - 1, i, end - 1)] + EF[idxe(end - 1, i + 1, end - 1)]) / 2;
-
-            WF[idxw(2 * (end - 1), 2 * (end - 1), 2 * i)] = EF[idxe(end - 1, end - 1, i)];
-
-            WF[idxw(2 * (end - 1), 2 * (end - 1), 2 * i + 1)] = (
-                    EF[idxe(end - 1, end - 1, i)] + EF[idxe(end - 1, end - 1, i + 1)]) / 2;
-        }
-        // Since we restrict always to N//2 + 1 we need to handle the case if
-        // the finer grid is even sized, because that means between the last
-        // and the forelast is no new colomn that needs to be calculated
-        if (w.shape[0] % 2 == 0) // != e.shape[0] % 2)
-        {
-
-            foreach (i; 0 .. end - 1)
-            {
-                foreach (j; 0 .. end - 1)
-                {
-                    WF[idxw(2 * i, 2 * j, OW - 1)] = EF[idxe(i, j, OE - 1)];
-                    WF[idxw(2 * i, MW - 1, 2 * j)] = EF[idxe(i, ME - 1, j)];
-                    WF[idxw(NW - 1, 2 * i, 2 * j)] = EF[idxe(NE - 1, i, j)];
-
-                    WF[idxw(2 * i, 2 * j + 1, OW - 1)] = (
-                            EF[idxe(i, j, OE - 1)] +
-                            EF[idxe(i, j + 1, OE - 1)]) / 2;
-
-                    WF[idxw(2 * i, MW - 1, 2 * j + 1)] = (
-                            EF[idxe(i, ME - 1, j)] +
-                            EF[idxe(i, ME - 1, j + 1)]) / 2;
-
-                    WF[idxw(2 * i + 1, 2 * j, OW - 1)] = (
-                            EF[idxe(i, j, OE - 1)] +
-                            EF[idxe(i + 1, j, OE - 1)]) / 2;
-
-                    WF[idxw(2 * i + 1, MW - 1, 2 * j)] = (
-                            EF[idxe(i, ME - 1, j)] +
-                            EF[idxe(i + 1, ME - 1, j)]) / 2;
-
-                    WF[idxw(2 * i + 1, MW - 1, 2 * j + 1)] = (
-                            EF[idxe(i, ME - 1, j)] +
-                            EF[idxe(i + 1, ME - 1, j)] +
-                            EF[idxe(i, ME - 1, j + 1)] +
-                            EF[idxe(i + 1, ME - 1, j + 1)]) / 4;
-
-                    WF[idxw(2 * i + 1, 2 * j + 1, OW - 1)] = (
-                            EF[idxe(i, j, OE - 1)] +
-                            EF[idxe(i, j + 1, OE - 1)] +
-                            EF[idxe(i + 1, j, OE - 1)] +
-                            EF[idxe(i + 1, j + 1, OE - 1)]) / 4;
-
-                    WF[idxw(NW - 1, 2 * i + 1, 2 * j)] = (
-                            EF[idxe(NE - 1, i, j)] +
-                            EF[idxe(NE - 1, i + 1, j)]) / 2;
-
-                    WF[idxw(NW - 1, 2 * i, 2 * j + 1)] = (
-                            EF[idxe(NE - 1, i, j)] +
-                            EF[idxe(NE - 1, i, j + 1)]) / 2;
-
-                    WF[idxw(NW - 1, 2 * i + 1, 2 * j + 1)] = (
-                            EF[idxe(NE - 1, i, j)] +
-                            EF[idxe(NE - 1, i, j + 1)] +
-                            EF[idxe(NE - 1, i + 1, j)] +
-                            EF[idxe(NE - 1, i + 1, j + 1)]) / 4;
-                }
-
-                WF[idxw(2 * i, 2 * (end - 1), OW - 1)] = EF[idxe(i, (end - 1), OE - 1)];
-                WF[idxw(2 * i, MW - 1, 2 * (end - 1))] = EF[idxe(i, ME - 1, (end - 1))];
-
-                WF[idxw(2 * (end - 1), MW - 1, 2 * i)] = EF[idxe((end - 1), ME - 1, i)];
-                WF[idxw(NW - 1, 2 * (end - 1), 2 * i)] = EF[idxe(NE - 1, (end - 1), i)];
-
-                WF[idxw(NW - 1, 2 * i, 2 * (end - 1))] = EF[idxe(NE - 1, i, (end - 1))];
-                WF[idxw(2 * (end - 1), 2 * i, OW - 1)] = EF[idxe((end - 1), i, OE - 1)];
-
-                WF[idxw(2 * i, MW - 1, OW - 1)] = EF[idxe(i, ME - 1, OE - 1)];
-                WF[idxw(NW - 1, 2 * i, OW - 1)] = EF[idxe(NE - 1, i, OE - 1)];
-                WF[idxw(NW - 1, MW - 1, 2 * i)] = EF[idxe(NE - 1, ME - 1, i)];
-
-                WF[idxw(2 * (end - 1), MW - 1, 2 * i + 1)] = (
-                        EF[idxe((end - 1), ME - 1, i)] +
-                        EF[idxe((end - 1), ME - 1, i + 1)]) / 2;
-
-                WF[idxw(2 * (end - 1), 2 * i + 1, OW - 1)] = (
-                        EF[idxe((end - 1), i, OE - 1)] +
-                        EF[idxe((end - 1), i + 1, OE - 1)]) / 2;
-
-                WF[idxw((NW - 1), 2 * i + 1, OW - 1)] = (
-                        EF[idxe((NE - 1), i, OE - 1)] +
-                        EF[idxe((NE - 1), i + 1, OE - 1)]) / 2;
-
-                WF[idxw(NW - 1, MW - 1, 2 * i + 1)] = (
-                        EF[idxe(NE - 1, ME - 1, i)] +
-                        EF[idxe(NE - 1, ME - 1, i + 1)]) / 2;
-
-                WF[idxw(2 * i + 1, MW - 1, OW - 1)] = (
-                        EF[idxe(i, ME - 1, OE - 1)] +
-                        EF[idxe(i + 1, ME - 1, OE - 1)]) / 2;
-
-                WF[idxw(2 * i + 1, 2 * (end - 1), OW - 1)] = (
-                        EF[idxe(i, (end - 1), OE - 1)] +
-                        EF[idxe(i + 1, (end - 1), OE - 1)]) / 2;
-
-                WF[idxw(2 * i + 1, MW - 1, 2 * (end - 1))] = (EF[idxe(i, ME - 1, (end - 1))] +
-                        EF[idxe(i + 1, ME - 1, (end - 1))]) / 2;
-
-                WF[idxw(NW - 1, 2 * i + 1, 2 * (end - 1))] = (
-                        EF[idxe(NE - 1, i, (end - 1))] +
-                        EF[idxe(NE - 1, i + 1, (end - 1))]) / 2;
-
-                WF[idxw(NW - 1, 2 * (end - 1), 2 * i + 1)] = (
-                        EF[idxe(NE - 1, (end - 1), i)] +
-                        EF[idxe(NE - 1, (end - 1), i + 1)]) / 2;
-            }
-
-            WF[idxw(2 * (end - 1), MW - 1, OW - 1)] = EF[idxe((end - 1), ME - 1, OE - 1)];
-            WF[idxw(NW - 1, 2 * (end - 1), OW - 1)] = EF[idxe(NE - 1, (end - 1), OE - 1)];
-            WF[idxw(NW - 1, MW - 1, 2 * (end - 1))] = EF[idxe(NE - 1, ME - 1, (end - 1))];
-
-            WF[idxw(2 * (end - 1), MW - 1, 2 * (end - 1))] = EF[idxe((end - 1), ME - 1, (end - 1))];
-            WF[idxw(2 * (end - 1), 2 * (end - 1), OW - 1)] = EF[idxe((end - 1), (end - 1), OE - 1)];
-            WF[idxw(NW - 1, 2 * (end - 1), 2 * (end - 1))] = EF[idxe(NE - 1, end - 1, (end - 1))];
-            WF[idxw(2 * (end - 1), 2 * (end - 1), 2 * (end - 1))] =
-                EF[idxe((end - 1), (end - 1), (end - 1))];
-
-        }
-
+        alias expand = naryFun!"a = b";
+        alias apply = naryFun!"b = a / 2";
     }
     else
     {
-        static assert(false, Dim.stringof ~ " is not a supported dimension!");
+        alias expand = prolongation;
+        alias apply = each!"b = a / 2";
     }
+
+    import mir.functional: reverseArgs;
+    import multid.multigrid.restriction;
+    restriction!(reverseArgs!expand)(b.byDim!0, a.byDim!0);
+    each!apply(a.byDim!0.slide!(3, "a + c").strided(2), a.byDim!0[1 .. $ - 1].strided(2));
 }
 
 // Tests 1D
@@ -342,17 +47,17 @@ unittest
 
     auto a = [0, 2, 4, 6, 8].sliced!double;
     auto correct = 9.iota.slice;
-    const auto ret = prolongation!(double, 1)(a, correct.shape);
+    auto ret = prolongation!(double, 1)(a, correct.shape);
     assert(ret == correct);
 
     auto a2 = [0, 2, 4, 6, 8, 9].sliced!long;
     auto correct2 = 10.iota.slice;
-    const auto ret2 = prolongation!(long, 1)(a2, correct2.shape);
+    auto ret2 = prolongation!(long, 1)(a2, correct2.shape);
     assert(ret2 == correct2);
 
     auto a3 = [0, 2, 4, 6, 7].sliced!long;
     auto correct3 = 8.iota.slice;
-    const auto ret3 = prolongation!(long, 1)(a3, correct3.shape);
+    auto ret3 = prolongation!(long, 1)(a3, correct3.shape);
     assert(ret3 == correct3);
 
 }
@@ -371,12 +76,12 @@ unittest
     ].sliced(5, 5);
 
     auto correct = iota([9, 9]).slice;
-    const auto ret = prolongation!(double, 2)(arr, correct.shape);
+    auto ret = prolongation!(double, 2)(arr, correct.shape);
     assert(ret == correct);
     auto arr2 = [0., 2., 4., 6., 7., 16., 18., 20., 22., 23., 32., 34., 36.,
         38., 39., 48., 50., 52., 54., 55., 56., 58., 60., 62., 63.].sliced(5, 5);
     auto correct2 = iota([8, 8]).slice;
-    const auto ret2 = prolongation!(double, 2)(arr2, correct2.shape);
+    auto ret2 = prolongation!(double, 2)(arr2, correct2.shape);
     assert(ret2 == correct2);
 }
 
@@ -462,8 +167,8 @@ unittest
         322., 324., 326., 328.,
         336., 338., 340., 342.
     ].sliced(4, 4, 4);
-    const auto correct = iota([7, 7, 7]).slice;
-    const auto B = prolongation!(double, 3)(A, [7, 7, 7]);
+    auto correct = iota([7, 7, 7]).slice;
+    auto B = prolongation!(double, 3)(A, [7, 7, 7]);
     assert(correct == B);
 }
 
@@ -490,7 +195,7 @@ unittest
         204., 206., 208., 209.,
         210., 212., 214., 215.
     ].sliced(4, 4, 4);
-    const auto correct = iota([6, 6, 6]).slice;
-    const auto B = prolongation!(double, 3)(A, [6, 6, 6]);
+    auto correct = iota([6, 6, 6]).slice;
+    auto B = prolongation!(double, 3)(A, [6, 6, 6]);
     assert(correct == B);
 }
