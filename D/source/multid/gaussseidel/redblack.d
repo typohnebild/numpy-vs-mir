@@ -76,6 +76,7 @@ size_t GS_RB(size_t max_iter = 10_000_000, size_t norm_iter = 1_000,
     while (it < max_iter)
     {
         it++;
+        static if (norm_iter < max_iter)
         if (it % norm_iter == 0)
         {
             compute_residual(R, F, U, h);

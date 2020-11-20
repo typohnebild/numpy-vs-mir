@@ -15,11 +15,11 @@ class Cycle(T, size_t Dim) if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 {
 protected:
     uint mu, l;
-    Slice!(T*, Dim) initialF;
+    Slice!(const(T)*, Dim) initialF;
     T[] Rdata;
     Slice!(T*, Dim + 1)[] temp;
 
-    final auto R(size_t[Dim] shape)
+    @nogc final auto R(size_t[Dim] shape)
     {
         return Rdata[0 .. shape.iota.elementCount].sliced(shape);
     }
@@ -83,7 +83,7 @@ public:
         l = the depth of the multigrid cycle if it is set to 0, the maxmium depth is choosen
         h = is the distance between the grid points if set to 0 1 / F.length is used
     +/
-    this(Slice!(T*, Dim) F, uint mu, uint l, T h)
+    this(Slice!(const(T)*, Dim) F, uint mu, uint l, T h)
     {
         auto ls = F.shape[0].to!double.log2;
         enforce!"l is to big for F"(l == 0 || ls > l);
@@ -113,7 +113,7 @@ public:
     /++
         This computes the residual
     +/
-    @nogc Slice!(T*, Dim) residual(Slice!(T*, Dim) F, Slice!(T*, Dim) U)
+    @nogc Slice!(T*, Dim) residual(Slice!(const(T)*, Dim) F, Slice!(const(T)*, Dim) U)
     {
         return compute_residual(F, U, this.h);
     }
@@ -121,13 +121,13 @@ public:
     /++
         The actual function to caculate a cycle
     +/
-    void cycle(Slice!(T*, Dim) U)
+    @nogc void cycle(Slice!(T*, Dim) U)
     {
         do_cycle(this.initialF, U, 0, this.h);
     }
 
     /++ Computes the l2 norm of U and the inital F+/
-    @nogc abstract T norm(Slice!(T*, Dim) U);
+    @nogc abstract T norm(Slice!(const(T)*, Dim) U);
 }
 
 /++ Poisson Cycle:
@@ -187,12 +187,12 @@ public:
         l = the depth of the multigrid cycle if it is set to 0, the maxmium depth is choosen
         h = is the distance between the grid points if set to 0 1 / F.length is used
     +/
-    this(Slice!(T*, Dim) F, uint mu, uint l, T h)
+    this(Slice!(const(T)*, Dim) F, uint mu, uint l, T h)
     {
         super(F, mu, l, h);
     }
 
-    override T norm(Slice!(T*, Dim) U)
+    override T norm(Slice!(const(T)*, Dim) U)
     {
         import multid.tools.norm : nrmL2;
 

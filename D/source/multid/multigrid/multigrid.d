@@ -12,7 +12,7 @@ Method to run some multigrid steps for abstract cycle
 Slice!(T*, Dim) multigrid(T, size_t Dim)(Cycle!(T, Dim) cycle, Slice!(T*, Dim) U, size_t iter_cycle, double eps)
 {
     //scale the epsilon with the number of gridpoints
-    eps *= U.shape[0] * U.shape[0];
+    eps *= U.elementCount;
     foreach (i; 1 .. iter_cycle + 1)
     {
 

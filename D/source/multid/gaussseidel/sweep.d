@@ -2,7 +2,7 @@ module multid.gaussseidel.sweep;
 
 import mir.math: fastmath;
 import mir.algorithm.iteration: each;
-import mir.ndslice : slice, sliced, Slice, SliceKind, stride;
+import mir.ndslice : assumeSameShape, slice, sliced, Slice, SliceKind, stride;
 import multid.gaussseidel.redblack : Color;
 
 /++
@@ -17,6 +17,7 @@ Params:
 @nogc @fastmath
 void sweep_field(Color color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
 {
+    assumeSameShape(F, U);
     const auto N = F.shape[0];
     auto UF = U.field;
     auto FF = F.field;
@@ -38,6 +39,7 @@ Params:
 @nogc @fastmath
 void sweep_field(Color color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
 {
+    assumeSameShape(F, U);
     const auto m = F.shape[0];
     const auto n = F.shape[1];
     auto UF = U.field;
@@ -70,6 +72,7 @@ Params:
 @nogc @fastmath
 void sweep_field(Color color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
 {
+    assumeSameShape(F, U);
     const auto m = F.shape[0];
     const auto n = F.shape[1];
     const auto l = F.shape[2];
@@ -120,6 +123,7 @@ private struct SweepKernel(T, size_t Dim)
 @nogc @fastmath
 void sweep_slice(Color color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
 {
+    assumeSameShape(F, U);
     auto kernel = SweepKernel!(T, 1)(h2);
 
     each!kernel(
@@ -133,6 +137,7 @@ void sweep_slice(Color color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const 
 @nogc @fastmath
 void sweep_slice(Color color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
 {
+    assumeSameShape(F, U);
     auto kernel = SweepKernel!(T, 2)(h2);
 
     each!(each!kernel)(
@@ -156,6 +161,7 @@ void sweep_slice(Color color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const 
 @nogc @fastmath
 void sweep_slice(Color color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
 {
+    assumeSameShape(F, U);
     auto kernel = SweepKernel!(T, 3)(h2);
 
     each!(each!(each!kernel))(
@@ -203,6 +209,7 @@ void sweep_slice(Color color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const 
 @nogc @fastmath
 void sweep_naive(Color color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
 {
+    assumeSameShape(F, U);
 
     const auto n = F.shape[0];
     foreach (i; 1 .. n - 1)
@@ -218,6 +225,7 @@ void sweep_naive(Color color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const 
 @nogc @fastmath
 void sweep_naive(Color color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
 {
+    assumeSameShape(F, U);
     const auto n = F.shape[0];
     const auto m = F.shape[1];
 
@@ -236,6 +244,7 @@ void sweep_naive(Color color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const 
 @nogc @fastmath
 void sweep_naive(Color color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
 {
+    assumeSameShape(F, U);
     const auto n = F.shape[0];
     const auto m = F.shape[1];
     const auto l = F.shape[2];
