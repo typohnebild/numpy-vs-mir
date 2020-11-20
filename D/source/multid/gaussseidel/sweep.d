@@ -2,7 +2,7 @@ module multid.gaussseidel.sweep;
 
 import mir.math: fastmath;
 import mir.algorithm.iteration: each;
-import mir.ndslice : slice, sliced, Slice, SliceKind, strided;
+import mir.ndslice : slice, sliced, Slice, SliceKind, stride;
 import multid.gaussseidel.redblack : Color;
 
 /++
@@ -123,10 +123,10 @@ void sweep_slice(Color color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const 
     auto kernel = SweepKernel!(T, 1)(h2);
 
     each!kernel(
-        U[2 - color .. $ - 1].strided(2),
-        U[1 - color .. $ - 2].strided(2),
-        U[3 - color .. $].strided(2),
-        F[2 - color .. $ - 1].strided(2));
+        U[2 - color .. $ - 1].stride,
+        U[1 - color .. $ - 2].stride,
+        U[3 - color .. $].stride,
+        F[2 - color .. $ - 1].stride);
 }
 
 /++ slow sweep for 2D +/
@@ -135,21 +135,21 @@ void sweep_slice(Color color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const 
 {
     auto kernel = SweepKernel!(T, 2)(h2);
 
-    each!kernel(
-        U[1 .. $ - 1, 1 + color .. $ - 1].strided(2),
-        U[0 .. $ - 2, 1 + color .. $ - 1].strided(2),
-        U[2 .. $, 1 + color .. $ - 1].strided(2),
-        U[1 .. $ - 1, color .. $ - 2].strided(2),
-        U[1 .. $ - 1, 2 + color .. $].strided(2),
-        F[1 .. $ - 1, 1 + color .. $ - 1].strided(2));
+    each!(each!kernel)(
+        U[1 .. $ - 1, 1 + color .. $ - 1].stride,
+        U[0 .. $ - 2, 1 + color .. $ - 1].stride,
+        U[2 .. $, 1 + color .. $ - 1].stride,
+        U[1 .. $ - 1, color .. $ - 2].stride,
+        U[1 .. $ - 1, 2 + color .. $].stride,
+        F[1 .. $ - 1, 1 + color .. $ - 1].stride);
 
-    each!kernel(
-        U[2 .. $ - 1, 2 - color .. $ - 1].strided(2),
-        U[1 .. $ - 2, 2 - color .. $ - 1].strided(2),
-        U[3 .. $, 2 - color .. $ - 1].strided(2),
-        U[2 .. $ - 1, 1 - color .. $ - 2].strided(2),
-        U[2 .. $ - 1, 3 - color .. $].strided(2),
-        F[2 .. $ - 1, 2 - color .. $ - 1].strided(2));
+    each!(each!kernel)(
+        U[2 .. $ - 1, 2 - color .. $ - 1].stride,
+        U[1 .. $ - 2, 2 - color .. $ - 1].stride,
+        U[3 .. $, 2 - color .. $ - 1].stride,
+        U[2 .. $ - 1, 1 - color .. $ - 2].stride,
+        U[2 .. $ - 1, 3 - color .. $].stride,
+        F[2 .. $ - 1, 2 - color .. $ - 1].stride);
 }
 
 /++ slow sweep for 3D +/
@@ -158,45 +158,45 @@ void sweep_slice(Color color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const 
 {
     auto kernel = SweepKernel!(T, 3)(h2);
 
-    each!kernel(
-        U[2 .. $ - 1, 1 .. $ - 1, 1 + color .. $ - 1].strided(2),
-        U[1 .. $ - 2, 1 .. $ - 1, 1 + color .. $ - 1].strided(2),
-        U[3 .. $, 1 .. $ - 1, 1 + color .. $ - 1].strided(2),
-        U[2 .. $ - 1, 0 .. $ - 2, 1 + color .. $ - 1].strided(2),
-        U[2 .. $ - 1, 2 .. $, 1 + color .. $ - 1].strided(2),
-        U[2 .. $ - 1, 1 .. $ - 1, color .. $ - 2].strided(2),
-        U[2 .. $ - 1, 1 .. $ - 1, 2 + color .. $].strided(2),
-        F[2 .. $ - 1, 1 .. $ - 1, 1 + color .. $ - 1].strided(2));
+    each!(each!(each!kernel))(
+        U[2 .. $ - 1, 1 .. $ - 1, 1 + color .. $ - 1].stride,
+        U[1 .. $ - 2, 1 .. $ - 1, 1 + color .. $ - 1].stride,
+        U[3 .. $, 1 .. $ - 1, 1 + color .. $ - 1].stride,
+        U[2 .. $ - 1, 0 .. $ - 2, 1 + color .. $ - 1].stride,
+        U[2 .. $ - 1, 2 .. $, 1 + color .. $ - 1].stride,
+        U[2 .. $ - 1, 1 .. $ - 1, color .. $ - 2].stride,
+        U[2 .. $ - 1, 1 .. $ - 1, 2 + color .. $].stride,
+        F[2 .. $ - 1, 1 .. $ - 1, 1 + color .. $ - 1].stride);
 
-    each!kernel(
-        U[1 .. $ - 1, 1 .. $ - 1, 2 - color .. $ - 1].strided(2),
-        U[0 .. $ - 2, 1 .. $ - 1, 2 - color .. $ - 1].strided(2),
-        U[2 .. $, 1 .. $ - 1, 2 - color .. $ - 1].strided(2),
-        U[1 .. $ - 1, 0 .. $ - 2, 2 - color .. $ - 1].strided(2),
-        U[1 .. $ - 1, 2 .. $, 2 - color .. $ - 1].strided(2),
-        U[1 .. $ - 1, 1 .. $ - 1, 1 - color .. $ - 2].strided(2),
-        U[1 .. $ - 1, 1 .. $ - 1, 3 - color .. $].strided(2),
-        F[1 .. $ - 1, 1 .. $ - 1, 2 - color .. $ - 1].strided(2));
+    each!(each!(each!kernel))(
+        U[1 .. $ - 1, 1 .. $ - 1, 2 - color .. $ - 1].stride,
+        U[0 .. $ - 2, 1 .. $ - 1, 2 - color .. $ - 1].stride,
+        U[2 .. $, 1 .. $ - 1, 2 - color .. $ - 1].stride,
+        U[1 .. $ - 1, 0 .. $ - 2, 2 - color .. $ - 1].stride,
+        U[1 .. $ - 1, 2 .. $, 2 - color .. $ - 1].stride,
+        U[1 .. $ - 1, 1 .. $ - 1, 1 - color .. $ - 2].stride,
+        U[1 .. $ - 1, 1 .. $ - 1, 3 - color .. $].stride,
+        F[1 .. $ - 1, 1 .. $ - 1, 2 - color .. $ - 1].stride);
 
-    each!kernel(
-        U[1 .. $ - 1, 2 .. $ - 1, 1 + color .. $ - 1].strided(2),
-        U[0 .. $ - 2, 2 .. $ - 1, 1 + color .. $ - 1].strided(2),
-        U[2 .. $, 2 .. $ - 1, 1 + color .. $ - 1].strided(2),
-        U[1 .. $ - 1, 1 .. $ - 2, 1 + color .. $ - 1].strided(2),
-        U[1 .. $ - 1, 3 .. $, 1 + color .. $ - 1].strided(2),
-        U[1 .. $ - 1, 2 .. $ - 1, color .. $ - 2].strided(2),
-        U[1 .. $ - 1, 2 .. $ - 1, 2 + color .. $].strided(2),
-        F[1 .. $ - 1, 2 .. $ - 1, 1 + color .. $ - 1].strided(2));
+    each!(each!(each!kernel))(
+        U[1 .. $ - 1, 2 .. $ - 1, 1 + color .. $ - 1].stride,
+        U[0 .. $ - 2, 2 .. $ - 1, 1 + color .. $ - 1].stride,
+        U[2 .. $, 2 .. $ - 1, 1 + color .. $ - 1].stride,
+        U[1 .. $ - 1, 1 .. $ - 2, 1 + color .. $ - 1].stride,
+        U[1 .. $ - 1, 3 .. $, 1 + color .. $ - 1].stride,
+        U[1 .. $ - 1, 2 .. $ - 1, color .. $ - 2].stride,
+        U[1 .. $ - 1, 2 .. $ - 1, 2 + color .. $].stride,
+        F[1 .. $ - 1, 2 .. $ - 1, 1 + color .. $ - 1].stride);
 
-    each!kernel(
-        U[2 .. $ - 1, 2 .. $ - 1, 2 - color .. $ - 1].strided(2),
-        U[1 .. $ - 2, 2 .. $ - 1, 2 - color .. $ - 1].strided(2),
-        U[3 .. $, 2 .. $ - 1, 2 - color .. $ - 1].strided(2),
-        U[2 .. $ - 1, 1 .. $ - 2, 2 - color .. $ - 1].strided(2),
-        U[2 .. $ - 1, 3 .. $, 2 - color .. $ - 1].strided(2),
-        U[2 .. $ - 1, 2 .. $ - 1, 1 - color .. $ - 2].strided(2),
-        U[2 .. $ - 1, 2 .. $ - 1, 3 - color .. $].strided(2),
-        F[2 .. $ - 1, 2 .. $ - 1, 2 - color .. $ - 1].strided(2));
+    each!(each!(each!kernel))(
+        U[2 .. $ - 1, 2 .. $ - 1, 2 - color .. $ - 1].stride,
+        U[1 .. $ - 2, 2 .. $ - 1, 2 - color .. $ - 1].stride,
+        U[3 .. $, 2 .. $ - 1, 2 - color .. $ - 1].stride,
+        U[2 .. $ - 1, 1 .. $ - 2, 2 - color .. $ - 1].stride,
+        U[2 .. $ - 1, 3 .. $, 2 - color .. $ - 1].stride,
+        U[2 .. $ - 1, 2 .. $ - 1, 1 - color .. $ - 2].stride,
+        U[2 .. $ - 1, 2 .. $ - 1, 3 - color .. $].stride,
+        F[2 .. $ - 1, 2 .. $ - 1, 2 - color .. $ - 1].stride);
 }
 
 /++ naive sweep for 1D +/

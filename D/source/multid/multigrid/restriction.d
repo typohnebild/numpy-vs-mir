@@ -2,6 +2,7 @@ module multid.multigrid.restriction;
 
 import mir.algorithm.iteration: each;
 import mir.exception : enforce;
+import mir.functional: recurseTemplatePipe;
 import mir.math: fastmath;
 import mir.ndslice;
 import numir : approxEqual;
@@ -33,7 +34,7 @@ template restriction(alias fun = "a = b")
     {
         import std.traits: Select;
         alias f = Select!(N == 1, fun, .restriction!fun);
-        each!f(a[0 .. $ - 1].byDim!0, b[0 .. $ - 1].byDim!0.strided(2));
+        each!f(a[0 .. $ - 1].byDim!0, b[0 .. $ - 1].byDim!0.stride);
         f(a.back, b.back);
     }
     else
@@ -64,7 +65,14 @@ void weighted_restriction(T, size_t N)(Slice!(T*, N) r, Slice!(const(T)*, N) A)
         rc.popFront!d;
         rc.popBack!d;
     }
-    rc.assignImpl!N = A.weights3;
+
+    enum factor = 2 ^^ (N * 2);
+    static if (__traits(isIntegral, T))
+        alias scaled = a => cast(T)(a / factor);
+    else
+        alias scaled = a => a * (T(1) / (factor));
+
+    rc.assignImpl!N = A.slide!(3, "a + 2 * b + c").recurseTemplatePipe!(map, N, scaled);
 }
 
 @nogc @fastmath
@@ -79,7 +87,7 @@ void weighted_restriction_borders(T, size_t N)(Slice!(T*, N) r, Slice!(const(T)*
     else
     {
         restriction(r.front, A.front);
-        each!weighted_restriction_borders(r[1 .. $ - 1].byDim!0, A[2 .. $ - 1].byDim!0.strided(2));
+        each!weighted_restriction_borders(r[1 .. $ - 1].byDim!0, A[2 .. $ - 1].byDim!0.stride);
         restriction(r.back, A.back);
     }
 }
@@ -91,42 +99,15 @@ private template assignImpl(size_t N)
     void assignImpl(T)(ref T a, const T b) @fastmath
         if (isNumeric!T)
     {
-        enum factor = 2 ^^ (N * 2);
-        static if (__traits(isIntegral, T))
-            a = b / factor;
-        else
-            a = b * (T(1) / (factor));
+        a = b;
     }
 
     @nogc @fastmath
     void assignImpl(Slice1, Slice2)(Slice1 a, Slice2 b) @fastmath @property
         if (isSlice!Slice1)
     {
-        each!assignImpl(a.byDim!0, b[1 .. $].stride(2));
+        each!assignImpl(a.byDim!0, b[1 .. $].stride);
     }
-}
-
-private @nogc @fastmath
-auto sum3(T)(const T a, const T b, const T c) @fastmath
-    if (isNumeric!T)
-{
-    return a + b * 2 + c;
-}
-
-private @nogc @fastmath
-auto sum3(It1, It2, It3)(Slice!It1 a, Slice!It2 b, Slice!It3 c) @fastmath
-{
-    return zip!true(a, b, c).map!(.sum3);
-}
-
-// constructs lazy view of sums
-private @nogc @fastmath
-auto weights3(T, size_t N, SliceKind kind)(Slice!(const(T)*, N, kind) a) @fastmath
-{
-    static if (N == 1)
-        return a.slide!(3, sum3);
-    else
-        return a.byDim!0.map!weights3.slide!(3, sum3);
 }
 
 // Test restriction 1D

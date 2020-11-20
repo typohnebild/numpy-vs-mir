@@ -37,7 +37,7 @@ void prolongation(IteratorA, IteratorB, size_t N, SliceKind aKind, SliceKind bKi
     import mir.functional: reverseArgs;
     import multid.multigrid.restriction;
     restriction!(reverseArgs!expand)(b.byDim!0, a.byDim!0);
-    each!apply(a.byDim!0.slide!(3, "a + c").strided(2), a.byDim!0[1 .. $ - 1].strided(2));
+    each!apply(a.byDim!0.slide!(3, "a + c").stride, a.byDim!0[1 .. $ - 1].stride);
 }
 
 // Tests 1D
@@ -132,14 +132,14 @@ unittest
     auto ret6 = prolongation!(double, 2)(A, [6, 6]);
     auto ret7 = prolongation!(double, 2)(A, [7, 7]);
 
-    assert(ret6[0, 0 .. $].strided(2) == A[0, 0 .. $ - 1]);
-    assert(ret6[0 .. $, 0].strided(2) == A[0 .. $ - 1, 0]);
+    assert(ret6[0, 0 .. $].stride == A[0, 0 .. $ - 1]);
+    assert(ret6[0 .. $, 0].stride == A[0 .. $ - 1, 0]);
     assert(ret6[$ - 2 .. $, 0 .. $].strided!1(2) == A[$ - 2 .. $, 0 .. $ - 1]);
     assert(ret6[0 .. $, $ - 2 .. $].strided!0(2) == A[0 .. $ - 1, $ - 2 .. $]);
     assert(ret6[$ - 2 .. $, $ - 2 .. $] == A[$ - 2 .. $, $ - 2 .. $]);
 
-    assert(ret7[0, 0 .. $].strided(2) == A[0, 0 .. $]);
-    assert(ret7[0 .. $, 0].strided(2) == A[0 .. $, 0]);
+    assert(ret7[0, 0 .. $].stride == A[0, 0 .. $]);
+    assert(ret7[0 .. $, 0].stride == A[0 .. $, 0]);
     assert(ret7[$ - 1 .. $, 0 .. $].strided!1(2) == A[$ - 1 .. $, 0 .. $]);
     assert(ret7[0 .. $, $ - 1 .. $].strided!0(2) == A[0 .. $, $ - 1 .. $]);
 }
