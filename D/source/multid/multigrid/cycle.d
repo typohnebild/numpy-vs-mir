@@ -137,7 +137,7 @@ public:
     v2 = number of postsmoothing steps
     eps = the epsilon the is used in the cycle esspecially in the solve step as stopcriteria
 +/
-class PoissonCycle(T, size_t Dim, uint v1, uint v2, SweepType sweep = SweepType.field,
+final class PoissonCycle(T, size_t Dim, uint v1, uint v2, SweepType sweep = SweepType.field,
         T eps = 1e-8) : Cycle!(T, Dim) if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 {
     import multid.gaussseidel.redblack : GS_RB;
