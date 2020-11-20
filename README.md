@@ -453,6 +453,15 @@ To get the FLOP/s this value is then divided by 16, since for every 32 MB that i
 there are 2 floating point operations.
 (see [here](https://moodle.rrze.uni-erlangen.de/pluginfile.php/16786/mod_resource/content/1/09_06_04-2020-PTfS.pdf) on slide 21)
 
+In the following the results are shown in graphs. In the graph legend the variations are named
+as follows:
+- D: &nbsp; ***D with MIR (`<sweep type>`)***, while `<sweep type>` can be *field*, *naive* or *slice*.
+- Python: &nbsp; ***`<environment>` `<# threads>` `<numba type>`***, where `<environment>` can be *intel* for the
+Intel Python Disribution or *openblas* for the default Python environment with OpenBlas backend.
+The `<# threads>` is the number of allowed threads used by Numpy and Numba which is set to *1* or *8*.
+Finally, the `<numba type>` indicates if Numba was used or not. Here, *numba* and *nonumba* are
+possible values.
+
 ### Table Multigrid-Cycles
 
 The following table contains some details about how many multigrid cycles and levels are performed
