@@ -50,13 +50,13 @@ Slice!(T*, Dim) poisson_multigrid(uint v1, uint v2, T, size_t Dim)(
     switch (sweep)
     {
     case "slice":
-        cycle = new PoissonCycle!(T, Dim, v1, v2, SweepType.slice)(F, mu, level, h);
+        cycle = new PoissonCycle!(T, Dim, SweepType.slice)(F, mu, level, h, v1, v2);
         break;
     case "naive":
-        cycle = new PoissonCycle!(T, Dim, v1, v2, SweepType.naive)(F, mu, level, h);
+        cycle = new PoissonCycle!(T, Dim, SweepType.naive)(F, mu, level, h, v1, v2);
         break;
     default:
-        cycle = new PoissonCycle!(T, Dim, v1, v2, SweepType.field)(F, mu, level, h);
+        cycle = new PoissonCycle!(T, Dim, SweepType.field)(F, mu, level, h, v1, v2);
     }
     return multigrid!(T, Dim)(cycle, U, iter_cycles, eps);
 }

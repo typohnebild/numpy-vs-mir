@@ -137,24 +137,31 @@ public:
     v2 = number of postsmoothing steps
     eps = the epsilon the is used in the cycle esspecially in the solve step as stopcriteria
 +/
-final class PoissonCycle(T, size_t Dim, uint v1, uint v2, SweepType sweep = SweepType.field,
-        T eps = 1e-8) : Cycle!(T, Dim) if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
+final class PoissonCycle(
+    T,
+    size_t Dim,
+    SweepType sweep = SweepType.field,
+) : Cycle!(T, Dim) if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 {
     import multid.gaussseidel.redblack : GS_RB;
 
 protected:
+    uint v1;
+    uint v2;
+    T eps = 1e-8;
+
     override void presmooth(Slice!(const(T)*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
         auto r = R(F.shape);
         T norm;
-        auto it = GS_RB!(v1, 1_000, eps, sweep)(F, U, r, current_h, norm);
+        auto it = GS_RB!sweep(F, U, r, current_h, norm, v1, 1_000, eps);
     }
 
     override void postsmooth(Slice!(const(T)*, Dim) F, Slice!(T*, Dim) U, T current_h)
     {
         auto r = R(F.shape);
         T norm;
-        auto it = GS_RB!(v2, 1_000, eps, sweep)(F, U, r, current_h, norm);
+        auto it = GS_RB!sweep(F, U, r, current_h, norm, v2, 1_000, eps);
     }
 
     override Slice!(T*, Dim) compute_residual(Slice!(const(T)*, Dim) F, Slice!(const(T)*, Dim) U, T current_h)
@@ -170,7 +177,7 @@ protected:
     {
         auto r = R(F.shape);
         T norm;
-        auto it = GS_RB!(100_000, 5, eps, sweep)(F, U, r, current_h, norm);
+        auto it = GS_RB!sweep(F, U, r, current_h, norm, 100_000, 5, eps);
     }
 
     override void restriction(Slice!(T*, Dim) res, Slice!(const(T)*, Dim) U)
@@ -187,9 +194,18 @@ public:
         l = the depth of the multigrid cycle if it is set to 0, the maxmium depth is choosen
         h = is the distance between the grid points if set to 0 1 / F.length is used
     +/
-    this(Slice!(const(T)*, Dim) F, uint mu, uint l, T h)
+    this(Slice!(const(T)*, Dim) F,
+        uint mu,
+        uint l,
+        T h,
+        uint v1,
+        uint v2,
+    T eps = 1e-8)
     {
         super(F, mu, l, h);
+        this.v1 = v1;
+        this.v2 = v2;
+        this.eps = eps;
     }
 
     override T norm(Slice!(const(T)*, Dim) U)
@@ -225,7 +241,7 @@ unittest
     F[1 .. $, 0] = 1.0;
     F[$ - 1][1 .. $] = 0.0;
     F[1 .. $, $ - 1] = 0.0;
-    auto p = new PoissonCycle!(double, 2, 2, 2)(F, 2, 0, h);
+    auto p = new PoissonCycle!(double, 2)(F, 2, 0, h, 2, 2);
     p.cycle(U);
 
     const norm_after = compute_residual(F, U, h).nrmL2;

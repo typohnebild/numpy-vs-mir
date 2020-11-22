@@ -44,29 +44,35 @@ Params:
 Returns: U
 +/
 
-Slice!(T*, Dim) GS_RB(size_t max_iter = 10_000_000, size_t norm_iter = 1_000,
-        double eps = 1e-8, SweepType sweeptype = SweepType.field, T, size_t Dim)(
-            Slice!(const(T)*, Dim) F,
-            Slice!(T*, Dim) U,
-            const T h)
-        if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
+Slice!(T*, Dim) GS_RB(SweepType sweeptype = SweepType.field, T, size_t Dim)(
+    Slice!(const(T)*, Dim) F,
+    Slice!(T*, Dim) U,
+    const T h,
+    size_t max_iter = 10_000_000,
+    size_t norm_iter = 1_000,
+    double eps = 1e-8,
+    )
+if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 {
     auto R = U.shape.slice!T;
     T norm;
-    auto it = GS_RB!(max_iter, norm_iter, eps, sweeptype)(F, U, R, h, norm);
+    auto it = GS_RB!sweeptype(F, U, R, h, norm, max_iter, norm_iter, eps);
     logf("GS_RB converged after %d iterations with %e error", it, norm);
     return U;
 }
 
 @nogc @fastmath
-size_t GS_RB(size_t max_iter = 10_000_000, size_t norm_iter = 1_000,
-        double eps = 1e-8, SweepType sweeptype = SweepType.field, T, size_t Dim)(
-            Slice!(const(T)*, Dim) F,
-            Slice!(T*, Dim) U,
-            Slice!(T*, Dim) R, //residual
-            const T h,
-            out T norm)
-        if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
+size_t GS_RB(SweepType sweeptype = SweepType.field, T, size_t Dim)(
+    Slice!(const(T)*, Dim) F,
+    Slice!(T*, Dim) U,
+    Slice!(T*, Dim) R, //residual
+    const T h,
+    out T norm,
+    size_t max_iter = 10_000_000,
+    size_t norm_iter = 1_000,
+    double eps = 1e-8,
+    )
+    if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 {
     mixin("alias sweep = sweep_" ~ sweeptype ~ ";");
 
@@ -76,7 +82,6 @@ size_t GS_RB(size_t max_iter = 10_000_000, size_t norm_iter = 1_000,
     while (it < max_iter)
     {
         it++;
-        static if (norm_iter < max_iter)
         if (it % norm_iter == 0)
         {
             compute_residual(R, F, U, h);
@@ -101,7 +106,7 @@ unittest
     auto U1 = slice!double([N], 1.0);
     auto F1 = slice!double([N], 0.0);
     F1[1] = 1;
-    GS_RB!(1)(F1, U1, 1.0);
+    GS_RB(F1, U1, 1.0, 1);
     assert(U1 == [1.0, 1.0 / 2.0, 1.0].sliced);
 
     auto U2 = slice!double([N, N], 1.0);
@@ -110,13 +115,13 @@ unittest
 
     auto expected = slice!double([N, N], 1.0);
     expected[1, 1] = 3.0 / 4.0;
-    GS_RB!(1)(F2, U2, 1.0);
+    GS_RB(F2, U2, 1.0, 1);
     assert(expected == U2);
 
     auto U3 = slice!double([N, N, N], 1.0);
     auto F3 = slice!double([N, N, N], 0.0);
     F3[1, 1, 1] = 1;
-    GS_RB!(1)(F3, U3, 1.0);
+    GS_RB(F3, U3, 1.0, 1);
 
     auto expected3 = slice!double([N, N, N], 1.0);
     expected3[1, 1, 1] = 5.0;

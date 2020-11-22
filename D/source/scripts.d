@@ -67,7 +67,7 @@ void test1D()
     auto F = slice!double([N], 0.0);
     const double h = 1.0 / double(N);
 
-    GS_RB!(30_000)(F, U, h);
+    GS_RB(F, U, h, 30_000);
     // U.prettyArr.writeln;
 
 }

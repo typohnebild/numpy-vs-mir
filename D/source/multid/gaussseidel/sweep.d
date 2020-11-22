@@ -2,8 +2,21 @@ module multid.gaussseidel.sweep;
 
 import mir.math: fastmath;
 import mir.algorithm.iteration: each;
-import mir.ndslice : assumeSameShape, slice, sliced, Slice, SliceKind, stride;
+import mir.ndslice : assumeSameShape, slice, sliced, Slice, SliceKind, stride, dropBorders, withNeighboursSum;
 import multid.gaussseidel.redblack : Color;
+
+
+@nogc @fastmath
+void sweep_ndslice(Color color, T, size_t N)(Slice!(const(T)*, N) F, Slice!(T*, N) U, const T h2) nothrow
+{
+    auto c = color;
+    assumeSameShape(F, U);
+    U
+        .withNeighboursSum // Tensors pair of the element and sum of its neighbours
+        .zip!true(F.dropBorders) // ... zipped with F. `true` means tensors have the same strides
+        .pack!1 // pack the last dimension
+        .each!(z => z[0][0] = (T(1) / (2 * N)) * (z[0][1] - h2 * z[1]));
+}
 
 /++
 This is a sweep implementation for 1D
@@ -18,7 +31,7 @@ Params:
 void sweep_field(Color color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
 {
     assumeSameShape(F, U);
-    const auto N = F.shape[0];
+    const N = F.shape[0];
     auto UF = U.field;
     auto FF = F.field;
     for (size_t i = 2u - color; i < N - 1u; i += 2u)
@@ -39,9 +52,8 @@ Params:
 @nogc @fastmath
 void sweep_field(Color color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
 {
-    assumeSameShape(F, U);
-    const auto m = F.shape[0];
-    const auto n = F.shape[1];
+    const m = F.shape[0];
+    const n = F.shape[1];
     auto UF = U.field;
     auto FF = F.field;
 
@@ -72,17 +84,16 @@ Params:
 @nogc @fastmath
 void sweep_field(Color color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
 {
-    assumeSameShape(F, U);
-    const auto m = F.shape[0];
-    const auto n = F.shape[1];
-    const auto l = F.shape[2];
+    const m = F.shape[0];
+    const n = F.shape[1];
+    const l = F.shape[2];
     auto UF = U.field;
     auto FF = F.field;
     foreach (i; 1 .. m - 1)
     {
         foreach (j; 1 .. n - 1)
         {
-            const auto flatindex2d = i * (n * l) + j * l;
+            const flatindex2d = i * (n * l) + j * l;
             for (size_t k = 1u + (i + j + 1 + color) % 2; k < l - 1u; k += 2)
             {
                 const flatindex = flatindex2d + k;
@@ -209,9 +220,8 @@ void sweep_slice(Color color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const 
 @nogc @fastmath
 void sweep_naive(Color color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
 {
-    assumeSameShape(F, U);
 
-    const auto n = F.shape[0];
+    const n = F.shape[0];
     foreach (i; 1 .. n - 1)
     {
         if (i % 2 == color)
@@ -225,9 +235,8 @@ void sweep_naive(Color color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const 
 @nogc @fastmath
 void sweep_naive(Color color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
 {
-    assumeSameShape(F, U);
-    const auto n = F.shape[0];
-    const auto m = F.shape[1];
+    const n = F.shape[0];
+    const m = F.shape[1];
 
     foreach (i; 1 .. n - 1)
     {
@@ -244,10 +253,9 @@ void sweep_naive(Color color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const 
 @nogc @fastmath
 void sweep_naive(Color color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
 {
-    assumeSameShape(F, U);
-    const auto n = F.shape[0];
-    const auto m = F.shape[1];
-    const auto l = F.shape[2];
+    const n = F.shape[0];
+    const m = F.shape[1];
+    const l = F.shape[2];
     for (size_t i = 1u; i < n - 1u; i++)
     {
         for (size_t j = 1u; j < m - 1u; j++)
