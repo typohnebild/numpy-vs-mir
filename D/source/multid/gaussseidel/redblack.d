@@ -136,7 +136,7 @@ unittest
     auto U = randomMatrix!(double, 1)(N);
     auto U1 = U.dup;
     auto U2 = U.dup;
-    const auto F = slice!double([N], 1.0);
+    const F = slice!double([N], 1.0);
 
     sweep_naive!(Color.red)(F, U, h2);
     sweep_field!(Color.red)(F, U1, h2);
@@ -163,7 +163,7 @@ unittest
     auto U = randomMatrix!(double, 2)(N);
     auto U1 = U.dup;
     auto U2 = U.dup;
-    const auto F = slice!double([N, N], 1.0);
+    const F = slice!double([N, N], 1.0);
 
     sweep_naive!(Color.red)(F, U, h2);
     sweep_field!(Color.red)(F, U1, h2);
@@ -187,7 +187,7 @@ unittest
     auto U = randomMatrix!(double, 3)(N);
     auto U1 = U.dup;
     auto U2 = U.dup;
-    const auto F = slice!double([N, N, N], 1.0);
+    const F = slice!double([N, N, N], 1.0);
     const double h2 = 1.0;
 
     sweep_naive!(Color.red)(F, U, h2);

@@ -59,21 +59,20 @@ Slice!(T*, Dim) weighted_restriction(T, size_t Dim)(Slice!(const(T)*, Dim) A)
 void weighted_restriction(T, size_t N)(Slice!(T*, N) r, Slice!(const(T)*, N) A)
 {
     weighted_restriction_borders(r, A);
-    auto rc = r.canonical;
-    static foreach (d; 0 .. N)
-    {
-        rc.popFront!d;
-        rc.popBack!d;
-    }
+
+    auto rc = r.dropBorders;
+    auto ac = A.canonical;
+    ac.popFrontAll;
 
     enum factor = 2 ^^ (N * 2);
     static if (__traits(isIntegral, T))
         alias scaled = a => cast(T)(a / factor);
     else
-        alias scaled = a => a * (T(1) / (factor));
+        alias scaled = a => a * (T(1) / factor);
 
-    rc.assignImpl!N = A.slide!(3, "a + 2 * b + c").recurseTemplatePipe!(map, N, scaled);
+    rc[] = ac.slide!(3, "a + 2 * b + c").map!scaled.strided(2);
 }
+
 
 @nogc @fastmath
 void weighted_restriction_borders(T, size_t N)(Slice!(T*, N) r, Slice!(const(T)*, N) A)
@@ -89,24 +88,6 @@ void weighted_restriction_borders(T, size_t N)(Slice!(T*, N) r, Slice!(const(T)*
         restriction(r.front, A.front);
         each!weighted_restriction_borders(r[1 .. $ - 1].byDim!0, A[2 .. $ - 1].byDim!0.stride);
         restriction(r.back, A.back);
-    }
-}
-
-
-private template assignImpl(size_t N)
-{
-    @nogc @fastmath
-    void assignImpl(T)(ref T a, const T b) @fastmath
-        if (isNumeric!T)
-    {
-        a = b;
-    }
-
-    @nogc @fastmath
-    void assignImpl(Slice1, Slice2)(Slice1 a, Slice2 b) @fastmath @property
-        if (isSlice!Slice1)
-    {
-        each!assignImpl(a.byDim!0, b[1 .. $].stride);
     }
 }
 

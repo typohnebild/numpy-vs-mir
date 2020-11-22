@@ -2,7 +2,7 @@
   "name": "multid",
 
   "dependencies": {
-    "mir-algorithm": "~>3.10.9",
+    "mir-algorithm": "~>3.10.10",
     "mir-random": "~>2.2.14",
     "numir": "~>2.0.5"
   },
