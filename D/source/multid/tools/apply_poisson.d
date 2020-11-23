@@ -38,7 +38,7 @@ void compute_residual(T, size_t Dim)(Slice!(T*, Dim) R, Slice!(const(T)*, Dim) F
     // R[] = F - R
     // in a single memory access
     R.dropBorders[] = ((1 / current_h ^^ 2) * U.withNeighboursSum.map!((u, sum) => sum - 2 * Dim * u)).zip!true(F.dropBorders).map!"b - a";
-    eachOnBorder!"a = b - c"(R.retro, F.retro, U.retro); // retro: be more CPU cache friendly
+    eachOnBorder!"a = b - c"(R, F, U);
 }
 
 Slice!(T*, Dim) compute_residual(T, size_t Dim)(Slice!(const(T)*, Dim) F, Slice!(const(T)*, Dim) U, const T current_h)

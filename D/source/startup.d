@@ -14,7 +14,7 @@ template init()
     uint delay = 500;
     bool verbose = false;
     string path = default_path;
-    string sweep = "field";
+    string sweep = "ndslice";
     immutable string default_path = "../problems/problem_2D_100.npy";
 
     void start()

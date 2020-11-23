@@ -2,7 +2,7 @@ module multid.gaussseidel.sweep;
 
 import mir.math: fastmath;
 import mir.algorithm.iteration: Chequer, each;
-import mir.ndslice : assumeSameShape, retro, slice, sliced, Slice, SliceKind, strided, dropBorders, withNeighboursSum;
+import mir.ndslice : assumeSameShape, slice, sliced, Slice, SliceKind, strided, dropBorders, withNeighboursSum;
 
 
 @nogc @fastmath
@@ -10,25 +10,9 @@ void sweep_ndslice(Chequer color, T, size_t N)(Slice!(const(T)*, N) F, Slice!(T*
 {
     // find the naive implementation R/B order
     enum Chequer c = N % 2 ? cast(Chequer)!color : color;
-
     assumeSameShape(F, U);
-
-    static if (c == Chequer.black)
-    {
-        c.each!((p, f) => p.a = (T(1) / (2 * N)) * (p.b - h2 * f))
-            (U.withNeighboursSum, F.dropBorders);
-    }
-    else // iterate red color backward to be more CPU-cache friendly 
-    {
-        // flip color for backward iteration
-        auto s = c;
-        static foreach(d; 0 .. N)
-            s = cast(Chequer) ((s ^ U.length!d ^ 1) & 1);
-
-        s.each!((p, f) => p.a = (T(1) / (2 * N)) * (p.b - h2 * f))
-            // ... add `.retro`
-            (U.retro.withNeighboursSum, F.retro.dropBorders);
-    }
+    c.each!((u, f) => u.a = (T(1) / (2 * N)) * (u.b - h2 * f))
+        (U.withNeighboursSum, F.dropBorders);
 }
 
 /++
@@ -254,7 +238,7 @@ void sweep_naive(Chequer color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, cons
     foreach (k; 1 .. F.length!2 - 1)
         if ((i + j + k) % 2 == color)
             U[i, j, k] = (T(1) / 6) *
-                (U[i - 1, j, k]
+                ( U[i - 1, j, k]
                 + U[i + 1, j, k]
                 + U[i, j - 1, k]
                 + U[i, j + 1, k]
