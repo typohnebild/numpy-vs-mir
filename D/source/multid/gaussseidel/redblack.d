@@ -85,9 +85,9 @@ size_t GS_RB(SweepType sweeptype = SweepType.ndslice, T, size_t Dim)(
 
         }
         // rote Halbiteration
-        sweep!(Chequer.red)(F, U, h2);
+        sweep(Chequer.red, F, U, h2);
         // schwarze Halbiteration
-        sweep!(Chequer.black)(F, U, h2);
+        sweep(Chequer.black, F, U, h2);
     }
     return it;
 }
@@ -136,18 +136,18 @@ unittest
     auto U3 = U.dup;
     const F = slice!double([N], 1.0);
 
-    sweep_naive!(Chequer.red)(F, U, h2);
-    sweep_field!(Chequer.red)(F, U1, h2);
-    sweep_slice!(Chequer.red)(F, U2, h2);
-    sweep_ndslice!(Chequer.red)(F, U3, h2);
+    sweep_naive(Chequer.red, F, U, h2);
+    sweep_field(Chequer.red, F, U1, h2);
+    sweep_slice(Chequer.red, F, U2, h2);
+    sweep_ndslice(Chequer.red, F, U3, h2);
     assert(U == U1);
     assert(U1 == U2);
     assert(all!approxEqual(U, U3));
 
-    sweep_naive!(Chequer.black)(F, U, h2);
-    sweep_field!(Chequer.black)(F, U1, h2);
-    sweep_slice!(Chequer.black)(F, U2, h2);
-    sweep_ndslice!(Chequer.black)(F, U3, h2);
+    sweep_naive(Chequer.black, F, U, h2);
+    sweep_field(Chequer.black, F, U1, h2);
+    sweep_slice(Chequer.black, F, U2, h2);
+    sweep_ndslice(Chequer.black, F, U3, h2);
     assert(U == U1);
     assert(U1 == U2);
     assert(all!approxEqual(U, U3));
@@ -168,18 +168,18 @@ unittest
     auto U3 = U.dup;
     const F = slice!double([N, N], 1.0);
 
-    sweep_naive!(Chequer.red)(F, U, h2);
-    sweep_field!(Chequer.red)(F, U1, h2);
-    sweep_slice!(Chequer.red)(F, U2, h2);
-    sweep_ndslice!(Chequer.red)(F, U3, h2);
+    sweep_naive(Chequer.red, F, U, h2);
+    sweep_field(Chequer.red, F, U1, h2);
+    sweep_slice(Chequer.red, F, U2, h2);
+    sweep_ndslice(Chequer.red, F, U3, h2);
     assert(U == U1);
     assert(U1 == U2);
     assert(all!approxEqual(U, U3));
 
-    sweep_naive!(Chequer.black)(F, U, h2);
-    sweep_field!(Chequer.black)(F, U1, h2);
-    sweep_slice!(Chequer.black)(F, U2, h2);
-    sweep_ndslice!(Chequer.black)(F, U3, h2);
+    sweep_naive(Chequer.black, F, U, h2);
+    sweep_field(Chequer.black, F, U1, h2);
+    sweep_slice(Chequer.black, F, U2, h2);
+    sweep_ndslice(Chequer.black, F, U3, h2);
     assert(U == U1);
     assert(U1 == U2);
     assert(all!approxEqual(U, U3));
@@ -198,20 +198,20 @@ unittest
     const F = slice!double([N, N, N], 1.0);
     const double h2 = 1.0;
 
-    sweep_naive!(Chequer.red)(F, U, h2);
-    sweep_field!(Chequer.red)(F, U1, h2);
-    sweep_slice!(Chequer.red)(F, U2, h2);
-    sweep_ndslice!(Chequer.red)(F, U3, h2);
+    sweep_naive(Chequer.red, F, U, h2);
+    sweep_field(Chequer.red, F, U1, h2);
+    sweep_slice(Chequer.red, F, U2, h2);
+    sweep_ndslice(Chequer.red, F, U3, h2);
     // import std.stdio;
     // writeln(U - U1);
     assert(U == U1);
     assert(U1 == U2);
     assert(all!approxEqual(U, U3));
 
-    sweep_naive!(Chequer.black)(F, U, h2);
-    sweep_field!(Chequer.black)(F, U1, h2);
-    sweep_slice!(Chequer.black)(F, U2, h2);
-    sweep_ndslice!(Chequer.black)(F, U3, h2);
+    sweep_naive(Chequer.black, F, U, h2);
+    sweep_field(Chequer.black, F, U1, h2);
+    sweep_slice(Chequer.black, F, U2, h2);
+    sweep_ndslice(Chequer.black, F, U3, h2);
     assert(U == U1);
     assert(U1 == U2);
     assert(all!approxEqual(U, U3));

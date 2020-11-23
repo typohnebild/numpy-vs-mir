@@ -2,17 +2,17 @@ module multid.gaussseidel.sweep;
 
 import mir.math: fastmath;
 import mir.algorithm.iteration: Chequer, each;
-import mir.ndslice : assumeSameShape, slice, sliced, Slice, SliceKind, strided, dropBorders, withNeighboursSum;
+import mir.ndslice : assumeSameShape, slice, sliced, Slice, SliceKind, strided, dropBorders, withNeighboursSum, zip;
 
 
 @nogc @fastmath
-void sweep_ndslice(Chequer color, T, size_t N)(Slice!(const(T)*, N) F, Slice!(T*, N) U, const T h2) nothrow
+void sweep_ndslice(T, size_t N)(Chequer color, Slice!(const(T)*, N) F, Slice!(T*, N) U, const T h2) nothrow
 {
     // find the naive implementation R/B order
-    enum Chequer c = N % 2 ? cast(Chequer)!color : color;
+    color = N % 2 ? cast(Chequer)!color : color;
     assumeSameShape(F, U);
-    c.each!((u, f) => u.a = (T(1) / (2 * N)) * (u.b - h2 * f))
-        (U.withNeighboursSum, F.dropBorders);
+    color.each!(z => z.a.a = (T(1) / (2 * N)) * (z.a.b - h2 * z.b))
+        (U.withNeighboursSum.zip!true(F.dropBorders));
 }
 
 /++
@@ -25,7 +25,7 @@ Params:
     h2 = the squared distance between the grid points
 +/
 @nogc @fastmath
-void sweep_field(Chequer color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
+void sweep_field(T)(Chequer color, Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
 {
     const N = F.shape[0];
     auto UF = U.field;
@@ -46,7 +46,7 @@ Params:
     h2 = the squared distance between the grid points
 +/
 @nogc @fastmath
-void sweep_field(Chequer color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
+void sweep_field(T)(Chequer color, Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
 {
     const m = F.shape[0];
     const n = F.shape[1];
@@ -78,7 +78,7 @@ Params:
     h2 = the squared distance between the grid points
 +/
 @nogc @fastmath
-void sweep_field(Chequer color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
+void sweep_field(T)(Chequer color, Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
 {
     const m = F.shape[0];
     const n = F.shape[1];
@@ -128,7 +128,7 @@ private struct SweepKernel(T, size_t Dim)
 
 /++ slow sweep for 1D +/
 @nogc @fastmath
-void sweep_slice(Chequer color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
+void sweep_slice(T)(Chequer color, Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
 {
     assumeSameShape(F, U);
     auto kernel = SweepKernel!(T, 1)(h2);
@@ -142,7 +142,7 @@ void sweep_slice(Chequer color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, cons
 
 /++ slow sweep for 2D +/
 @nogc @fastmath
-void sweep_slice(Chequer color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
+void sweep_slice(T)(Chequer color, Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
 {
     assumeSameShape(F, U);
     auto kernel = SweepKernel!(T, 2)(h2);
@@ -166,7 +166,7 @@ void sweep_slice(Chequer color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, cons
 
 /++ slow sweep for 3D +/
 @nogc @fastmath
-void sweep_slice(Chequer color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
+void sweep_slice(T)(Chequer color, Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
 {
     assumeSameShape(F, U);
     auto kernel = SweepKernel!(T, 3)(h2);
@@ -214,7 +214,7 @@ void sweep_slice(Chequer color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, cons
 
 /++ naive sweep for 1D +/
 @nogc @fastmath
-void sweep_naive(Chequer color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
+void sweep_naive(T)(Chequer color, Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
 {
     foreach (i; 1 .. F.length - 1)
         if (i % 2 == color)
@@ -222,7 +222,7 @@ void sweep_naive(Chequer color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, cons
 }
 /++ naive sweep for 2D +/
 @nogc @fastmath
-void sweep_naive(Chequer color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
+void sweep_naive(T)(Chequer color, Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
 {
     foreach (i; 1 .. F.length!0 - 1)
     foreach (j; 1 .. F.length!1 - 1)
@@ -231,7 +231,7 @@ void sweep_naive(Chequer color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, cons
 }
 /++ naive sweep for 3D +/
 @nogc @fastmath
-void sweep_naive(Chequer color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
+void sweep_naive(T)(Chequer color, Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
 {
     foreach (i; 1 .. F.length!0 - 1)
     foreach (j; 1 .. F.length!1 - 1)
