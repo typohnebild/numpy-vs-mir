@@ -11,7 +11,7 @@ import std.traits : isFloatingPoint;
 /++
     Abstract base class for the Cycles it implements the base MG sheme
 +/
-class Cycle(T, size_t Dim) if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
+class Cycle(T, size_t Dim) if (1 <= Dim && isFloatingPoint!T)
 {
 protected:
     uint mu, l;
@@ -137,8 +137,9 @@ public:
 final class PoissonCycle(
     T,
     size_t Dim,
-    SweepType sweep = SweepType.field,
-) : Cycle!(T, Dim) if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
+    SweepType sweep = SweepType.ndslice,
+) : Cycle!(T, Dim)
+    if (1 <= Dim && (Dim <= 3 || SweepType.ndslice && Dim <= 8) && isFloatingPoint!T)
 {
     import multid.gaussseidel.redblack : GS_RB;
 
@@ -250,4 +251,10 @@ unittest
 
     // it should be at least a bit smaller than before
     assert(norm_after <= norm_before);
+}
+
+unittest
+{
+    // check we can compile 5-dimensional algorithm, 6-dim and higher are quite slow
+    alias PC5 = PoissonCycle!(double, 5, SweepType.ndslice);
 }

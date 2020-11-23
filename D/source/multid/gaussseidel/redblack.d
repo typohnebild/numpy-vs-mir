@@ -36,7 +36,7 @@ Params:
 Returns: U
 +/
 
-Slice!(T*, Dim) GS_RB(SweepType sweeptype = SweepType.field, T, size_t Dim)(
+Slice!(T*, Dim) GS_RB(SweepType sweeptype = SweepType.ndslice, T, size_t Dim)(
     Slice!(const(T)*, Dim) F,
     Slice!(T*, Dim) U,
     const T h,
@@ -44,7 +44,7 @@ Slice!(T*, Dim) GS_RB(SweepType sweeptype = SweepType.field, T, size_t Dim)(
     size_t norm_iter = 1_000,
     double eps = 1e-8,
     )
-if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
+    if ((1 <= Dim && Dim <= 8) && isFloatingPoint!T)
 {
     auto R = U.shape.slice!T;
     T norm;
@@ -54,7 +54,7 @@ if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
 }
 
 @nogc @fastmath
-size_t GS_RB(SweepType sweeptype = SweepType.field, T, size_t Dim)(
+size_t GS_RB(SweepType sweeptype = SweepType.ndslice, T, size_t Dim)(
     Slice!(const(T)*, Dim) F,
     Slice!(T*, Dim) U,
     Slice!(T*, Dim) R, //residual
@@ -64,7 +64,7 @@ size_t GS_RB(SweepType sweeptype = SweepType.field, T, size_t Dim)(
     size_t norm_iter = 1_000,
     double eps = 1e-8,
     )
-    if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
+    if ((1 <= Dim && Dim <= 8) && isFloatingPoint!T)
 {
     mixin("alias sweep = sweep_" ~ sweeptype ~ ";");
 
