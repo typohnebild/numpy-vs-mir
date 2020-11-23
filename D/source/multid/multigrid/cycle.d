@@ -3,7 +3,7 @@ module multid.multigrid.cycle;
 import mir.conv : to;
 import mir.exception : enforce;
 import mir.math : log2;
-import mir.ndslice : Slice, slice, iota, sliced;
+import mir.ndslice : Slice, slice, iota, sliced, uninitSlice;
 import multid.gaussseidel.redblack : SweepType;
 import multid.multigrid.prolongation : prolongation;
 import std.traits : isFloatingPoint;
@@ -44,13 +44,12 @@ protected:
     /++ adds the correction vector to the U +/
     @nogc void add_correction(Slice!(T*, Dim) U, Slice!(const(T)*, Dim) e)
     {
-
-        U.field[] += e.field[];
+        U[] += e;
     }
 
     @nogc void do_cycle(Slice!(const(T)*, Dim) F, Slice!(T*, Dim) U, uint d, T current_h)
     {
-        if (d + 1 >= l || U.shape[0] <= 1)
+        if (d + 1 >= l || U.length <= 1)
         {
             solve(F, U, current_h);
             return;
@@ -88,7 +87,7 @@ public:
         auto ls = F.shape[0].to!double.log2;
         enforce!"l is to big for F"(l == 0 || ls > l);
         this.initialF = F;
-        this.Rdata = F.shape.slice!double.field;
+        this.Rdata = F.shape.uninitSlice!double.field;
         this.l = l;
         this.h = h != 0 ? h : 1.0 / F.shape[0];
         this.mu = mu;
@@ -103,11 +102,9 @@ public:
             m = m / 2 + 1;
             size_t[Dim + 1] shape = m;
             shape[0] = 2;
-            temp ~= shape.slice!double;
-            if (m == 2)
-                break;
+            temp ~= shape.uninitSlice!double;
         }
-        while(m > 2);
+        while(m > 2 && temp.length + 1 < this.l);
     }
 
     /++

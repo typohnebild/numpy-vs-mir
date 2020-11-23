@@ -42,9 +42,17 @@ Params:
 
 Returns: U
 +/
-Slice!(T*, Dim) poisson_multigrid(uint v1, uint v2, T, size_t Dim)(
-        Slice!(T*, Dim) F, Slice!(T*, Dim) U, uint level, uint mu, size_t iter_cycles,
-        string sweep = "field", T eps = 1e-6, T h = 0)
+Slice!(T*, Dim) poisson_multigrid(T, size_t Dim)(
+        Slice!(T*, Dim) F,
+        Slice!(T*, Dim) U,
+        uint level,
+        uint mu,
+        uint v1,
+        uint v2,
+        size_t iter_cycles,
+        string sweep = "ndslice",
+        T eps = 1e-6,
+        T h = 0)
 {
     Cycle!(T, Dim) cycle;
     switch (sweep)
@@ -55,8 +63,11 @@ Slice!(T*, Dim) poisson_multigrid(uint v1, uint v2, T, size_t Dim)(
     case "naive":
         cycle = new PoissonCycle!(T, Dim, SweepType.naive)(F, mu, level, h, v1, v2);
         break;
-    default:
+    case "field":
         cycle = new PoissonCycle!(T, Dim, SweepType.field)(F, mu, level, h, v1, v2);
+        break;
+    default:
+        cycle = new PoissonCycle!(T, Dim, SweepType.ndslice)(F, mu, level, h, v1, v2);
     }
     return multigrid!(T, Dim)(cycle, U, iter_cycles, eps);
 }
@@ -87,7 +98,7 @@ unittest
     F[$ - 1][1 .. $] = 0.0;
     F[1 .. $, $ - 1] = 0.0;
     auto U1 = U.dup;
-    poisson_multigrid!(2, 2)(F, U, 0, 2, 100, "field", 1e-9);
+    poisson_multigrid(F, U, 0, 2, 2, 2, 100, "field", 1e-9);
 
     GS_RB(F, U1, h);
 

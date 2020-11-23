@@ -90,7 +90,7 @@ void testMG2D()
     F[$ - 1][1 .. $] = 0.0;
     F[1 .. $, $ - 1] = 0.0;
 
-    U = poisson_multigrid!(2, 2)(F, U, 0, 2, 100);
+    U = poisson_multigrid(F, U, 0, 2, 2, 2, 100);
 
     //U.prettyArr.writeln;
 }

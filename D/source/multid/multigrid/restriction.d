@@ -70,7 +70,8 @@ void weighted_restriction(T, size_t N)(Slice!(T*, N) r, Slice!(const(T)*, N) A)
     else
         alias scaled = a => a * (T(1) / factor);
 
-    rc[] = ac.slide!(3, "a + 2 * b + c").map!scaled.strided(2);
+    // use `.retro` to be more CPU-cache friendly
+    rc.retro[] = ac.slide!(3, "a + 2 * b + c").map!scaled.strided(2).retro;
 }
 
 

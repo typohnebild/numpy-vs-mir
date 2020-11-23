@@ -1,6 +1,7 @@
 module multid.gaussseidel.redblack;
 
-import mir.math: fastmath;
+import mir.math: fastmath, approxEqual;
+import mir.algorithm.iteration: Chequer, all;
 import mir.ndslice : slice, uninitSlice, sliced, Slice, strided;
 import multid.gaussseidel.sweep;
 import multid.tools.apply_poisson : compute_residual;
@@ -8,19 +9,10 @@ import multid.tools.norm : nrmL2;
 import std.experimental.logger;
 import std.traits : isFloatingPoint;
 
-/++
-    red is for even indicies
-    black for the odd
-+/
-enum Color
-{
-    red = 1u,
-    black = 0u
-}
-
 /++ enum to differentiate between sweep types +/
 enum SweepType
 {
+    ndslice = "ndslice",
     field = "field",
     slice = "slice",
     naive = "naive"
@@ -93,9 +85,9 @@ size_t GS_RB(SweepType sweeptype = SweepType.field, T, size_t Dim)(
 
         }
         // rote Halbiteration
-        sweep!(Color.red)(F, U, h2);
+        sweep!(Chequer.red)(F, U, h2);
         // schwarze Halbiteration
-        sweep!(Color.black)(F, U, h2);
+        sweep!(Chequer.black)(F, U, h2);
     }
     return it;
 }
@@ -141,19 +133,24 @@ unittest
     auto U = randomMatrix!(double, 1)(N);
     auto U1 = U.dup;
     auto U2 = U.dup;
+    auto U3 = U.dup;
     const F = slice!double([N], 1.0);
 
-    sweep_naive!(Color.red)(F, U, h2);
-    sweep_field!(Color.red)(F, U1, h2);
-    sweep_slice!(Color.red)(F, U2, h2);
+    sweep_naive!(Chequer.red)(F, U, h2);
+    sweep_field!(Chequer.red)(F, U1, h2);
+    sweep_slice!(Chequer.red)(F, U2, h2);
+    sweep_ndslice!(Chequer.red)(F, U3, h2);
     assert(U == U1);
     assert(U1 == U2);
+    assert(all!approxEqual(U, U3));
 
-    sweep_naive!(Color.black)(F, U, h2);
-    sweep_field!(Color.black)(F, U1, h2);
-    sweep_slice!(Color.black)(F, U2, h2);
+    sweep_naive!(Chequer.black)(F, U, h2);
+    sweep_field!(Chequer.black)(F, U1, h2);
+    sweep_slice!(Chequer.black)(F, U2, h2);
+    sweep_ndslice!(Chequer.black)(F, U3, h2);
     assert(U == U1);
     assert(U1 == U2);
+    assert(all!approxEqual(U, U3));
 
 }
 
@@ -168,19 +165,24 @@ unittest
     auto U = randomMatrix!(double, 2)(N);
     auto U1 = U.dup;
     auto U2 = U.dup;
+    auto U3 = U.dup;
     const F = slice!double([N, N], 1.0);
 
-    sweep_naive!(Color.red)(F, U, h2);
-    sweep_field!(Color.red)(F, U1, h2);
-    sweep_slice!(Color.red)(F, U2, h2);
+    sweep_naive!(Chequer.red)(F, U, h2);
+    sweep_field!(Chequer.red)(F, U1, h2);
+    sweep_slice!(Chequer.red)(F, U2, h2);
+    sweep_ndslice!(Chequer.red)(F, U3, h2);
     assert(U == U1);
     assert(U1 == U2);
+    assert(all!approxEqual(U, U3));
 
-    sweep_naive!(Color.black)(F, U, h2);
-    sweep_field!(Color.black)(F, U1, h2);
-    sweep_slice!(Color.black)(F, U2, h2);
+    sweep_naive!(Chequer.black)(F, U, h2);
+    sweep_field!(Chequer.black)(F, U1, h2);
+    sweep_slice!(Chequer.black)(F, U2, h2);
+    sweep_ndslice!(Chequer.black)(F, U3, h2);
     assert(U == U1);
     assert(U1 == U2);
+    assert(all!approxEqual(U, U3));
 }
 
 unittest
@@ -192,20 +194,25 @@ unittest
     auto U = randomMatrix!(double, 3)(N);
     auto U1 = U.dup;
     auto U2 = U.dup;
+    auto U3 = U.dup;
     const F = slice!double([N, N, N], 1.0);
     const double h2 = 1.0;
 
-    sweep_naive!(Color.red)(F, U, h2);
-    sweep_field!(Color.red)(F, U1, h2);
-    sweep_slice!(Color.red)(F, U2, h2);
+    sweep_naive!(Chequer.red)(F, U, h2);
+    sweep_field!(Chequer.red)(F, U1, h2);
+    sweep_slice!(Chequer.red)(F, U2, h2);
+    sweep_ndslice!(Chequer.red)(F, U3, h2);
     // import std.stdio;
     // writeln(U - U1);
     assert(U == U1);
     assert(U1 == U2);
+    assert(all!approxEqual(U, U3));
 
-    sweep_naive!(Color.black)(F, U, h2);
-    sweep_field!(Color.black)(F, U1, h2);
-    sweep_slice!(Color.black)(F, U2, h2);
+    sweep_naive!(Chequer.black)(F, U, h2);
+    sweep_field!(Chequer.black)(F, U1, h2);
+    sweep_slice!(Chequer.black)(F, U2, h2);
+    sweep_ndslice!(Chequer.black)(F, U3, h2);
     assert(U == U1);
     assert(U1 == U2);
+    assert(all!approxEqual(U, U3));
 }

@@ -1,21 +1,34 @@
 module multid.gaussseidel.sweep;
 
 import mir.math: fastmath;
-import mir.algorithm.iteration: each;
-import mir.ndslice : assumeSameShape, slice, sliced, Slice, SliceKind, stride, dropBorders, withNeighboursSum;
-import multid.gaussseidel.redblack : Color;
+import mir.algorithm.iteration: Chequer, each;
+import mir.ndslice : assumeSameShape, retro, slice, sliced, Slice, SliceKind, strided, dropBorders, withNeighboursSum;
 
 
 @nogc @fastmath
-void sweep_ndslice(Color color, T, size_t N)(Slice!(const(T)*, N) F, Slice!(T*, N) U, const T h2) nothrow
+void sweep_ndslice(Chequer color, T, size_t N)(Slice!(const(T)*, N) F, Slice!(T*, N) U, const T h2) nothrow
 {
-    auto c = color;
+    // find the naive implementation R/B order
+    enum Chequer c = N % 2 ? cast(Chequer)!color : color;
+
     assumeSameShape(F, U);
-    U
-        .withNeighboursSum // Tensors pair of the element and sum of its neighbours
-        .zip!true(F.dropBorders) // ... zipped with F. `true` means tensors have the same strides
-        .pack!1 // pack the last dimension
-        .each!(z => z[0][0] = (T(1) / (2 * N)) * (z[0][1] - h2 * z[1]));
+
+    static if (c == Chequer.black)
+    {
+        c.each!((p, f) => p.a = (T(1) / (2 * N)) * (p.b - h2 * f))
+            (U.withNeighboursSum, F.dropBorders);
+    }
+    else // iterate red color backward to be more CPU-cache friendly 
+    {
+        // flip color for backward iteration
+        auto s = c;
+        static foreach(d; 0 .. N)
+            s = cast(Chequer) ((s ^ U.length!d ^ 1) & 1);
+
+        s.each!((p, f) => p.a = (T(1) / (2 * N)) * (p.b - h2 * f))
+            // ... add `.retro`
+            (U.retro.withNeighboursSum, F.retro.dropBorders);
+    }
 }
 
 /++
@@ -28,7 +41,7 @@ Params:
     h2 = the squared distance between the grid points
 +/
 @nogc @fastmath
-void sweep_field(Color color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
+void sweep_field(Chequer color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
 {
     assumeSameShape(F, U);
     const N = F.shape[0];
@@ -50,7 +63,7 @@ Params:
     h2 = the squared distance between the grid points
 +/
 @nogc @fastmath
-void sweep_field(Color color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
+void sweep_field(Chequer color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
 {
     const m = F.shape[0];
     const n = F.shape[1];
@@ -82,7 +95,7 @@ Params:
     h2 = the squared distance between the grid points
 +/
 @nogc @fastmath
-void sweep_field(Color color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
+void sweep_field(Chequer color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
 {
     const m = F.shape[0];
     const n = F.shape[1];
@@ -132,93 +145,93 @@ private struct SweepKernel(T, size_t Dim)
 
 /++ slow sweep for 1D +/
 @nogc @fastmath
-void sweep_slice(Color color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
+void sweep_slice(Chequer color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
 {
     assumeSameShape(F, U);
     auto kernel = SweepKernel!(T, 1)(h2);
 
     each!kernel(
-        U[2 - color .. $ - 1].stride,
-        U[1 - color .. $ - 2].stride,
-        U[3 - color .. $].stride,
-        F[2 - color .. $ - 1].stride);
+        U[2 - color .. $ - 1].strided(2),
+        U[1 - color .. $ - 2].strided(2),
+        U[3 - color .. $].strided(2),
+        F[2 - color .. $ - 1].strided(2));
 }
 
 /++ slow sweep for 2D +/
 @nogc @fastmath
-void sweep_slice(Color color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
+void sweep_slice(Chequer color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
 {
     assumeSameShape(F, U);
     auto kernel = SweepKernel!(T, 2)(h2);
 
-    each!(each!kernel)(
-        U[1 .. $ - 1, 1 + color .. $ - 1].stride,
-        U[0 .. $ - 2, 1 + color .. $ - 1].stride,
-        U[2 .. $, 1 + color .. $ - 1].stride,
-        U[1 .. $ - 1, color .. $ - 2].stride,
-        U[1 .. $ - 1, 2 + color .. $].stride,
-        F[1 .. $ - 1, 1 + color .. $ - 1].stride);
+    each!kernel(
+        U[1 .. $ - 1, 1 + color .. $ - 1].strided(2),
+        U[0 .. $ - 2, 1 + color .. $ - 1].strided(2),
+        U[2 .. $, 1 + color .. $ - 1].strided(2),
+        U[1 .. $ - 1, color .. $ - 2].strided(2),
+        U[1 .. $ - 1, 2 + color .. $].strided(2),
+        F[1 .. $ - 1, 1 + color .. $ - 1].strided(2));
 
-    each!(each!kernel)(
-        U[2 .. $ - 1, 2 - color .. $ - 1].stride,
-        U[1 .. $ - 2, 2 - color .. $ - 1].stride,
-        U[3 .. $, 2 - color .. $ - 1].stride,
-        U[2 .. $ - 1, 1 - color .. $ - 2].stride,
-        U[2 .. $ - 1, 3 - color .. $].stride,
-        F[2 .. $ - 1, 2 - color .. $ - 1].stride);
+    each!kernel(
+        U[2 .. $ - 1, 2 - color .. $ - 1].strided(2),
+        U[1 .. $ - 2, 2 - color .. $ - 1].strided(2),
+        U[3 .. $, 2 - color .. $ - 1].strided(2),
+        U[2 .. $ - 1, 1 - color .. $ - 2].strided(2),
+        U[2 .. $ - 1, 3 - color .. $].strided(2),
+        F[2 .. $ - 1, 2 - color .. $ - 1].strided(2));
 }
 
 /++ slow sweep for 3D +/
 @nogc @fastmath
-void sweep_slice(Color color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
+void sweep_slice(Chequer color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
 {
     assumeSameShape(F, U);
     auto kernel = SweepKernel!(T, 3)(h2);
 
-    each!(each!(each!kernel))(
-        U[2 .. $ - 1, 1 .. $ - 1, 1 + color .. $ - 1].stride,
-        U[1 .. $ - 2, 1 .. $ - 1, 1 + color .. $ - 1].stride,
-        U[3 .. $, 1 .. $ - 1, 1 + color .. $ - 1].stride,
-        U[2 .. $ - 1, 0 .. $ - 2, 1 + color .. $ - 1].stride,
-        U[2 .. $ - 1, 2 .. $, 1 + color .. $ - 1].stride,
-        U[2 .. $ - 1, 1 .. $ - 1, color .. $ - 2].stride,
-        U[2 .. $ - 1, 1 .. $ - 1, 2 + color .. $].stride,
-        F[2 .. $ - 1, 1 .. $ - 1, 1 + color .. $ - 1].stride);
+    each!kernel(
+        U[2 .. $ - 1, 1 .. $ - 1, 1 + color .. $ - 1].strided(2),
+        U[1 .. $ - 2, 1 .. $ - 1, 1 + color .. $ - 1].strided(2),
+        U[3 .. $, 1 .. $ - 1, 1 + color .. $ - 1].strided(2),
+        U[2 .. $ - 1, 0 .. $ - 2, 1 + color .. $ - 1].strided(2),
+        U[2 .. $ - 1, 2 .. $, 1 + color .. $ - 1].strided(2),
+        U[2 .. $ - 1, 1 .. $ - 1, color .. $ - 2].strided(2),
+        U[2 .. $ - 1, 1 .. $ - 1, 2 + color .. $].strided(2),
+        F[2 .. $ - 1, 1 .. $ - 1, 1 + color .. $ - 1].strided(2));
 
-    each!(each!(each!kernel))(
-        U[1 .. $ - 1, 1 .. $ - 1, 2 - color .. $ - 1].stride,
-        U[0 .. $ - 2, 1 .. $ - 1, 2 - color .. $ - 1].stride,
-        U[2 .. $, 1 .. $ - 1, 2 - color .. $ - 1].stride,
-        U[1 .. $ - 1, 0 .. $ - 2, 2 - color .. $ - 1].stride,
-        U[1 .. $ - 1, 2 .. $, 2 - color .. $ - 1].stride,
-        U[1 .. $ - 1, 1 .. $ - 1, 1 - color .. $ - 2].stride,
-        U[1 .. $ - 1, 1 .. $ - 1, 3 - color .. $].stride,
-        F[1 .. $ - 1, 1 .. $ - 1, 2 - color .. $ - 1].stride);
+    each!kernel(
+        U[1 .. $ - 1, 1 .. $ - 1, 2 - color .. $ - 1].strided(2),
+        U[0 .. $ - 2, 1 .. $ - 1, 2 - color .. $ - 1].strided(2),
+        U[2 .. $, 1 .. $ - 1, 2 - color .. $ - 1].strided(2),
+        U[1 .. $ - 1, 0 .. $ - 2, 2 - color .. $ - 1].strided(2),
+        U[1 .. $ - 1, 2 .. $, 2 - color .. $ - 1].strided(2),
+        U[1 .. $ - 1, 1 .. $ - 1, 1 - color .. $ - 2].strided(2),
+        U[1 .. $ - 1, 1 .. $ - 1, 3 - color .. $].strided(2),
+        F[1 .. $ - 1, 1 .. $ - 1, 2 - color .. $ - 1].strided(2));
 
-    each!(each!(each!kernel))(
-        U[1 .. $ - 1, 2 .. $ - 1, 1 + color .. $ - 1].stride,
-        U[0 .. $ - 2, 2 .. $ - 1, 1 + color .. $ - 1].stride,
-        U[2 .. $, 2 .. $ - 1, 1 + color .. $ - 1].stride,
-        U[1 .. $ - 1, 1 .. $ - 2, 1 + color .. $ - 1].stride,
-        U[1 .. $ - 1, 3 .. $, 1 + color .. $ - 1].stride,
-        U[1 .. $ - 1, 2 .. $ - 1, color .. $ - 2].stride,
-        U[1 .. $ - 1, 2 .. $ - 1, 2 + color .. $].stride,
-        F[1 .. $ - 1, 2 .. $ - 1, 1 + color .. $ - 1].stride);
+    each!kernel(
+        U[1 .. $ - 1, 2 .. $ - 1, 1 + color .. $ - 1].strided(2),
+        U[0 .. $ - 2, 2 .. $ - 1, 1 + color .. $ - 1].strided(2),
+        U[2 .. $, 2 .. $ - 1, 1 + color .. $ - 1].strided(2),
+        U[1 .. $ - 1, 1 .. $ - 2, 1 + color .. $ - 1].strided(2),
+        U[1 .. $ - 1, 3 .. $, 1 + color .. $ - 1].strided(2),
+        U[1 .. $ - 1, 2 .. $ - 1, color .. $ - 2].strided(2),
+        U[1 .. $ - 1, 2 .. $ - 1, 2 + color .. $].strided(2),
+        F[1 .. $ - 1, 2 .. $ - 1, 1 + color .. $ - 1].strided(2));
 
-    each!(each!(each!kernel))(
-        U[2 .. $ - 1, 2 .. $ - 1, 2 - color .. $ - 1].stride,
-        U[1 .. $ - 2, 2 .. $ - 1, 2 - color .. $ - 1].stride,
-        U[3 .. $, 2 .. $ - 1, 2 - color .. $ - 1].stride,
-        U[2 .. $ - 1, 1 .. $ - 2, 2 - color .. $ - 1].stride,
-        U[2 .. $ - 1, 3 .. $, 2 - color .. $ - 1].stride,
-        U[2 .. $ - 1, 2 .. $ - 1, 1 - color .. $ - 2].stride,
-        U[2 .. $ - 1, 2 .. $ - 1, 3 - color .. $].stride,
-        F[2 .. $ - 1, 2 .. $ - 1, 2 - color .. $ - 1].stride);
+    each!kernel(
+        U[2 .. $ - 1, 2 .. $ - 1, 2 - color .. $ - 1].strided(2),
+        U[1 .. $ - 2, 2 .. $ - 1, 2 - color .. $ - 1].strided(2),
+        U[3 .. $, 2 .. $ - 1, 2 - color .. $ - 1].strided(2),
+        U[2 .. $ - 1, 1 .. $ - 2, 2 - color .. $ - 1].strided(2),
+        U[2 .. $ - 1, 3 .. $, 2 - color .. $ - 1].strided(2),
+        U[2 .. $ - 1, 2 .. $ - 1, 1 - color .. $ - 2].strided(2),
+        U[2 .. $ - 1, 2 .. $ - 1, 3 - color .. $].strided(2),
+        F[2 .. $ - 1, 2 .. $ - 1, 2 - color .. $ - 1].strided(2));
 }
 
 /++ naive sweep for 1D +/
 @nogc @fastmath
-void sweep_naive(Color color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
+void sweep_naive(Chequer color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const T h2) nothrow
 {
 
     const n = F.shape[0];
@@ -233,7 +246,7 @@ void sweep_naive(Color color, T)(Slice!(const(T)*, 1) F, Slice!(T*, 1) U, const 
 }
 /++ naive sweep for 2D +/
 @nogc @fastmath
-void sweep_naive(Color color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
+void sweep_naive(Chequer color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const T h2) nothrow
 {
     const n = F.shape[0];
     const m = F.shape[1];
@@ -251,7 +264,7 @@ void sweep_naive(Color color, T)(Slice!(const(T)*, 2) F, Slice!(T*, 2) U, const 
 }
 /++ naive sweep for 3D +/
 @nogc @fastmath
-void sweep_naive(Color color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
+void sweep_naive(Chequer color, T)(Slice!(const(T)*, 3) F, Slice!(T*, 3) U, const T h2) nothrow
 {
     const n = F.shape[0];
     const m = F.shape[1];

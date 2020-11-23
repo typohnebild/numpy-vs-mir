@@ -37,7 +37,8 @@ void prolongation(IteratorA, IteratorB, size_t N, SliceKind aKind, SliceKind bKi
     import mir.functional: reverseArgs;
     import multid.multigrid.restriction;
     restriction!(reverseArgs!expand)(b.byDim!0, a.byDim!0);
-    each!apply(a.byDim!0.slide!(3, "a + c").stride, a.byDim!0[1 .. $ - 1].stride);
+    // use `.retro` to be more CPU-cache friendly
+    each!apply(a.byDim!0.slide!(3, "a + c").stride.retro, a.byDim!0[1 .. $ - 1].stride.retro);
 }
 
 // Tests 1D

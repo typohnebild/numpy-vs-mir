@@ -20,7 +20,7 @@ void main(string[] argv)
     void warmup()
     {
         auto UF1 = npyload!(double, 2)(i.default_path);
-        GS_RB!(SweepType.field)(UF1[1].slice, UF1[0].slice, 1, iterations, iterations + 10, 1e-8);
+        GS_RB!(SweepType.ndslice)(UF1[1].slice, UF1[0].slice, 1, iterations, iterations + 10, 1e-8);
     }
 
     const uint dim = getDim(i.path);
@@ -37,8 +37,11 @@ void main(string[] argv)
     case "naive":
         GS_RB!(SweepType.naive)(UF[1].slice, UF[0].slice, 1, iterations, iterations + 10, 1e-8);
         break;
-    default:
+    case "field":
         GS_RB!(SweepType.field)(UF[1].slice, UF[0].slice, 1, iterations, iterations + 10, 1e-8);
+        break;
+    default:
+        GS_RB!(SweepType.ndslice)(UF[1].slice, UF[0].slice, 1, iterations, iterations + 10, 1e-8);
 
     }
     i.print_time();
