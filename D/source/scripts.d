@@ -1,18 +1,13 @@
-import std.stdio;
-import std.range : generate;
-import std.random : uniform;
-import std.array;
-import std.algorithm;
+import loadproblem;
 import mir.ndslice;
-import pretty_array;
-import std.datetime.stopwatch : StopWatch;
-import std.conv : to;
-
 import multid.gaussseidel.redblack;
-import multid.multigrid.restriction;
 import multid.multigrid.cycle;
 import multid.multigrid.multigrid;
-import loadproblem;
+import multid.multigrid.restriction;
+import multid.tools.util;
+// import pretty_array;
+import std.datetime.stopwatch : StopWatch;
+import std.stdio;
 
 /++
 This performs a GS_RB run for 3D
@@ -21,9 +16,7 @@ void test3D()
 {
 
     immutable size_t N = 50;
-    auto U = slice!double(N, N, N);
-    auto fun = generate!(() => uniform(0.0, 1.0));
-    U.field.fill(fun);
+    auto U = N.randomMatrix!(double, 3);
     U[0, 0 .. $, 0 .. $] = 1.0;
     U[0 .. $, 0, 0 .. $] = 1.0;
     U[0 .. $, 0 .. $, 0] = 1.0;
@@ -34,8 +27,8 @@ void test3D()
     auto F = slice!double([N, N, N], 0.0);
     const double h = 1.0 / double(N);
 
-    GS_RB!(double, 3)(F, U, h);
-    U.prettyArr.writeln;
+    GS_RB(F, U, h);
+    // U.prettyArr.writeln;
 
 }
 
@@ -46,9 +39,7 @@ void test2D()
 {
 
     immutable size_t N = 200;
-    auto U = slice!double(N, N);
-    auto fun = generate!(() => uniform(0.0, 1.0));
-    U.field.fill(fun);
+    auto U = N.randomMatrix!(double, 2);
     U[0][0 .. $] = 1.0;
     U[1 .. $, 0] = 1.0;
     U[$ - 1][1 .. $] = 0.0;
@@ -57,8 +48,8 @@ void test2D()
     auto F = slice!double([N, N], 0.0);
     const double h = 1.0 / double(N);
 
-    GS_RB!(double, 2)(F, U, h);
-    U.prettyArr.writeln;
+    GS_RB(F, U, h);
+    // U.prettyArr.writeln;
 
 }
 
@@ -69,17 +60,15 @@ void test1D()
 {
 
     immutable size_t N = 1000;
-    auto U = slice!double(N);
-    auto fun = generate!(() => uniform(0.0, 1.0));
-    U.field.fill(fun);
+    auto U = N.randomMatrix!(double, 1);
     U[0] = 1.0;
     U[$ - 1] = 0.0;
 
     auto F = slice!double([N], 0.0);
     const double h = 1.0 / double(N);
 
-    GS_RB!(double, 1, 30_000)(F, U, h);
-    U.prettyArr.writeln;
+    GS_RB(F, U, h, 30_000);
+    // U.prettyArr.writeln;
 
 }
 
@@ -89,9 +78,7 @@ This performs multigrid for 2D
 void testMG2D()
 {
     immutable size_t N = 1000;
-    auto U = slice!double(N, N);
-    auto fun = generate!(() => uniform(0.0, 1.0));
-    U.field.fill(fun);
+    auto U = N.randomMatrix!(double, 2);
     U[0][0 .. $] = 1.0;
     U[1 .. $, 0] = 1.0;
     U[$ - 1][1 .. $] = 0.0;
@@ -103,7 +90,7 @@ void testMG2D()
     F[$ - 1][1 .. $] = 0.0;
     F[1 .. $, $ - 1] = 0.0;
 
-    U = poisson_multigrid!(double, 2, 2, 2)(F, U, 0, 2, 100);
+    U = poisson_multigrid(F, U, 0, 2, 2, 2, 100);
 
     //U.prettyArr.writeln;
 }

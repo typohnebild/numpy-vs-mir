@@ -1,27 +1,18 @@
 module multid.gaussseidel.redblack;
 
+import mir.math: fastmath, approxEqual;
+import mir.algorithm.iteration: Chequer, all;
+import mir.ndslice : slice, uninitSlice, sliced, Slice, strided;
+import multid.gaussseidel.sweep;
 import multid.tools.apply_poisson : compute_residual;
 import multid.tools.norm : nrmL2;
-
-import mir.ndslice : slice, sliced, Slice, strided;
-import std.traits : isFloatingPoint;
-
-import multid.gaussseidel.sweep;
 import std.experimental.logger;
-
-/++
-    red is for even indicies
-    black for the odd
-+/
-enum Color
-{
-    red = 1u,
-    black = 0u
-}
+import std.traits : isFloatingPoint;
 
 /++ enum to differentiate between sweep types +/
 enum SweepType
 {
+    ndslice = "ndslice",
     field = "field",
     slice = "slice",
     naive = "naive"
@@ -38,27 +29,55 @@ it solves AU = F, with A being a poisson matrix like this
         1 .. 1 1 1 1
 so the borders of U remain unchanged
 Params:
-    U = slice of dimension Dim
     F = slice of dimension Dim
+    U = slice of dimension Dim
+    R = slice of dimension Dim
     h = the distance between the grid points
 Returns: U
 +/
-Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000, size_t norm_iter = 1_000,
-        double eps = 1e-8, SweepType sweeptype = SweepType.field)(in Slice!(T*, Dim) F, Slice!(T*, Dim) U, in T h)
-        if (1 <= Dim && Dim <= 3 && isFloatingPoint!T)
+
+Slice!(T*, Dim) GS_RB(SweepType sweeptype = SweepType.ndslice, T, size_t Dim)(
+    Slice!(const(T)*, Dim) F,
+    Slice!(T*, Dim) U,
+    const T h,
+    size_t max_iter = 10_000_000,
+    size_t norm_iter = 1_000,
+    double eps = 1e-8,
+    )
+    if ((1 <= Dim && Dim <= 8) && isFloatingPoint!T)
+{
+    auto R = U.shape.slice!T;
+    T norm;
+    auto it = GS_RB!sweeptype(F, U, R, h, norm, max_iter, norm_iter, eps);
+    logf("GS_RB converged after %d iterations with %e error", it, norm);
+    return U;
+}
+
+@nogc @fastmath
+size_t GS_RB(SweepType sweeptype = SweepType.ndslice, T, size_t Dim)(
+    Slice!(const(T)*, Dim) F,
+    Slice!(T*, Dim) U,
+    Slice!(T*, Dim) R, //residual
+    const T h,
+    out T norm,
+    size_t max_iter = 10_000_000,
+    size_t norm_iter = 1_000,
+    double eps = 1e-8,
+    )
+    if ((1 <= Dim && Dim <= 8) && isFloatingPoint!T)
 {
     mixin("alias sweep = sweep_" ~ sweeptype ~ ";");
 
     const T h2 = h * h;
-    T norm = 0;
-    size_t it = 0;
-
+    size_t it;
+    norm = 0;
     while (it < max_iter)
     {
         it++;
         if (it % norm_iter == 0)
         {
-            norm = compute_residual!(T, Dim)(F, U, h).nrmL2;
+            compute_residual(R, F, U, h);
+            norm = R.nrmL2;
             if (norm <= eps)
             {
                 break;
@@ -66,12 +85,11 @@ Slice!(T*, Dim) GS_RB(T, size_t Dim, size_t max_iter = 10_000_000, size_t norm_i
 
         }
         // rote Halbiteration
-        sweep!(T, Dim, Color.red)(F, U, h2);
+        sweep(Chequer.red, F, U, h2);
         // schwarze Halbiteration
-        sweep!(T, Dim, Color.black)(F, U, h2);
+        sweep(Chequer.black, F, U, h2);
     }
-    logf("GS_RB converged after %d iterations with %e error", it, norm);
-    return U;
+    return it;
 }
 
 unittest
@@ -80,7 +98,7 @@ unittest
     auto U1 = slice!double([N], 1.0);
     auto F1 = slice!double([N], 0.0);
     F1[1] = 1;
-    GS_RB!(double, 1, 1)(F1, U1, 1.0);
+    GS_RB(F1, U1, 1.0, 1);
     assert(U1 == [1.0, 1.0 / 2.0, 1.0].sliced);
 
     auto U2 = slice!double([N, N], 1.0);
@@ -89,16 +107,17 @@ unittest
 
     auto expected = slice!double([N, N], 1.0);
     expected[1, 1] = 3.0 / 4.0;
-    GS_RB!(double, 2, 1)(F2, U2, 1.0);
+    GS_RB(F2, U2, 1.0, 1);
     assert(expected == U2);
 
     auto U3 = slice!double([N, N, N], 1.0);
     auto F3 = slice!double([N, N, N], 0.0);
     F3[1, 1, 1] = 1;
-    GS_RB!(double, 3, 1)(F3, U3, 1.0);
+    GS_RB(F3, U3, 1.0, 1);
 
     auto expected3 = slice!double([N, N, N], 1.0);
-    expected3[1, 1, 1] = 5.0 / 6.0;
+    expected3[1, 1, 1] = 5.0;
+    expected3[1, 1, 1] *= 1 / 6.0;
     assert(expected3 == U3);
 
 }
@@ -114,19 +133,24 @@ unittest
     auto U = randomMatrix!(double, 1)(N);
     auto U1 = U.dup;
     auto U2 = U.dup;
-    const auto F = slice!double([N], 1.0);
+    auto U3 = U.dup;
+    const F = slice!double([N], 1.0);
 
-    sweep_naive!(double, 1, Color.red)(F, U, h2);
-    sweep_field!(double, 1, Color.red)(F, U1, h2);
-    sweep_slice!(double, 1, Color.red)(F, U2, h2);
+    sweep_naive(Chequer.red, F, U, h2);
+    sweep_field(Chequer.red, F, U1, h2);
+    sweep_slice(Chequer.red, F, U2, h2);
+    sweep_ndslice(Chequer.red, F, U3, h2);
     assert(U == U1);
     assert(U1 == U2);
+    assert(all!approxEqual(U, U3));
 
-    sweep_naive!(double, 1, Color.black)(F, U, h2);
-    sweep_field!(double, 1, Color.black)(F, U1, h2);
-    sweep_slice!(double, 1, Color.black)(F, U2, h2);
+    sweep_naive(Chequer.black, F, U, h2);
+    sweep_field(Chequer.black, F, U1, h2);
+    sweep_slice(Chequer.black, F, U2, h2);
+    sweep_ndslice(Chequer.black, F, U3, h2);
     assert(U == U1);
     assert(U1 == U2);
+    assert(all!approxEqual(U, U3));
 
 }
 
@@ -141,19 +165,24 @@ unittest
     auto U = randomMatrix!(double, 2)(N);
     auto U1 = U.dup;
     auto U2 = U.dup;
-    const auto F = slice!double([N, N], 1.0);
+    auto U3 = U.dup;
+    const F = slice!double([N, N], 1.0);
 
-    sweep_naive!(double, 2, Color.red)(F, U, h2);
-    sweep_field!(double, 2, Color.red)(F, U1, h2);
-    sweep_slice!(double, 2, Color.red)(F, U2, h2);
+    sweep_naive(Chequer.red, F, U, h2);
+    sweep_field(Chequer.red, F, U1, h2);
+    sweep_slice(Chequer.red, F, U2, h2);
+    sweep_ndslice(Chequer.red, F, U3, h2);
     assert(U == U1);
     assert(U1 == U2);
+    assert(all!approxEqual(U, U3));
 
-    sweep_naive!(double, 2, Color.black)(F, U, h2);
-    sweep_field!(double, 2, Color.black)(F, U1, h2);
-    sweep_slice!(double, 2, Color.black)(F, U2, h2);
+    sweep_naive(Chequer.black, F, U, h2);
+    sweep_field(Chequer.black, F, U1, h2);
+    sweep_slice(Chequer.black, F, U2, h2);
+    sweep_ndslice(Chequer.black, F, U3, h2);
     assert(U == U1);
     assert(U1 == U2);
+    assert(all!approxEqual(U, U3));
 }
 
 unittest
@@ -165,18 +194,25 @@ unittest
     auto U = randomMatrix!(double, 3)(N);
     auto U1 = U.dup;
     auto U2 = U.dup;
-    const auto F = slice!double([N, N, N], 1.0);
+    auto U3 = U.dup;
+    const F = slice!double([N, N, N], 1.0);
     const double h2 = 1.0;
 
-    sweep_naive!(double, 3, Color.red)(F, U, h2);
-    sweep_field!(double, 3, Color.red)(F, U1, h2);
-    sweep_slice!(double, 3, Color.red)(F, U2, h2);
+    sweep_naive(Chequer.red, F, U, h2);
+    sweep_field(Chequer.red, F, U1, h2);
+    sweep_slice(Chequer.red, F, U2, h2);
+    sweep_ndslice(Chequer.red, F, U3, h2);
+    // import std.stdio;
+    // writeln(U - U1);
     assert(U == U1);
     assert(U1 == U2);
+    assert(all!approxEqual(U, U3));
 
-    sweep_naive!(double, 3, Color.black)(F, U, h2);
-    sweep_field!(double, 3, Color.black)(F, U1, h2);
-    sweep_slice!(double, 3, Color.black)(F, U2, h2);
+    sweep_naive(Chequer.black, F, U, h2);
+    sweep_field(Chequer.black, F, U1, h2);
+    sweep_slice(Chequer.black, F, U2, h2);
+    sweep_ndslice(Chequer.black, F, U3, h2);
     assert(U == U1);
     assert(U1 == U2);
+    assert(all!approxEqual(U, U3));
 }

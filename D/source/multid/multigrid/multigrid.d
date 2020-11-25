@@ -12,11 +12,11 @@ Method to run some multigrid steps for abstract cycle
 Slice!(T*, Dim) multigrid(T, size_t Dim)(Cycle!(T, Dim) cycle, Slice!(T*, Dim) U, size_t iter_cycle, double eps)
 {
     //scale the epsilon with the number of gridpoints
-    eps *= U.shape[0] * U.shape[0];
+    eps *= U.elementCount;
     foreach (i; 1 .. iter_cycle + 1)
     {
 
-        U = cycle.cycle(U);
+        cycle.cycle(U);
         auto norm = cycle.norm(U);
         logf("Residual has a L2-Norm of %f after %d iterations", norm, i);
         if (norm <= eps)
@@ -42,21 +42,32 @@ Params:
 
 Returns: U
 +/
-Slice!(T*, Dim) poisson_multigrid(T, size_t Dim, uint v1, uint v2)(
-        Slice!(T*, Dim) F, Slice!(T*, Dim) U, uint level, uint mu, size_t iter_cycles,
-        string sweep = "field", T eps = 1e-6, T h = 0)
+Slice!(T*, Dim) poisson_multigrid(T, size_t Dim)(
+        Slice!(T*, Dim) F,
+        Slice!(T*, Dim) U,
+        uint level,
+        uint mu,
+        uint v1,
+        uint v2,
+        size_t iter_cycles,
+        string sweep = "ndslice",
+        T eps = 1e-6,
+        T h = 0)
 {
     Cycle!(T, Dim) cycle;
     switch (sweep)
     {
     case "slice":
-        cycle = new PoissonCycle!(T, Dim, v1, v2, SweepType.slice)(F, mu, level, h);
+        cycle = new PoissonCycle!(T, Dim, SweepType.slice)(F, mu, level, h, v1, v2);
         break;
     case "naive":
-        cycle = new PoissonCycle!(T, Dim, v1, v2, SweepType.naive)(F, mu, level, h);
+        cycle = new PoissonCycle!(T, Dim, SweepType.naive)(F, mu, level, h, v1, v2);
+        break;
+    case "field":
+        cycle = new PoissonCycle!(T, Dim, SweepType.field)(F, mu, level, h, v1, v2);
         break;
     default:
-        cycle = new PoissonCycle!(T, Dim, v1, v2, SweepType.field)(F, mu, level, h);
+        cycle = new PoissonCycle!(T, Dim, SweepType.ndslice)(F, mu, level, h, v1, v2);
     }
     return multigrid!(T, Dim)(cycle, U, iter_cycles, eps);
 }
@@ -87,9 +98,9 @@ unittest
     F[$ - 1][1 .. $] = 0.0;
     F[1 .. $, $ - 1] = 0.0;
     auto U1 = U.dup;
-    poisson_multigrid!(double, 2, 2, 2)(F, U, 0, 2, 100, "field", 1e-9);
+    poisson_multigrid(F, U, 0, 2, 2, 2, 100, "field", 1e-9);
 
-    GS_RB!(double, 2)(F, U1, h);
+    GS_RB(F, U1, h);
 
     import numir : approxEqual;
 

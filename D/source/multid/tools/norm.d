@@ -1,11 +1,12 @@
 module multid.tools.norm;
 
-import std.math : sqrt;
+import mir.math : sqrt, fastmath;
 import mir.ndslice : Slice, sliced;
 
 /++
     Computes the L2 norm
 +/
+@fastmath
 T nrmL2(T, size_t Dim)(Slice!(T*, Dim) v)
 {
     T s = 0.0;

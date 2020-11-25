@@ -1,10 +1,10 @@
 module loadproblem;
 
+import mir.conv : to;
 import mir.ndslice;
 import numir.io;
 import std.regex;
 import std.stdio;
-import std.conv : to;
 
 // /++
 // Implementation of npy loader

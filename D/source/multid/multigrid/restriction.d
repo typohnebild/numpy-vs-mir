@@ -1,207 +1,106 @@
 module multid.multigrid.restriction;
 
-import mir.ndslice : Slice, slice, sliced, strided, iota, as, fuse;
-import std.exception : enforce;
+import mir.algorithm.iteration: each;
+import mir.exception : enforce;
+import mir.functional: recurseTemplatePipe;
+import mir.math: fastmath;
+import mir.ndslice;
 import numir : approxEqual;
+import std.traits: isNumeric;
 
 /++
-This is the implementation of a restriction for 1D
+This is the implementation of a restriction for 1D, 2D, 3D
 +/
-Slice!(T*, Dim) restriction(T, size_t Dim : 1)(in Slice!(T*, Dim) A)
+@fastmath
+
+// TODO: move to mir.algorithm.iteration
+
+template restriction(alias fun = "a = b")
 {
-    auto N = A.shape[0] / 2 + 1;
-    auto ret = slice!T([N]);
-    const auto end = N - (A.shape[0] + 1) % 2;
-    auto AF = A.field;
+    import mir.functional: naryFun;
 
-    foreach (i; 0 .. end)
+    static if (__traits(isSame, naryFun!fun, fun))
+    Slice!(T*, Dim) restriction(T, size_t Dim)(Slice!(const(T)*, Dim) A)
     {
-        // get every second element in AF
-        ret.field[i] = AF[i * 2];
+        size_t[Dim] shape = A.length / 2 + 1;
+        auto ret = shape.slice!T;
+        .restriction!fun(ret, A);
+        return ret;
     }
-    // special case: outer corner
-    ret.field[$ - 1] = AF[$ - 1];
 
+    static if (__traits(isSame, naryFun!fun, fun))
+    @nogc @fastmath
+    void restriction(IteratorA, IteratorB, size_t N, SliceKind aKind, SliceKind bKind)(Slice!(IteratorA, N, aKind) a, Slice!(IteratorB, N, bKind) b)
+    {
+        import std.traits: Select;
+        alias f = Select!(N == 1, fun, .restriction!fun);
+        each!f(a[0 .. $ - 1].byDim!0, b[0 .. $ - 1].byDim!0.stride);
+        f(a.back, b.back);
+    }
+    else
+        alias restriction = .restriction!(naryFun!fun);
+}
+
+
+
+/++
+This is the implementation of a restriction for 1D, 2D, 3D
++/
+@fastmath
+Slice!(T*, Dim) weighted_restriction(T, size_t Dim)(Slice!(const(T)*, Dim) A)
+{
+    size_t[Dim] shape = A.length / 2 + 1;
+    auto ret = shape.slice!T;
+    weighted_restriction(ret, A);
     return ret;
 }
 
-/++
-This is the implementation of a restriction for 2D
-works only for square grids
-+/
-Slice!(T*, Dim) restriction(T, size_t Dim : 2)(in Slice!(T*, Dim) A)
+@nogc @fastmath
+void weighted_restriction(T, size_t N)(Slice!(T*, N) r, Slice!(const(T)*, N) A)
 {
-    enforce(A.shape[0] == A.shape[1], "not all dimensions have the same length");
-    const auto M = A.shape[0];
-    const auto N = M / 2 + 1;
-    auto ret = slice!T([N, N]);
-    const auto end = N - (A.shape[0] + 1) % 2;
-    auto AF = A.field;
+    weighted_restriction_borders(r, A);
 
-    foreach (i; 0 .. end)
-    {
-        foreach (j; 0 .. end)
-        {
-            // get every second element in AF
-            auto flattindexret = i * N + j;
-            auto flattindexA = i * M * 2 + j * 2;
-            ret.field[flattindexret] = AF[flattindexA];
-        }
-    }
-    // special case: borders
-    foreach (i; 0 .. end)
-    {
-        auto indexrowR = (N - 1) * N + i;
-        auto indexrowA = (M - 1) * M + 2 * i;
-        auto indexcolR = N * i + N - 1;
-        auto indexcolA = M * 2 * i + M - 1;
-        ret.field[indexrowR] = AF[indexrowA];
-        ret.field[indexcolR] = AF[indexcolA];
-    }
-    // special case: outer corner
-    ret.field[$ - 1] = AF[$ - 1];
+    auto rc = r.dropBorders;
+    auto ac = A.canonical;
+    ac.popFrontAll;
 
-    return ret;
+    enum factor = 2 ^^ (N * 2);
+    static if (__traits(isIntegral, T))
+        alias scaled = a => cast(T)(a / factor);
+    else
+        alias scaled = a => a * (T(1) / factor);
+
+    rc[] = ac.slide!(3, "a + 2 * b + c").map!scaled.strided(2);
 }
 
-/++
-This is the implementation of a restriction for 3D
-works only if all dimensions have the same length
-+/
-Slice!(T*, Dim) restriction(T, size_t Dim : 3)(in Slice!(T*, Dim) A)
+
+@nogc @fastmath
+void weighted_restriction_borders(T, size_t N)(Slice!(T*, N) r, Slice!(const(T)*, N) A)
 {
-    enforce(A.shape[0] == A.shape[1] && A.shape[1] == A.shape[2], "not all dimensions have the same length");
-    const auto M = A.shape[0];
-    const auto N = M / 2 + 1;
-    auto ret = slice!T([N, N, N]);
-    const auto end = N - (A.shape[0] + 1) % 2;
-    auto AF = A.field;
-
-    foreach (k; 0 .. end)
+    import std.traits: Select;
+    static if (N == 1)
     {
-        foreach (i; 0 .. end)
-        {
-            foreach (j; 0 .. end)
-            {
-                // get every second element in AF
-                auto flattindexret = k * (N * N) + i * N + j;
-                auto flattindexA = k * (M * M) * 2 + i * M * 2 + j * 2;
-                ret.field[flattindexret] = AF[flattindexA];
-            }
-        }
+        r.front = A.front;
+        r.back = A.back;
     }
-    // special case: inner borders
-    ret[0 .. end, 0 .. end, $ - 1] = A[0 .. $, 0 .. $, $ - 1].strided!(0, 1)(2, 2);
-    ret[$ - 1, 0 .. end, 0 .. end] = A[$ - 1, 0 .. $, 0 .. $].strided!(0, 1)(2, 2);
-    ret[0 .. end, $ - 1, 0 .. end] = A[0 .. $, $ - 1, 0 .. $].strided!(0, 1)(2, 2);
-    // special case: outer borders
-    ret[0 .. end, $ - 1, $ - 1] = A[0 .. $, $ - 1, $ - 1].strided!(0)(2);
-    ret[$ - 1, 0 .. end, $ - 1] = A[$ - 1, 0 .. $, $ - 1].strided!(0)(2);
-    ret[$ - 1, $ - 1, 0 .. end] = A[$ - 1, $ - 1, 0 .. $].strided!(0)(2);
-    // special case: outer corner
-    ret.field[$ - 1] = AF[$ - 1];
-
-    return ret;
-}
-
-/++
-This is the implementation of a weighted_restriction 1D
-+/
-Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 1)(in Slice!(T*, Dim) A)
-{
-    const auto M = A.shape[0];
-    const auto N = M / 2 + 1;
-    auto ret = restriction!(T, Dim)(A);
-    auto AF = A.field;
-    foreach (i; 1u .. N - 1u)
+    else
     {
-        ret.field[i] = ret.field[i] / 2 + (AF[i * 2 - 1u] + AF[i * 2 + 1u]) / cast(T)(4);
+        restriction(r.front, A.front);
+        each!weighted_restriction_borders(r[1 .. $ - 1].byDim!0, A[2 .. $ - 1].byDim!0.stride);
+        restriction(r.back, A.back);
     }
-    return ret;
-}
-
-/++
-This is the implementation of a weighted_restriction 2D
-+/
-Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 2)(in Slice!(T*, Dim) A)
-{
-    enforce(A.shape[0] == A.shape[1], "not all dimensions have the same length");
-    const auto M = A.shape[0];
-    const auto N = M / 2 + 1;
-    auto ret = restriction!(T, Dim)(A);
-    auto AF = A.field;
-
-    foreach (i; 1u .. N - 1u)
-    {
-        foreach (j; 1u .. N - 1u)
-        {
-            auto indexR = i * N + j;
-            auto indexA = i * M * 2 + j * 2;
-            ret.field[indexR] = ret.field[indexR] / cast(T)(4) +
-                (
-                        AF[indexA - 1] + AF[indexA + 1] +
-                        AF[indexA - M] + AF[indexA + M]) / cast(T)(8) +
-                (
-                        AF[indexA - 1 - M] + AF[indexA - 1 + M] +
-                        AF[indexA + 1 - M] + AF[indexA + 1 + M]) / cast(T)(16);
-        }
-    }
-    return ret;
-}
-
-/++
-This is the implementation of a weighted_restriction 3D
-+/
-Slice!(T*, Dim) weighted_restriction(T, size_t Dim : 3)(in Slice!(T*, Dim) A)
-{
-    enforce(A.shape[0] == A.shape[1] && A.shape[1] == A.shape[2], "not all dimensions have the same length");
-    const auto M = A.shape[0];
-    const auto N = M / 2 + 1;
-    auto ret = restriction!(T, Dim)(A);
-    auto AF = A.field;
-    foreach (k; 1u .. N - 1u)
-    {
-        foreach (i; 1u .. N - 1u)
-        {
-            foreach (j; 1u .. N - 1u)
-            {
-                auto indexR = k * (N * N) + i * N + j;
-                auto indexA = k * (M * M) * 2 + i * M * 2 + j * 2;
-                ret.field[indexR] = (
-                        ret.field[indexR] * cast(T)(8) +
-                        (
-                            AF[indexA - 1] + AF[indexA + 1] +
-                            AF[indexA - M] + AF[indexA + M] +
-                            AF[indexA - M * M] + AF[indexA + M * M]) * cast(T)(4) +
-                        (
-                            AF[indexA - 1 - M] + AF[indexA + 1 + M] +
-                            AF[indexA - 1 + M] + AF[indexA + 1 - M] +
-                            AF[indexA - 1 - M * M] + AF[indexA + 1 + M * M] +
-                            AF[indexA - 1 + M * M] + AF[indexA + 1 - M * M] +
-                            AF[indexA - M - M * M] + AF[indexA + M + M * M] +
-                            AF[indexA - M + M * M] + AF[indexA + M - M * M]) * cast(
-                            T)(2) +
-                        (AF[indexA - 1 - M - M * M] + AF[indexA + 1 - M - M * M] +
-                            AF[indexA - 1 + M - M * M] + AF[indexA + 1 + M - M * M] +
-                            AF[indexA - 1 - M + M * M] + AF[indexA + 1 - M + M * M] +
-                            AF[indexA - 1 + M + M * M] + AF[indexA + 1 + M + M * M])) /
-                    cast(T)(64);
-            }
-        }
-    }
-    return ret;
 }
 
 // Test restriction 1D
 unittest
 {
     auto arr = iota(10).slice;
-    auto ret = restriction!(long, 1)(arr);
+    auto ret = restriction!"a = b"(arr);
     auto correct = [0, 2, 4, 6, 8, 9];
     assert(ret == correct);
 
     arr = iota(11).slice;
-    ret = restriction!(long, 1)(arr);
+    ret = restriction(arr);
     correct = [0, 2, 4, 6, 8, 10];
     assert(ret == correct);
 }
@@ -209,13 +108,13 @@ unittest
 // Test restriction 2D
 unittest
 {
-    auto arr = iota([5, 5]).slice;
-    auto ret = restriction!(long, 2)(arr);
+    auto arr = [5, 5].iota.slice;
+    auto ret = restriction(arr);
     auto correct = [[0, 2, 4], [10, 12, 14], [20, 22, 24]];
     assert(ret == correct);
 
-    arr = iota([6, 6]).slice;
-    ret = restriction!(long, 2)(arr);
+    arr = [6, 6].iota.slice;
+    ret = restriction(arr);
     correct = [[0, 2, 4, 5], [12, 14, 16, 17], [24, 26, 28, 29], [30, 32, 34, 35]];
     assert(ret == correct);
 }
@@ -223,8 +122,8 @@ unittest
 // Test restrtiction 3D
 unittest
 {
-    auto arr = iota([5, 5, 5]).slice;
-    auto ret = restriction!(long, 3)(arr);
+    auto arr = [5, 5, 5].iota.slice;
+    auto ret = restriction(arr);
     auto correct = [[[0., 2., 4.],
             [10., 12., 14.],
             [20., 22., 24.]],
@@ -238,8 +137,8 @@ unittest
             [120., 122., 124.]]];
     assert(ret == correct);
 
-    arr = iota([6, 6, 6]).slice;
-    ret = restriction!(long, 3)(arr);
+    arr = [6, 6, 6].iota.slice;
+    ret = restriction(arr);
     correct = [[[0., 2., 4., 5.],
             [12., 14., 16., 17.],
             [24., 26., 28., 29.],
@@ -266,12 +165,12 @@ unittest
 unittest
 {
     auto arr = iota(10).slice;
-    auto ret = weighted_restriction!(long, 1)(arr);
+    auto ret = weighted_restriction(arr);
     auto correct = [0, 2, 4, 6, 8, 9];
     assert(ret == correct);
 
     arr = iota(11).slice;
-    ret = weighted_restriction!(long, 1)(arr);
+    ret = weighted_restriction(arr);
     correct = [0, 2, 4, 6, 8, 10];
     assert(ret == correct);
 }
@@ -279,26 +178,27 @@ unittest
 unittest
 {
     auto arr2 = [1.0, 2.0, 3.0, 2.0, 1.0].sliced;
-    auto ret2 = weighted_restriction!(double, 1)(arr2);
+    auto ret2 = weighted_restriction(arr2);
     auto correct2 = [1.0, 2.5, 1.0];
     assert(ret2 == correct2);
 
     arr2 = [1.0, 2.0, 3.0, 3.0, 2.0, 1.0].sliced;
-    ret2 = weighted_restriction!(double, 1)(arr2);
+    ret2 = weighted_restriction(arr2);
     correct2 = [1.0, 2.75, 2.0, 1.0];
     assert(ret2 == correct2);
 }
 
+
 // Test weighted_restriction 2D long
 unittest
 {
-    auto arr = iota([5, 5]).slice;
-    auto ret = weighted_restriction!(long, 2)(arr);
+    auto arr = [5, 5].iota.slice;
+    auto ret = weighted_restriction(arr);
     auto correct = [[0, 2, 4], [10, 12, 14], [20, 22, 24]];
     assert(ret == correct);
 
-    arr = iota([6, 6]).slice;
-    ret = restriction!(long, 2)(arr);
+    arr = [6, 6].iota.slice;
+    ret = restriction(arr);
     correct = [[0, 2, 4, 5], [12, 14, 16, 17], [24, 26, 28, 29], [30, 32, 34, 35]];
     assert(ret == correct);
 }
@@ -310,10 +210,11 @@ unittest
         3.0, 4.0, 5.0, 4.0, 3.0,
         4.0, 5.0, 6.0, 5.0, 4.0,
         5.0, 6.0, 7.0, 6.0, 5.0].sliced(5, 5);
-    auto ret2 = weighted_restriction!(double, 2)(arr2);
+    auto ret2 = weighted_restriction(arr2);
     auto correct2 = [[1.0, 3.0, 1.0],
         [3.0, 4.5, 3.0],
         [5.0, 7.0, 5.0]];
+
     assert(ret2 == correct2);
 
     arr2 = [1.0, 2.0, 3.0, 3.0, 2.0, 1.0,
@@ -322,7 +223,7 @@ unittest
         4.0, 5.0, 6.0, 6.0, 5.0, 4.0,
         5.0, 6.0, 7.0, 7.0, 6.0, 5.0,
         6.0, 7.0, 8.0, 8.0, 7.0, 6.0].sliced(6, 6);
-    ret2 = weighted_restriction!(double, 2)(arr2);
+    ret2 = weighted_restriction(arr2);
     correct2 = [[1.0, 3.0, 2.0, 1.0],
         [3.0, 4.75, 4.0, 3.0],
         [5.0, 6.75, 6.0, 5.0],
@@ -333,8 +234,8 @@ unittest
 // Test weighted_restriction 3D double
 unittest
 {
-    auto arr = iota([5, 5, 5]).as!double.slice;
-    auto ret = weighted_restriction!(double, 3)(arr);
+    auto arr = [5, 5, 5].iota.as!double.slice;
+    auto ret = weighted_restriction(arr);
     auto correct = [[[0., 2., 4.],
             [10., 12., 14.],
             [20., 22., 24.]],
@@ -348,8 +249,8 @@ unittest
             [120., 122., 124.]]];
     assert(ret == correct);
 
-    arr = iota([6, 6, 6]).as!double.slice;
-    ret = restriction!(double, 3)(arr);
+    arr = [6, 6, 6].iota.as!double.slice;
+    ret = restriction(arr);
     correct = [[[0., 2., 4., 5.],
             [12., 14., 16., 17.],
             [24., 26., 28., 29.],
@@ -392,7 +293,7 @@ unittest
         0.9038084, 0.45367844, 0.41827524, 0.95954425,
         0.30096364, 0.37174358, 0.45047108, 0.47731472,
         0.98000574, 0.49313159, 0.44181032, 0.97419118].sliced(4, 4);
-    auto ret = weighted_restriction!(double, 2)(arr);
+    auto ret = weighted_restriction(arr);
 
     assert(approxEqual(ret, correct, 1e-2, 1e-8));
 }
@@ -420,7 +321,7 @@ unittest
         [0.99019009, 0.54380879, 0.5277031, 0.6169349, 0.14346233],
         [0.24181791, 0.44420891, 0.44207825, 0.45405526, 0.51607495],
         [0.68527047, 0.13484427, 0.23751941, 0.20323849, 0.59139025]];
-    auto ret = weighted_restriction!(double, 2)(arr.fuse);
+    auto ret = weighted_restriction(arr.fuse);
 
     assert(approxEqual(ret, correct.fuse, 1e-8, 1e-8));
 }

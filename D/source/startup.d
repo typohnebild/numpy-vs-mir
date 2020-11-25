@@ -3,19 +3,18 @@ module startup;
 
 template init()
 {
-
     import core.thread : Thread;
+    import mir.conv : to;
     import std.datetime.stopwatch : StopWatch, msecs;
     import std.experimental.logger : infof, globalLogLevel, LogLevel;
     import std.getopt : getopt;
-    import std.conv : to;
 
     StopWatch sw;
 
     uint delay = 500;
     bool verbose = false;
     string path = default_path;
-    string sweep = "field";
+    string sweep = "ndslice";
     immutable string default_path = "../problems/problem_2D_100.npy";
 
     void start()
