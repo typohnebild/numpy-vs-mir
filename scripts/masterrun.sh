@@ -66,7 +66,7 @@ oldpwd=$(pwd)
 
 cd ../D || exit 1
 dub build --force --compiler=ldc2 --build=release-nobounds --config="$buildconf"
-for x in "field" "naive" "slice"; do
+for x in "field" "naive" "slice" "ndslice"; do
 	run_d "./$buildconf -s $x"
 done
 cd "$oldpwd" || exit 1
