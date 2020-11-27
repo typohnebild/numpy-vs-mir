@@ -6,6 +6,12 @@ Pictures are [here](#results-and-discussion).
 
 If you have suggestions for improvements, feel free to open an issue or a pull request.
 
+**Acknowledgements**
+We would like to thank [Ilya Yaroshenko](https://github.com/9il) for the
+[pull request](https://github.com/typohnebild/numpy-vs-mir/pull/1) with the
+improvements of the D implementation.
+Furthermore, we would like to thank [Jan Hönig](https://github.com/m3m0ry) for the supervision.
+
 ## Content
 
 - [NumPy vs. MIR using multigrid](#numpy-vs-mir-using-multigrid)
@@ -243,21 +249,23 @@ The efficiency differences in using Numba or not are considered in the
 In order to estimate the fastest approach in D, we consider three variations of the
 Red-Black Gauss-Seidel sweep:
 
-1. Slices: Python like. Uses D Slices and Strides for grouping (Red-Black).
+1. Slice: Python like. Uses D Slices and Strides for grouping (Red-Black).
 2. Naive: one for-loop for each dimension. Matrix-Access via multi-dimensional Array.
-3. Fields: one for-loop. Matrix is flattened. Access via flattened index.
+3. Field: one for-loop. Matrix is flattened. Access via flattened index.
+4. NdSlice: D like. Uses just MIR functionalities.
 
-The [first one](D/source/multid/gaussseidel/sweep.d#L98)
+The [first one](D/source/multid/gaussseidel/sweep.d#L131)
 is the approach to implement the Gauss-Seidel in a way, that it "looks" syntactical
-like the [Python](Python/multipy/GaussSeidel/GaussSeidel_RB.py#L85) implementation.
+like the [Python](Python/multipy/GaussSeidel/GaussSeidel_RB.py#L72) implementation.
 But since the indexing operator of the MIR slices does not support striding,
 it is needed to do with a extra function call of
 [`strided`](http://mir-algorithm.libmir.org/mir_ndslice_dynamic.html#.strided).
-The [second](D/source/multid/gaussseidel/sweep.d#L176),
+The [second](D/source/multid/gaussseidel/sweep.d#L217),
 the "naive" version is an implementation as it can be found in an textbook.
-The [third](D/source/multid/gaussseidel/sweep.d#L16) one is the most
-optimized version with accessing the underling D-array of the MIR slice directly.
-In the end it looks like a C/C++ implementation would look like.
+The [third](D/source/multid/gaussseidel/sweep.d#L28) one is the most
+C/C++ like version with accessing the underling D-array of the MIR slice directly.
+The [last](D/source/multid/gaussseidel/sweep.d#L9) one is implemented by
+[Ilya Yaroshenko](https://github.com/9il) and gets along with surprisingly few code lines.
 
 We do not compare these different variations in Python, because this would mean to use high level
 Python for-loops which are not competitive for this application at
@@ -282,7 +290,7 @@ Especially because a loop version would have been significantly slower without _
       - NumPy 1.18.5
       - Numba 0.51.2
   - _D_
-    - LDC 1.23 [pre-built package](https://github.com/ldc-developers/ldc/releases)
+    - LDC 1.24 [pre-built package](https://github.com/ldc-developers/ldc/releases)
     - mir-algorithm 3.9.6
     - mir-random 2.2.14
 
@@ -455,7 +463,7 @@ there are 2 floating point operations.
 
 In the following the results are shown in graphs. In the graph legend the variations are named
 as follows:
-- D: &nbsp; ***D with MIR (`<sweep type>`)***, while `<sweep type>` can be *field*, *naive* or *slice*.
+- D: &nbsp; ***D with MIR (`<sweep type>`)***, while `<sweep type>` can be *field*, *naive*, *slice* or *ndslice*.
 - Python: &nbsp; ***`<environment>` `<# threads>` `<numba type>`***, where `<environment>` can be *intel* for the
 Intel Python Disribution or *openblas* for the default Python environment with OpenBlas backend.
 The `<# threads>` is the number of allowed threads used by Numpy and Numba which is set to *1* or *8*.
@@ -482,7 +490,7 @@ and levels are always the same. The number of levels are simply calculated with 
 | :---------------------------------: | :--------------------------------: |
 | ![](graphs/gsrb_flops.png?raw=true) | ![](graphs/gsrb_time.png?raw=true) |
 
-Here is already apparent that the D version with using the fields is the fastest one.
+Here is already apparent that the D version with using fields and ndslices are the fastest ones.
 While the Python implementation using the Intel Distribution without Numba is the slowest one.
 Furthermore, there is no difference in the single- and the multithreaded runs visible.
 This could be an effect of the relatively small array size, so multithreading would not be worthwhile.
@@ -492,7 +500,7 @@ sharply before the L1 cache limit.
 Between the L1 and L2 cache lines the graphs stop rising that much.
 Up to the L3 cache line and beyond, the graphs start to decrease slightly and level out.
 In contrast, Python implementations without Numba show no response to all cache limits.
-This may be a consequence of the missing optimization without Numba.
+This may be a consequence of the missing optimization of Numba.
 
 All setups that are using Numba take almost the same time for the corresponding problem sizes.
 So the FLOP/s graphs for these setups look verry similar and close
@@ -516,17 +524,24 @@ For big problems, the Python runs can be grouped by applying and not applying th
 
 In the left figure we see the FLOP/s achieved during the benchmarks with the different
 D implementations.
-The _field_ version performs best, then follows close the _naive_ version.
+The _ndslice_ version performs best, then follows close the _field_ and _naive_ version.
 The _slice_ version achieves the lowest FLOP/s, since it is the most time consuming version,
 as it can be seen in the right figure.
 
 The execution time of the _slice_ implementation has a higher slope for greater problems than
-the _field_ and _naive_ implementations that remain closely. This results in a greater gap of FLOP/s
-for greater problem sizes between the _slice_ the other two implementations.
+the _ndslice_, _field_ and _naive_ implementations that remain closely.
+This results in a greater gap of FLOP/s for greater problem sizes between the _slice_ the other
+three implementations.
 
 Furthermore, the execution times for small problem sizes are in the range of several milliseconds.
 As a result, even small changes in the execution time have a great impact to the
 corresponding FLOP/s value.
+
+Compared to the [Solver Benchmark](#solver-benchmark), the FLOP/s of the different sweep versions
+for sizes smaller than 1280 are closer together.
+This is mainly an effect of the multigrid architecture since all these versions
+need to perform the same overhead like the intergrid operations.
+
 
 ### Python Benchmark
 
@@ -573,8 +588,8 @@ For bigger prolem sizes the FLOP/s slightly drop and finally level out.
 
 From a performance perspective the MIR implementations are superior to the NumPy implementation.
 The big difference is especially visible in [this figures](#benchmarks-combined).
-For the biggest multigird problem, the D versions take around 5-10 seconds,
-while the Python versions take from 15 to 19 seconds.
+For the biggest multigird problem, the D versions take around 3 to 4 seconds,
+while the Python versions take from 15 to 20 seconds.
 Propably this is mainly caused by the overhead of the Python interpreter
 and might be reduced by more optimization efforts.
 
@@ -598,6 +613,9 @@ and how striding is handled.
 For convenience, there is also the library [_numir_](https://github.com/libmir/numir),
 which provides some NumPy-like helper functions.
 This allows a similar use of MIR compared to NumPy.
+From the [rework](https://github.com/typohnebild/numpy-vs-mir/pull/1) we have learned that MIR
+provides a lot of convenient functionalities that allow to write short and pragmatic code like the
+[ndslice sweep implementation](D/source/multid/gaussseidel/sweep.d#L9).
 
 For those who are not afraid of statically typed programming languages and want to leave a lot of
 optimization to a compiler, D in combination with MIR seems to be good choice for HPC applications.
