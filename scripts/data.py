@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/bin/env python3
 """
 A not to well writen script to produces the figures.
 
@@ -74,7 +74,7 @@ parser.add_option(
 
 options, args = parser.parse_args()
 
-COLORS = cycle([*mcolor.TABLEAU_COLORS.keys(), 'darkcyan'])
+COLORS = cycle([*mcolor.TABLEAU_COLORS.keys(), 'darkcyan', 'indigo'])
 COLOR_TABLE = {}
 
 
@@ -229,7 +229,7 @@ def subplots(frames, base_path, column):
 
     for i, frame in enumerate(frames):
         name, df = frame
-        axe = overflow and axes.flat[i] if i < 3 else axes.flat[i + 1]
+        axe = axes.flat[i] if not overflow or i < 3 else axes.flat[i + 1]
         g = df[column]
         g.plot(
             label=name,
@@ -249,7 +249,7 @@ def subplots(frames, base_path, column):
 
 def plot(frames, func, base_path, title):
     plt.clf()
-    if func.__name__ == 'flops' and len(frames) == 11:
+    if func.__name__ == 'flops' and len(frames) >= 11:
         plot_membandwidth(plt)
     plt.title(title)
     for name, df in frames:
