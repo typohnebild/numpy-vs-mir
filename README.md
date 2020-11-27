@@ -6,7 +6,7 @@ Pictures are [here](#results-and-discussion).
 
 If you have suggestions for improvements, feel free to open an issue or a pull request.
 
-**Acknowledgements**
+**Acknowledgements** <br>
 We would like to thank [Ilya Yaroshenko](https://github.com/9il) for the
 [pull request](https://github.com/typohnebild/numpy-vs-mir/pull/1) with the
 improvements of the D implementation.
@@ -201,36 +201,45 @@ The implementation in D is very similar to the implementation in Python. It is s
 version from Python to D.
 
 ```D
-    Slice!(T*, Dim) compute_correction(Slice!(T*, Dim) r, uint l, T current_h)
+    @nogc void compute_correction(Slice!(T*, Dim) e, Slice!(const(T)*, Dim) r, uint d, T current_h)
     {
-        auto e = slice!T(r.shape, 0);
+        e[] = 0;
         foreach (_; 0 .. mu)
         {
-            e = do_cycle(r, e, l, current_h);
-
+            do_cycle(r, e, d, current_h);
         }
-        return e;
     }
 
-    Slice!(T*, Dim) do_cycle(Slice!(T*, Dim) F, Slice!(T*, Dim) U, uint l, T current_h)
+    /++ adds the correction vector to the U +/
+    @nogc void add_correction(Slice!(T*, Dim) U, Slice!(const(T)*, Dim) e)
     {
-        if (l <= 1 || U.shape[0] <= 1)
+        U[] += e;
+    }
+
+    @nogc void do_cycle(Slice!(const(T)*, Dim) F, Slice!(T*, Dim) U, uint d, T current_h)
+    {
+        if (d + 1 >= l || U.length <= 1)
         {
-            return solve(F, U, current_h);
+            solve(F, U, current_h);
+            return;
         }
 
-        U = presmooth(F, U, current_h);
+        presmooth(F, U, current_h);
 
         auto r = compute_residual(F, U, current_h);
 
-        r = restriction(r);
+        auto res = temp[d][0];
+        restriction(res, r);
 
-        auto e = compute_correction(r, l - 1, current_h * 2);
+        auto cor = temp[d][1];
+        compute_correction(cor, res, d + 1, current_h * 2);
 
-        e = prolongation!(T, Dim)(e, U.shape);
-        U = add_correction(U, e);
+        auto e = R(U.shape);
+        prolongation(e, cor);
 
-        return postsmooth(F, U, current_h);
+        add_correction(U, e);
+
+        postsmooth(F, U, current_h);
     }
 ```
 
@@ -400,7 +409,7 @@ These packages are accelerated with the _Intel MKL_.
 When not using the _Intel Python Distribution_, NumPy is accelerated with the OpenBlas libary.
 
 In the [D-Benchmark](#d-benchmark) we differentiate the measurements between
-the sweep implementations _slice_, _naive_ and _field_ in the Gauss-Seidel method.
+the sweep implementations _slice_, _naive_, _field_ and _ndslice_ in the Gauss-Seidel method.
 
 ### How was measured?
 
