@@ -1,16 +1,18 @@
 # NumPy vs. MIR using multigrid
 
-**TLDR:**
+**TLDR** <br>
 Comparison of the implementations of a multigrid method in Python and in D.
 Pictures are [here](#results-and-discussion).
-
-If you have suggestions for improvements, feel free to open an issue or a pull request.
 
 **Acknowledgements** <br>
 We would like to thank [Ilya Yaroshenko](https://github.com/9il) for the
 [pull request](https://github.com/typohnebild/numpy-vs-mir/pull/1) with the
 improvements of the D implementation.
 Furthermore, we would like to thank [Jan Hönig](https://github.com/m3m0ry) for the supervision.
+
+**Feedback is welcome** <br>
+If you have suggestions for further improvements, feel free to open an issue or a pull request.
+
 
 ## Content
 
