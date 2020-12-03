@@ -302,7 +302,7 @@ Especially because a loop version would have been significantly slower without _
       - Numba 0.51.2
   - _D_
     - LDC 1.24 [pre-built package](https://github.com/ldc-developers/ldc/releases)
-    - mir-algorithm 3.9.6
+    - mir-algorithm 3.10.11
     - mir-random 2.2.14
 
 - **Hardware:**
