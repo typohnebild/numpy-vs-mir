@@ -593,15 +593,15 @@ More or less all implementations follow a similar pattern in behaviour of execut
 as it can be seen in the figures with the single graphs.
 For smaller problem sizes we can observe a sharp increase in FLOP/s until they reach a peak
 round about problem size 500.
-For bigger prolem sizes the FLOP/s slightly drop and finally level out.
+For bigger problem sizes the FLOP/s slightly drop and finally level out.
 
 ## Summary
 
 From a performance perspective the MIR implementations are superior to the NumPy implementation.
-The big difference is especially visible in [this figures](#benchmarks-combined).
+The big difference is especially visible in [these figures](#benchmarks-combined).
 For the biggest multigird problem, the D versions take around 3 to 4 seconds,
 while the Python versions take from 15 to 20 seconds.
-Propably this is mainly caused by the overhead of the Python interpreter
+Probably this is mainly caused by the overhead of the Python interpreter
 and might be reduced by more optimization efforts.
 
 From a programming perspective it was a bit easier to use NumPy than MIR.
