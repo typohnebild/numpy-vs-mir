@@ -4,6 +4,13 @@ import mir.math: fastmath;
 import mir.algorithm.iteration: Chequer, each;
 import mir.ndslice : assumeSameShape, slice, sliced, Slice, SliceKind, strided, dropBorders, withNeighboursSum, zip;
 
+template sweep_ndslice_kernel(T, size_t N, alias h2)
+{
+    @fastmath void sweep_ndslice_kernel(Z) (Z z)
+    {
+        z.a.a = (T(1) / (2 * N)) * (z.a.b - h2 * z.b);
+    }
+}
 
 @nogc @fastmath
 void sweep_ndslice(T, size_t N)(Chequer color, Slice!(const(T)*, N) F, Slice!(T*, N) U, const T h2) nothrow
@@ -11,8 +18,7 @@ void sweep_ndslice(T, size_t N)(Chequer color, Slice!(const(T)*, N) F, Slice!(T*
     // find the naive implementation R/B order
     color = N % 2 ? cast(Chequer)!color : color;
     assumeSameShape(F, U);
-    color.each!(z => z.a.a = (T(1) / (2 * N)) * (z.a.b - h2 * z.b))
-        (U.withNeighboursSum.zip!true(F.dropBorders));
+    color.each!(sweep_ndslice_kernel!(T, N, h2))(U.withNeighboursSum.zip!true(F.dropBorders));
 }
 
 /++
