@@ -11,8 +11,14 @@ get_numpy_config(){
     python -c 'import numpy; print("numpy version:", numpy.__version__); numpy.show_config()'
 }
 
+get_git_head(){
+    CurrCom=$(git rev-parse HEAD)
+    echo "Current GIT-Commit: $CurrCom"
+}
+
 echo "############ INFOS"
 date
+get_git_head
 get_cpu_infos
 [ "$1" = "np" ] && get_numpy_config
 echo "############ END INFOS"
