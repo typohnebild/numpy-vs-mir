@@ -8,6 +8,7 @@ options:
     -o : sets the path were the figures are stored
     -s : produces the plots for each outfile
     -g : produces the plots for every group (D, numba, nonumba)
+    -l :
     --nl : disables the printing of the lines for caches/bandwidth
 """
 
@@ -71,6 +72,16 @@ parser.add_option(
     dest='lines',
     default=True,
     help='do NOT plot cache size and memory bandwidth in plots')
+
+parser.add_option(
+    '--nolog',
+    action='store_false',
+    dest='log',
+    default=True,
+    help=(
+        'makes the combined plot uses a linear '
+        'scale instead of log scale on y axis'))
+
 
 options, args = parser.parse_args()
 
@@ -158,7 +169,7 @@ def plot_cache_lines(fig):
     l3 = 12288e3
 
     def cache2size(x):
-        return np.sqrt((x/1) / 8)
+        return np.sqrt((x / 1) / 8)
 
     l1s = cache2size(l1)
     l2s = cache2size(l2)
@@ -247,8 +258,9 @@ def subplots(frames, base_path, column):
     fig.savefig(f'{base_path}_{column}_subplots.png', bbox_inches='tight')
 
 
-def plot(frames, func, base_path, title):
+def plot(frames, func, base_path, title, scale='linear'):
     plt.clf()
+    plt.yscale(scale)
     if func.__name__ == 'flops' and len(frames) >= 11:
         plot_membandwidth(plt)
     plt.title(title)
@@ -289,9 +301,19 @@ def main():
         _, df = read_file(arg)
         frames.append((extract_name(arg), df.groupby('size').median()))
 
-    plot(frames, flops, base_name, 'Floating Point Operations per second')
+    scale = 'linear'
+    if options.log:
+        scale = 'log'
 
-    plot(frames, time, base_name, 'Time in Seconds')
+    # plot with all entries
+    plot(
+        frames,
+        flops,
+        base_name,
+        'Floating Point Operations per second',
+        scale=scale)
+
+    plot(frames, time, base_name, 'Time in Seconds', scale=scale)
 
     # plot(frames, cycles, base_name, 'MG-Cycles till convergence')
 
