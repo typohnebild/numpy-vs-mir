@@ -48,7 +48,7 @@ benchmark() {
 
 paranoid=$(cat /proc/sys/kernel/perf_event_paranoid)
 perf=false
-reps=3
+reps=5
 if [ "$paranoid" -lt 3 ] && perf list eventgroups | grep -q FLOPS; then
 	perf=true
 fi
@@ -62,16 +62,16 @@ get_infos() {
 [ -e "${OUTFILE}_1_nonumba_${TYPE}" ] || get_infos >>"${OUTFILE}_1_nonumba_${TYPE}" || exit 1
 [ -e "${OUTFILE}_8_nonumba_${TYPE}" ] || get_infos >>"${OUTFILE}_8_nonumba_${TYPE}" || exit 1
 
-for problem in "$problempath/"*.npy; do
-	dim=$(echo "$problem" | awk -F'_' '{print $2}')
-	N=$(echo "$problem" | awk -F'_' '{print $3}')
-	N=${N%%\.npy}
 
-	echo "$problem"
-
+for _ in $(seq $reps); do
 	for threads in 1 8; do
 		for numba in "-n" " "; do
-			for _ in $(seq $reps); do
+            for problem in "$problempath/"*.npy; do
+                dim=$(echo "$problem" | awk -F'_' '{print $2}')
+                N=$(echo "$problem" | awk -F'_' '{print $3}')
+                N=${N%%\.npy}
+
+                echo "$problem $numba $threads"
 				EXTENSION=$([ "$numba" = " " ] && echo "nonumba" || echo "numba")
 				x=$(benchmark $perf $threads "$problem" "$numba") || continue
 				printf "%b:%b:%b\n" "$N" "$dim" "$x" >>"${OUTFILE}_${threads}_${EXTENSION}_${TYPE}"

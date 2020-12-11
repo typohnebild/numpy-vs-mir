@@ -33,7 +33,7 @@ benchmark(){
 
 }
 
-reps=3
+reps=5
 
 paranoid=$(cat /proc/sys/kernel/perf_event_paranoid)
 perf=false
@@ -48,12 +48,12 @@ get_infos(){
 
 [ -e "$OUTFILE" ] || get_infos $perf >> "$OUTFILE" || exit 1
 
-for problem in "$problempath/"*.npy; do
-    dim=$(echo "$problem" | awk -F'_' '{print $2}')
-    N=$(echo "$problem" | awk -F'_' '{print $3}')
-    N=${N%%\.npy}
+for _ in $(seq $reps); do
+    for problem in "$problempath/"*.npy; do
+        dim=$(echo "$problem" | awk -F'_' '{print $2}')
+        N=$(echo "$problem" | awk -F'_' '{print $3}')
+        N=${N%%\.npy}
 
-    for _ in $(seq $reps); do
         x=$(benchmark $perf "$problem") || break
         printf "%b:%b:%b\n" "$N" "$dim" "$x" >> "${OUTFILE}"
     done

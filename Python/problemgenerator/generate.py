@@ -40,7 +40,7 @@ def generate_problem(dim):
 
 
 def save_problem(base, dim, tensor):
-    filename = f"{base}/problem_{dim}D_{N}"
+    filename = f"{base}/problem_{dim}D_{N:04}"
     if os.path.exists(filename):
         os.remove(filename)
     save_to_npy(filename, tensor)
