@@ -497,6 +497,8 @@ and levels are always the same. The number of levels are simply calculated with 
 
 ### Solver Benchmark
 
+The Y-axis of the graphs below have a logarithmic scale to make these more concisely.
+
 |               Flop/s                |                Time                |
 | :---------------------------------: | :--------------------------------: |
 | ![](graphs/gsrb_flops.png?raw=true) | ![](graphs/gsrb_time.png?raw=true) |
@@ -578,6 +580,9 @@ These jumps in the required execution time also influence the ups and downs of t
 accordingly.
 
 ### Benchmarks combined
+
+For the sake of clarity the Y-axis of the combined views below have a logarithmic scale, but the
+single graphs remain with a linear Y-axis.
 
 |                      Flop/s                       |                       Time                       |
 | :-----------------------------------------------: | :----------------------------------------------: |
