@@ -44,13 +44,13 @@ run_d() {
 	./benchmark.sh "$problempath" "$1"
 }
 
-generate_problems.sh -p "$problempath" -b "$buildconf" -t "wave" || exit 1
+./generate_problems.sh -p "$problempath" -b "$buildconf" -t "wave" || exit 1
 
 oldpwd=$(pwd)
 
 if [ $RUN_D -eq 1 ]; then
 	cd ../D || exit 1
-	dub build --force --compiler=ldc2 --build=release-nobounds --config="$buildconf"
+	dub build --force --build=release-nobounds --config="$buildconf" || exit 1
 	for x in "field" "naive" "slice" "ndslice"; do
 		run_d "./$buildconf -s $x"
 	done

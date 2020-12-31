@@ -7,7 +7,7 @@ sweeptype=$(echo "$binary" | sed -r 's/.+ -s (field|naive|slice|ndslice).*/\1/')
 buildtype=$(echo "$binary" | sed -r 's/.+(multigrid|gsrb) .+/\1/')
 # sanitiy check at least aginst empty strings
 [ -z "$buildtype" ] && exit 1
-[ -z "$buildtype" ] && exit 1
+[ -z "$sweeptype" ] && exit 1
 
 OUTFILE="results/outfile_$(hostname -s)_$(date +%d%m)_${sweeptype}_${buildtype}"
 echo "$OUTFILE"
@@ -38,7 +38,7 @@ reps=5
 
 paranoid=$(cat /proc/sys/kernel/perf_event_paranoid)
 perf=false
-if [ "$paranoid" -lt 3 ] && perf list eventgroups | grep -q FLOPS; then
+if command -v perf && [ "$paranoid" -lt 3 ] && perf list eventgroups | grep -q FLOPS; then
 	perf=true
 fi
 
