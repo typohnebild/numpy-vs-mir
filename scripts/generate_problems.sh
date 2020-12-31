@@ -1,6 +1,11 @@
 #!/bin/sh
 
-problempath='/tmp/problems'
+usage() {
+	echo "Usage: $0 [ -p problempath ] [ -b (multigrid|gsrb)] [-t problemtype(wave|heat)]"
+	exit 2
+}
+
+problempath='../problems'
 buildconf='multigrid'
 typ='wave'
 while getopts 'p:b:t:' opts; do
@@ -8,9 +13,14 @@ while getopts 'p:b:t:' opts; do
 	p) problempath=$OPTARG ;;
 	b) buildconf=$OPTARG ;;
 	t) typ=$OPTARG ;;
-	*) ;;
+	*) usage ;;
 	esac
 done
+
+# sanitycheck
+[ -z "$problempath" ] && usage
+[ -z "$buildconf" ] && usage
+[ -z "$problempath" ] && usage
 
 generate_problem() {
 	../Python/problemgenerator/generate.py "$problempath" 2 "$1" -t "$typ"
