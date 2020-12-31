@@ -34,19 +34,14 @@ benchmark() {
 
 }
 
-reps=5
-
-paranoid=$(cat /proc/sys/kernel/perf_event_paranoid)
-perf=false
-if command -v perf && [ "$paranoid" -lt 3 ] && perf list eventgroups | grep -q FLOPS; then
-	perf=true
-fi
-
 get_infos() {
 	../scripts/getinfos.sh "mir" "$perf"
 }
 
-[ -e "$OUTFILE" ] || get_infos $perf >>"$OUTFILE" || exit 1
+[ -e "$OUTFILE" ] || get_infos "$perf" >>"$OUTFILE" || exit 1
+
+perf=$(../scripts/check_perf.sh)
+reps=5
 
 for _ in $(seq $reps); do
 	for problem in "$problempath/"*.npy; do
@@ -54,7 +49,7 @@ for _ in $(seq $reps); do
 		N=$(echo "$problem" | awk -F'_' '{print $3}')
 		N=${N%%\.npy}
 
-		x=$(benchmark $perf "$problem") || break
+		x=$(benchmark "$perf" "$problem") || break
 		printf "%b:%b:%b\n" "$N" "$dim" "$x" >>"${OUTFILE}"
 	done
 done

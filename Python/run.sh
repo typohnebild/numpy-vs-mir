@@ -46,12 +46,8 @@ benchmark() {
 
 }
 
-paranoid=$(cat /proc/sys/kernel/perf_event_paranoid)
-perf=false
+perf=$(../scripts/check_perf.sh)
 reps=5
-if command -v perf && [ "$paranoid" -lt 3 ] && perf list eventgroups | grep -q FLOPS; then
-	perf=true
-fi
 
 get_infos() {
 	../scripts/getinfos.sh "np" "$perf"
