@@ -2,7 +2,7 @@
 
 problempath=${1:-'../problems/'}
 [ -d "$problempath" ] || exit 1
-binary=${2:-'../multigrid -s ndslice'}
+binary=${2:-'./multigrid -s ndslice'}
 sweeptype=$(echo "$binary" | sed -r 's/.+ -s (field|naive|slice|ndslice).*/\1/')
 buildtype=$(echo "$binary" | sed -r 's/.+(multigrid|gsrb) .+/\1/')
 # sanitiy check at least aginst empty strings
@@ -10,6 +10,8 @@ buildtype=$(echo "$binary" | sed -r 's/.+(multigrid|gsrb) .+/\1/')
 [ -z "$sweeptype" ] && exit 1
 
 OUTFILE="results/outfile_$(hostname -s)_$(date +%d%m)_${sweeptype}_${buildtype}"
+# checks if the perf is usabele to count flops with GFOPS group
+
 echo "$OUTFILE"
 
 benchmark() {
@@ -34,13 +36,14 @@ benchmark() {
 
 }
 
+perf=$(../scripts/check_perf.sh)
+
 get_infos() {
 	../scripts/getinfos.sh "mir" "$perf"
 }
 
-[ -e "$OUTFILE" ] || get_infos "$perf" >>"$OUTFILE" || exit 1
+[ -e "$OUTFILE" ] || get_infos >>"$OUTFILE" || exit 1
 
-perf=$(../scripts/check_perf.sh)
 reps=5
 
 for _ in $(seq $reps); do
@@ -49,7 +52,6 @@ for _ in $(seq $reps); do
 		N=$(echo "$problem" | awk -F'_' '{print $3}')
 		N=${N%%\.npy}
 
-		x=$(benchmark "$perf" "$problem") || break
-		printf "%b:%b:%b\n" "$N" "$dim" "$x" >>"${OUTFILE}"
+		x=$(benchmark "$perf" "$problem") && printf "%b:%b:%b\n" "$N" "$dim" "$x" >>"${OUTFILE}"
 	done
 done
