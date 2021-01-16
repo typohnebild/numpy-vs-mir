@@ -4,8 +4,9 @@ problempath=${1:-'../problems/'}
 [ -d "$problempath" ] || exit 1
 binary=${2:-'./multigrid -s ndslice'}
 sweeptype=$(echo "$binary" | sed -r 's/.+ -s (field|naive|slice|ndslice).*/\1/')
-buildtype=$(echo "$binary" | sed -r 's/.+(multigrid|gsrb) .+/\1/')
+buildtype=$(echo "$binary" | sed -r 's/.+(multigrid|gsrb|gsrb-avx512) .+/\1/')
 # sanitiy check at least aginst empty strings
+
 [ -z "$buildtype" ] && exit 1
 [ -z "$sweeptype" ] && exit 1
 
@@ -20,7 +21,11 @@ benchmark() {
 	delay=1000
 	delayPerf=1000
 
-	cmd="$binary $([ "$buildtype" = 'gsrb' ] && echo '-v') -p $problem -d $delay"
+	cmd="$binary -p $problem -d $delay"
+	if [ "$buildtype" = 'gsrb' ] || [ "$buildtype" = 'gsrb-avx512' ]; then
+		cmd="$cmd -v"
+	fi
+
 	if [ "$perf" = true ]; then
 		cmd="perf stat -M GFLOPS -D $delayPerf $cmd"
 	fi

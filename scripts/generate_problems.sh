@@ -1,7 +1,7 @@
 #!/bin/sh
 
 usage() {
-	echo "Usage: $0 [ -p problempath ] [ -b (multigrid|gsrb)] [-t problemtype(wave|heat)]"
+	echo "Usage: $0 [ -p problempath ] [ -b (multigrid|gsrb|gsrb-avx512)] [-t problemtype(wave|heat)]"
 	exit 2
 }
 
@@ -53,6 +53,10 @@ case $buildconf in
 	generate 16 16 20
 	generate 384 64 15
 	;;
+"gsrb-avx512")
+	generate 16 16 20
+	generate 384 64 15
+	generate 1536 256 5;;
 
 *) echo "$buildconf is not a supported buildconf" ;;
 esac

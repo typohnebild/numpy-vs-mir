@@ -17,6 +17,7 @@ intelpython3
 Python/problems
 */multigrid
 */gsrb
+*/gsrb-avx512
 multid-test-multigrid
 multid-test-library
 multid-static

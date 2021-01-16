@@ -1,7 +1,7 @@
 #!/bin/sh
 
 usage() {
-	echo "Usage: $0 [-dio] [ -p problempath ] [ -b (multigrid|gsrb)]"
+	echo "Usage: $0 [-dio] [ -p problempath ] [ -b (multigrid|gsrb|gsrb-avx512)]"
 	exit 2
 }
 
@@ -22,7 +22,7 @@ while getopts 'diop:b:' opts; do
 	esac
 done
 
-[ "$buildconf" = "multigrid" ] || [ "$buildconf" = "gsrb" ] || exit 1
+[ "$buildconf" = "multigrid" ] || [ "$buildconf" = "gsrb" ] || [ "$buildconf" = "gsrb-avx512" ] || exit 1
 
 # source of virtual Python environment
 run_openblas() {

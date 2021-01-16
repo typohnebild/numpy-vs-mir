@@ -2,8 +2,8 @@
 #
 #SBATCH --nodes=1
 #SBATCH --tasks-per-node=1
-## allocate nodes for 4 hours
-#SBATCH --time=04:00:00
+## allocate nodes for 6 hours
+#SBATCH --time=06:00:00
 # job name
 #SBATCH --job-name=gsrb_dlang
 #SBATCH --constraint=hwperf
@@ -12,4 +12,4 @@
 #load required modules (compiler, MPI, ...)
 module load python
 # run
-srun ./masterrun.sh -i -o -p ~/problems -b gsrb
+srun ./gsrb_avx.sh
