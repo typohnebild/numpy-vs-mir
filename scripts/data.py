@@ -8,7 +8,7 @@ options:
     -o : sets the path were the figures are stored
     -s : produces the plots for each outfile
     -g : produces the plots for every group (D, numba, nonumba)
-    -l :
+    --nolog : make the y axis liniear not logarithmitc in combined plot
     --nl : disables the printing of the lines for caches/bandwidth
 """
 
@@ -97,7 +97,7 @@ def name_2_color(name):
 
 
 def read_file(path):
-    """ reads the outfiles and extracts the data and infos """
+    """Read the outfiles and extracts the data and infos."""
     infos = ''
     with open(path, 'r') as file_des:
         line = file_des.readline()  # read frist line
@@ -110,8 +110,10 @@ def read_file(path):
             file_des,
             sep=':',
             comment='#',
-            thousands=',')
+            thousands=',',
+            na_values='<not')
         del df['empty']
+        df.fillna(0)
         df['FLOP'] = (df['scalar_single'] +
                       df['scalar_double'] +
                       df['128b_packed_double'] +
@@ -161,8 +163,8 @@ def cycles(df, label):
 
 
 def plot_cache_lines(fig):
-    # if not options.lines:
-    #     return
+    if not options.lines:
+        return
 
     l1 = 32e3
     l2 = 256e3
@@ -278,6 +280,9 @@ def extract_name(path):
     if len(parts) == 4:
         return f'D with Mir ({parts[-1]})'
     if len(parts) == 5:
+        if parts[-1].endswith('-avx512'):
+            return f'D with Mir AVX512 ({parts[-2]})'
+
         return f'D with Mir ({parts[-2]})'
     return ' '.join(parts[-4:-1])
 
