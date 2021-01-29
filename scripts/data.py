@@ -282,6 +282,8 @@ def extract_name(path):
     if len(parts) == 5:
         if parts[-1].endswith('-avx512'):
             return f'D with Mir AVX512 ({parts[-2]})'
+        if parts[-1].endswith('-old'):
+            return f'D with Mir old({parts[-2]})'
 
         return f'D with Mir ({parts[-2]})'
     return ' '.join(parts[-4:-1])
